@@ -18,8 +18,7 @@ gl.shaderSource(vert, `
 	
 	void main()
 	{
-		gl_Position = vec4(0, 0, 0, 1);
-		gl_PointSize = 64.0;
+		gl_Position = pos;
 	}
 `);
 
@@ -41,4 +40,15 @@ gl.linkProgram(prog);
 
 gl.useProgram(prog);
 
-gl.drawArrays(gl.POINTS, 0, 1);
+let buf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+	0, 0, 0, 1,
+	1, 0, 0, 1,
+	0, 1, 0, 1,
+]), gl.STATIC_DRAW);
+
+gl.enableVertexAttribArray(0);
+gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 0, 0);
+
+gl.drawArrays(gl.TRIANGLES, 0, 3);
