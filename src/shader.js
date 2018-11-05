@@ -31,6 +31,7 @@ export class Shader
 		
 		this.gl = gl;
 		this.prog = prog;
+		this.vars = {};
 	}
 	
 	use()
@@ -40,6 +41,10 @@ export class Shader
 	
 	uniform1f(name, value)
 	{
-		this.gl.uniform1f(this.gl.getUniformLocation(this.prog, name), value);
+		if(!this.vars[name]) {
+			this.vars[name] = this.gl.getUniformLocation(this.prog, name);
+		}
+		
+		this.gl.uniform1f(this.vars[name], value);
 	}
 }
