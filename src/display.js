@@ -8,8 +8,8 @@ export class Display
 		let canvas = document.createElement("canvas");
 		let gl = canvas.getContext("webgl", {alpha: false, antialias: false});
 
-		gl.clearColor(0,0,0,0);
 		gl.enable(gl.CULL_FACE);
+		gl.enable(gl.DEPTH_TEST);
 		
 		this.canvas = canvas;
 		this.gl = gl;

@@ -56,7 +56,7 @@ let tex = display.createTexture("gfx/grass.png");
 
 display.onRender = () => {
 	drawQuad([0, 0, 0]);
-	drawQuad([-.5, -.5, 0]);
+	drawQuad([-.5, -.5, .5]);
 }
 
 function drawQuad(offs)
