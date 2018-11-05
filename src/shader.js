@@ -56,4 +56,17 @@ export class Shader
 		
 		this.gl.uniform1i(this.vars[name], value);
 	}
+	
+	uniformTex(name, tex, unit)
+	{
+		let gl = this.gl;
+		
+		if(!this.vars[name]) {
+			this.vars[name] = this.gl.getUniformLocation(this.prog, name);
+		}
+	
+		gl.activeTexture(gl.TEXTURE0 + unit);
+		gl.bindTexture(gl.TEXTURE_2D, tex.tex);
+		gl.uniform1i(this.vars[name], unit);
+	}
 }

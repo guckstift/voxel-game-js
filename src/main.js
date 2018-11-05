@@ -56,10 +56,7 @@ display.onRender = () => {
 	shader.use();
 	shader.uniform1f("aspect", display.aspect);
 	shader.uniform1f("angle", angle);
-	
-	gl.activeTexture(gl.TEXTURE0);
-	gl.bindTexture(gl.TEXTURE_2D, tex.tex);
-	shader.uniform1i("tex", 0);
+	shader.uniformTex("tex", tex, 0);
 
 	gl.enableVertexAttribArray(0);
 	gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 0, 0);
