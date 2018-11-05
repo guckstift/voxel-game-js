@@ -1,4 +1,5 @@
 import {Shader} from "./shader.js";
+import {Texture} from "./texture.js";
 
 export class Display
 {
@@ -12,6 +13,13 @@ export class Display
 		this.canvas = canvas;
 		this.gl = gl;
 		this.frame = this.frame.bind(this);
+		this.defaultTex = gl.createTexture();
+
+		gl.bindTexture(gl.TEXTURE_2D, this.defaultTex);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+		
 		this.resize(800, 600);
 		
 		requestAnimationFrame(this.frame);
@@ -55,5 +63,10 @@ export class Display
 		gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
 		
 		return buf;
+	}
+	
+	createTexture(url)
+	{
+		return new Texture(this, url);
 	}
 }
