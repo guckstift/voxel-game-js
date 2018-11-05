@@ -9,13 +9,13 @@ let shader = display.createShader(`
 	uniform float aspect;
 	uniform float angle;
 
-	attribute vec4 pos;
+	attribute vec3 pos;
 	
 	varying vec2 texcoord;
 	
 	void main()
 	{
-		gl_Position = pos;
+		gl_Position = vec4(pos, 1.0);
 		
 		gl_Position.xy = vec2(
 			dot(gl_Position.xy, vec2(cos(angle), -sin(angle))),
@@ -40,12 +40,12 @@ let shader = display.createShader(`
 `);
 
 let buf = display.createStaticBuffer(new Float32Array([
-	0, 0, 0, 1,
-	1, 0, 0, 1,
-	0, 1, 0, 1,
-	0, 1, 0, 1,
-	1, 0, 0, 1,
-	1, 1, 0, 1,
+	0, 0, 0,
+	1, 0, 0,
+	0, 1, 0,
+	0, 1, 0,
+	1, 0, 0,
+	1, 1, 0,
 ]));
 
 let angle = 0.0;
@@ -54,13 +54,13 @@ let tex = display.createTexture("gfx/grass.png");
 
 display.onRender = () => {
 	shader.use();
+	
 	shader.uniform1f("aspect", display.aspect);
 	shader.uniform1f("angle", angle);
 	shader.uniformTex("tex", tex, 0);
-
-	gl.enableVertexAttribArray(0);
-	gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 0, 0);
-
+	
+	shader.vertexAttrib("pos", buf, 3);
+	
 	gl.drawArrays(gl.TRIANGLES, 0, 6);
 	
 	angle += 0.01;

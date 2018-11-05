@@ -39,6 +39,19 @@ export class Shader
 		this.gl.useProgram(this.prog);
 	}
 	
+	vertexAttrib(name, buffer, size, stride = 0, offset = 0)
+	{
+		let gl = this.gl;
+		
+		if(!this.vars[name]) {
+			this.vars[name] = this.gl.getAttribLocation(this.prog, name);
+		}
+		
+		gl.enableVertexAttribArray(this.vars[name]);
+		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+		gl.vertexAttribPointer(this.vars[name], size, gl.FLOAT, false, stride, offset);
+	}
+	
 	uniform1f(name, value)
 	{
 		if(!this.vars[name]) {
