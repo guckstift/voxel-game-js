@@ -9,6 +9,7 @@ export class Display
 		let gl = canvas.getContext("webgl", {alpha: false, antialias: false});
 
 		gl.clearColor(0,0,0,0);
+		gl.enable(gl.CULL_FACE);
 		
 		this.canvas = canvas;
 		this.gl = gl;

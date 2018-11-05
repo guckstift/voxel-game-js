@@ -18,9 +18,9 @@ let shader = display.createShader(`
 	{
 		gl_Position = vec4(pos, 1.0);
 		
-		gl_Position.xy = vec2(
-			dot(gl_Position.xy, vec2(cos(angle), -sin(angle))),
-			dot(gl_Position.xy, vec2(sin(angle), cos(angle)))
+		gl_Position.xz = vec2(
+			dot(gl_Position.xz, vec2(cos(angle), -sin(angle))),
+			dot(gl_Position.xz, vec2(sin(angle), cos(angle)))
 		);
 		
 		gl_Position.x /= aspect;
