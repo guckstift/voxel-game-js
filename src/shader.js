@@ -39,47 +39,54 @@ export class Shader
 		this.gl.useProgram(this.prog);
 	}
 	
-	vertexAttrib(name, buffer, size, stride = 0, offset = 0)
+	getAttrib(name)
 	{
-		let gl = this.gl;
-		
 		if(!this.vars[name]) {
 			this.vars[name] = this.gl.getAttribLocation(this.prog, name);
 		}
 		
+		return this.vars[name];
+	}
+	
+	getUniform(name)
+	{
+		if(!this.vars[name]) {
+			this.vars[name] = this.gl.getUniformLocation(this.prog, name);
+		}
+		
+		return this.vars[name];
+	}
+	
+	vertexAttrib(name, buffer, size, stride = 0, offset = 0)
+	{
+		let gl = this.gl;
+		
 		gl.enableVertexAttribArray(this.vars[name]);
 		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-		gl.vertexAttribPointer(this.vars[name], size, gl.FLOAT, false, stride, offset);
+		gl.vertexAttribPointer(this.getAttrib(name), size, gl.FLOAT, false, stride, offset);
 	}
 	
 	uniform1f(name, value)
 	{
-		if(!this.vars[name]) {
-			this.vars[name] = this.gl.getUniformLocation(this.prog, name);
-		}
-		
-		this.gl.uniform1f(this.vars[name], value);
+		this.gl.uniform1f(this.getUniform(name), value);
 	}
 	
 	uniform1i(name, value)
 	{
-		if(!this.vars[name]) {
-			this.vars[name] = this.gl.getUniformLocation(this.prog, name);
-		}
-		
-		this.gl.uniform1i(this.vars[name], value);
+		this.gl.uniform1i(this.getUniform(name), value);
+	}
+	
+	uniform3fv(name, value)
+	{
+		this.gl.uniform3fv(this.getUniform(name), value);
 	}
 	
 	uniformTex(name, tex, unit)
 	{
 		let gl = this.gl;
-		
-		if(!this.vars[name]) {
-			this.vars[name] = this.gl.getUniformLocation(this.prog, name);
-		}
 	
 		gl.activeTexture(gl.TEXTURE0 + unit);
 		gl.bindTexture(gl.TEXTURE_2D, tex.tex);
-		gl.uniform1i(this.vars[name], unit);
+		gl.uniform1i(this.getUniform(name), unit);
 	}
 }
