@@ -40,6 +40,18 @@ export class Display
 
 		gl.linkProgram(prog);
 		
+		if(gl.getShaderParameter(vert, gl.COMPILE_STATUS) === false) {
+			throw "error compile vertex shader: " + gl.getShaderInfoLog(vert);
+		}
+		
+		if(gl.getShaderParameter(frag, gl.COMPILE_STATUS) === false) {
+			throw "error compile fragment shader: " + gl.getShaderInfoLog(frag);
+		}
+		
+		if(gl.getProgramParameter(prog, gl.LINK_STATUS) === false) {
+			throw "error link program: " + gl.getProgramInfoLog(prog);
+		}
+		
 		return prog;
 	}
 	
