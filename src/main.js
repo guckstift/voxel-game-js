@@ -11,7 +11,7 @@ let shader = display.createShader(`
 
 	attribute vec4 pos;
 	
-	varying vec4 color;
+	varying vec2 texcoord;
 	
 	void main()
 	{
@@ -23,16 +23,19 @@ let shader = display.createShader(`
 		);
 		
 		gl_Position.x /= aspect;
-		color = pos;
+		
+		texcoord = vec2(pos.x, 1.0 - pos.y);
 	}
 `,`
 	precision highp float;
 	
-	varying vec4 color;
+	uniform sampler2D tex;
+	
+	varying vec2 texcoord;
 	
 	void main()
 	{
-		gl_FragColor = color;
+		gl_FragColor = texture2D(tex, texcoord);
 	}
 `);
 
@@ -47,10 +50,25 @@ let buf = display.createStaticBuffer(new Float32Array([
 
 let angle = 0.0;
 
+let img = document.createElement("img");
+let tex = gl.createTexture();
+
+img.src = "gfx/grass.png";
+img.onload = () => {
+	gl.bindTexture(gl.TEXTURE_2D, tex);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+};
+
 display.onRender = () => {
 	shader.use();
 	shader.uniform1f("aspect", display.aspect);
 	shader.uniform1f("angle", angle);
+	
+	gl.activeTexture(gl.TEXTURE0);
+	gl.bindTexture(gl.TEXTURE_2D, tex);
+	shader.uniform1i("tex", 0);
 
 	gl.enableVertexAttribArray(0);
 	gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 0, 0);
