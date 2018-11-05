@@ -7,6 +7,7 @@ document.body.appendChild(display.canvas);
 
 let shader = display.createShader(`
 	uniform float aspect;
+	uniform float angle;
 
 	attribute vec4 pos;
 	
@@ -15,6 +16,12 @@ let shader = display.createShader(`
 	void main()
 	{
 		gl_Position = pos;
+		
+		gl_Position.xy = vec2(
+			dot(gl_Position.xy, vec2(cos(angle), -sin(angle))),
+			dot(gl_Position.xy, vec2(sin(angle), cos(angle)))
+		);
+		
 		gl_Position.x /= aspect;
 		color = pos;
 	}
@@ -38,14 +45,19 @@ let buf = display.createStaticBuffer(new Float32Array([
 	1, 1, 0, 1,
 ]));
 
+let angle = 0.0;
+
 display.onRender = () => {
 	shader.use();
 	shader.uniform1f("aspect", display.aspect);
+	shader.uniform1f("angle", angle);
 
 	gl.enableVertexAttribArray(0);
 	gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 0, 0);
 
 	gl.drawArrays(gl.TRIANGLES, 0, 6);
+	
+	angle += 0.01;
 }
 
 window.display = display;
