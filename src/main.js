@@ -6,6 +6,8 @@ let gl = display.gl;
 document.body.appendChild(display.canvas);
 
 let shader = display.createShader(`
+	uniform float aspect;
+
 	attribute vec4 pos;
 	
 	varying vec4 color;
@@ -13,6 +15,7 @@ let shader = display.createShader(`
 	void main()
 	{
 		gl_Position = pos;
+		gl_Position.x /= aspect;
 		color = pos;
 	}
 `,`
@@ -36,6 +39,8 @@ let buf = display.createStaticBuffer(new Float32Array([
 ]));
 
 gl.useProgram(shader);
+
+gl.uniform1f(gl.getUniformLocation(shader, "aspect"), display.canvas.width / display.canvas.height);
 
 gl.enableVertexAttribArray(0);
 gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 0, 0);
