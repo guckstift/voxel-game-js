@@ -4,7 +4,7 @@ canvas.width = 800;
 canvas.height = 600;
 document.body.appendChild(canvas);
 
-let gl = canvas.getContext("webgl");
+let gl = canvas.getContext("webgl", {alpha: false, antialias: false});
 
 gl.clearColor(0,0,0,0);
 gl.clear(gl.COLOR_BUFFER_BIT);
@@ -16,18 +16,23 @@ let prog = gl.createProgram();
 gl.shaderSource(vert, `
 	attribute vec4 pos;
 	
+	varying vec4 color;
+	
 	void main()
 	{
 		gl_Position = pos;
+		color = pos;
 	}
 `);
 
 gl.shaderSource(frag, `
 	precision highp float;
 	
+	varying vec4 color;
+	
 	void main()
 	{
-		gl_FragColor = vec4(0, 0, 0, 1);
+		gl_FragColor = color;
 	}
 `);
 
@@ -46,9 +51,12 @@ gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
 	0, 0, 0, 1,
 	1, 0, 0, 1,
 	0, 1, 0, 1,
+	0, 1, 0, 1,
+	1, 0, 0, 1,
+	1, 1, 0, 1,
 ]), gl.STATIC_DRAW);
 
 gl.enableVertexAttribArray(0);
 gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 0, 0);
 
-gl.drawArrays(gl.TRIANGLES, 0, 3);
+gl.drawArrays(gl.TRIANGLES, 0, 6);
