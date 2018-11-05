@@ -10,8 +10,9 @@ let shader = display.createShader(`
 	uniform float angle;
 
 	attribute vec3 pos;
+	attribute vec2 texcoord;
 	
-	varying vec2 texcoord;
+	varying vec2 vTexcoord;
 	
 	void main()
 	{
@@ -24,28 +25,28 @@ let shader = display.createShader(`
 		
 		gl_Position.x /= aspect;
 		
-		texcoord = vec2(pos.x, 1.0 - pos.y);
+		vTexcoord = texcoord;
 	}
 `,`
 	precision highp float;
 	
 	uniform sampler2D tex;
 	
-	varying vec2 texcoord;
+	varying vec2 vTexcoord;
 	
 	void main()
 	{
-		gl_FragColor = texture2D(tex, texcoord);
+		gl_FragColor = texture2D(tex, vTexcoord);
 	}
 `);
 
 let buf = display.createStaticBuffer(new Float32Array([
-	0, 0, 0,
-	1, 0, 0,
-	0, 1, 0,
-	0, 1, 0,
-	1, 0, 0,
-	1, 1, 0,
+	0, 0, 0,  0, 1,
+	1, 0, 0,  1, 1,
+	0, 1, 0,  0, 0,
+	0, 1, 0,  0, 0,
+	1, 0, 0,  1, 1,
+	1, 1, 0,  1, 0,
 ]));
 
 let angle = 0.0;
@@ -59,7 +60,8 @@ display.onRender = () => {
 	shader.uniform1f("angle", angle);
 	shader.uniformTex("tex", tex, 0);
 	
-	shader.vertexAttrib("pos", buf, 3);
+	shader.vertexAttrib("pos",      buf, 3, 4 * 5, 4 * 0);
+	shader.vertexAttrib("texcoord", buf, 2, 4 * 5, 4 * 3);
 	
 	gl.drawArrays(gl.TRIANGLES, 0, 6);
 	
