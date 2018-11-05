@@ -39,9 +39,8 @@ let buf = display.createStaticBuffer(new Float32Array([
 ]));
 
 display.onRender = () => {
-	gl.useProgram(shader);
-
-	gl.uniform1f(gl.getUniformLocation(shader, "aspect"), display.canvas.width / display.canvas.height);
+	shader.use();
+	shader.uniform1f("aspect", display.aspect);
 
 	gl.enableVertexAttribArray(0);
 	gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 0, 0);
