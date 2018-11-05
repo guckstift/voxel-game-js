@@ -9,8 +9,19 @@ export class Display
 		
 		this.canvas = canvas;
 		this.gl = gl;
-		
+		this.frame = this.frame.bind(this);
 		this.resize(800, 600);
+		
+		requestAnimationFrame(this.frame);
+	}
+	
+	frame()
+	{
+		if(this.onRender) {
+			this.onRender();
+		}
+		
+		requestAnimationFrame(this.frame);
 	}
 	
 	resize(w, h)

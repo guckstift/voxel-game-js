@@ -38,11 +38,15 @@ let buf = display.createStaticBuffer(new Float32Array([
 	1, 1, 0, 1,
 ]));
 
-gl.useProgram(shader);
+display.onRender = () => {
+	gl.useProgram(shader);
 
-gl.uniform1f(gl.getUniformLocation(shader, "aspect"), display.canvas.width / display.canvas.height);
+	gl.uniform1f(gl.getUniformLocation(shader, "aspect"), display.canvas.width / display.canvas.height);
 
-gl.enableVertexAttribArray(0);
-gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(0);
+	gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 0, 0);
 
-gl.drawArrays(gl.TRIANGLES, 0, 6);
+	gl.drawArrays(gl.TRIANGLES, 0, 6);
+}
+
+window.display = display;
