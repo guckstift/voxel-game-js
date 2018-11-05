@@ -1,19 +1,11 @@
-let canvas = document.createElement("canvas");
+import {Display} from "./display.js";
 
-canvas.width = 800;
-canvas.height = 600;
-document.body.appendChild(canvas);
+let display = new Display();
+let gl = display.gl;
 
-let gl = canvas.getContext("webgl", {alpha: false, antialias: false});
+document.body.appendChild(display.canvas);
 
-gl.clearColor(0,0,0,0);
-gl.clear(gl.COLOR_BUFFER_BIT);
-
-let vert = gl.createShader(gl.VERTEX_SHADER);
-let frag = gl.createShader(gl.FRAGMENT_SHADER);
-let prog = gl.createProgram();
-
-gl.shaderSource(vert, `
+let shader = display.createShader(`
 	attribute vec4 pos;
 	
 	varying vec4 color;
@@ -23,9 +15,7 @@ gl.shaderSource(vert, `
 		gl_Position = pos;
 		color = pos;
 	}
-`);
-
-gl.shaderSource(frag, `
+`,`
 	precision highp float;
 	
 	varying vec4 color;
@@ -36,25 +26,16 @@ gl.shaderSource(frag, `
 	}
 `);
 
-gl.compileShader(vert);
-gl.compileShader(frag);
-gl.attachShader(prog, vert);
-gl.attachShader(prog, frag);
-
-gl.linkProgram(prog);
-
-gl.useProgram(prog);
-
-let buf = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+let buf = display.createStaticBuffer(new Float32Array([
 	0, 0, 0, 1,
 	1, 0, 0, 1,
 	0, 1, 0, 1,
 	0, 1, 0, 1,
 	1, 0, 0, 1,
 	1, 1, 0, 1,
-]), gl.STATIC_DRAW);
+]));
+
+gl.useProgram(shader);
 
 gl.enableVertexAttribArray(0);
 gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 0, 0);
