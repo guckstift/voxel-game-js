@@ -52,14 +52,15 @@ let buf = display.createStaticBuffer(new Float32Array([
 
 let angle = 0.0;
 
-let tex = display.createTexture("gfx/grass.png");
+let tex1 = display.createTexture("gfx/grass.png");
+let tex2 = display.createTexture("gfx/stone.png");
 
 display.onRender = () => {
-	drawQuad([0, 0, 0]);
-	drawQuad([-.5, -.5, .5]);
+	drawQuad([0, 0, 0], tex1);
+	drawQuad([-.5, -.5, .5], tex2);
 }
 
-function drawQuad(offs)
+function drawQuad(offs, tex)
 {
 	shader.use();
 	
