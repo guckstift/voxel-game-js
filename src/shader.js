@@ -81,6 +81,11 @@ export class Shader
 		this.gl.uniform3fv(this.getUniform(name), value);
 	}
 	
+	uniformMatrix4fv(name, value)
+	{
+		this.gl.uniformMatrix4fv(this.getUniform(name), false, value);
+	}
+	
 	uniformTex(name, tex, unit)
 	{
 		let gl = this.gl;

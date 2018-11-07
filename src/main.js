@@ -6,9 +6,13 @@ let gl = display.gl;
 document.body.appendChild(display.canvas);
 
 let shader = display.createShader(`
+	/*
 	uniform float aspect;
 	uniform float angle;
 	uniform vec3 offs;
+	*/
+	
+	uniform mat4 mat;
 
 	attribute vec3 pos;
 	attribute vec2 texcoord;
@@ -17,6 +21,7 @@ let shader = display.createShader(`
 	
 	void main()
 	{
+		/*
 		gl_Position = vec4(pos + offs, 1.0);
 		
 		gl_Position.xz = vec2(
@@ -25,6 +30,9 @@ let shader = display.createShader(`
 		);
 		
 		gl_Position.x /= aspect;
+		*/
+		
+		gl_Position = mat * vec4(pos, 1.0);
 		
 		vTexcoord = texcoord;
 	}
@@ -55,6 +63,13 @@ let angle = 0.0;
 let tex1 = display.createTexture("gfx/grass.png");
 let tex2 = display.createTexture("gfx/stone.png");
 
+let mat = [
+	1, 0, 0, 0,
+	0, 1, 0, 0,
+	0, 0, 1, 0,
+	0, 0, 0, 1,
+];
+
 display.onRender = () => {
 	drawQuad([0, 0, 0], tex1);
 	drawQuad([-.5, -.5, .5], tex2);
@@ -62,11 +77,20 @@ display.onRender = () => {
 
 function drawQuad(offs, tex)
 {
+	mat[0] = 1 / display.aspect;
+	mat[12] = offs[0] / display.aspect;
+	mat[13] = offs[1];
+	mat[14] = offs[2];
+	
 	shader.use();
 	
+	/*
 	shader.uniform1f("aspect", display.aspect);
 	shader.uniform1f("angle", angle);
 	shader.uniform3fv("offs", offs);
+	*/
+	
+	shader.uniformMatrix4fv("mat", mat);
 	shader.uniformTex("tex", tex, 0);
 	
 	shader.vertexAttrib("pos",      buf, 3, 4 * 5, 4 * 0);
