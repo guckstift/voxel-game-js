@@ -1,4 +1,5 @@
 import {Display} from "./display.js";
+import * as matrix from "./matrix.js";
 
 let display = new Display();
 let gl = display.gl;
@@ -64,19 +65,8 @@ let angle = 0.0;
 let tex1 = display.createTexture("gfx/grass.png");
 let tex2 = display.createTexture("gfx/stone.png");
 
-let view = [
-	1, 0, 0, 0,
-	0, 1, 0, 0,
-	0, 0, 1, 0,
-	0, 0, 0, 1,
-];
-
-let model = [
-	1, 0, 0, 0,
-	0, 1, 0, 0,
-	0, 0, 1, 0,
-	0, 0, 0, 1,
-];
+let view = matrix.identity();
+let model = matrix.identity();
 
 display.onRender = () => {
 	drawQuad([0, 0, 0], tex1);
@@ -85,11 +75,8 @@ display.onRender = () => {
 
 function drawQuad(offs, tex)
 {
-	view[0] = 1 / display.aspect;
-	
-	model[12] = offs[0];
-	model[13] = offs[1];
-	model[14] = offs[2];
+	matrix.scaling(1 / display.aspect, 1, 1, view);
+	matrix.translation(...offs, model);
 	
 	shader.use();
 	
