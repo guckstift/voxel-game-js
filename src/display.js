@@ -55,13 +55,13 @@ export class Display
 		return new Shader(this, vertSrc, fragSrc);
 	}
 	
-	createStaticBuffer(data)
+	createStaticFloatBuffer(data)
 	{
 		let gl = this.gl;
 		let buf = gl.createBuffer();
 		
 		gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-		gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
 		
 		return buf;
 	}

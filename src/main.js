@@ -12,7 +12,8 @@ let shader = display.createShader(`
 	uniform vec3 offs;
 	*/
 	
-	uniform mat4 mat;
+	uniform mat4 view;
+	uniform mat4 model;
 
 	attribute vec3 pos;
 	attribute vec2 texcoord;
@@ -32,7 +33,7 @@ let shader = display.createShader(`
 		gl_Position.x /= aspect;
 		*/
 		
-		gl_Position = mat * vec4(pos, 1.0);
+		gl_Position = view * model * vec4(pos, 1.0);
 		
 		vTexcoord = texcoord;
 	}
@@ -49,21 +50,28 @@ let shader = display.createShader(`
 	}
 `);
 
-let buf = display.createStaticBuffer(new Float32Array([
+let buf = display.createStaticFloatBuffer([
 	0, 0, 0,  0, 1,
 	1, 0, 0,  1, 1,
 	0, 1, 0,  0, 0,
 	0, 1, 0,  0, 0,
 	1, 0, 0,  1, 1,
 	1, 1, 0,  1, 0,
-]));
+]);
 
 let angle = 0.0;
 
 let tex1 = display.createTexture("gfx/grass.png");
 let tex2 = display.createTexture("gfx/stone.png");
 
-let mat = [
+let view = [
+	1, 0, 0, 0,
+	0, 1, 0, 0,
+	0, 0, 1, 0,
+	0, 0, 0, 1,
+];
+
+let model = [
 	1, 0, 0, 0,
 	0, 1, 0, 0,
 	0, 0, 1, 0,
@@ -77,10 +85,11 @@ display.onRender = () => {
 
 function drawQuad(offs, tex)
 {
-	mat[0] = 1 / display.aspect;
-	mat[12] = offs[0] / display.aspect;
-	mat[13] = offs[1];
-	mat[14] = offs[2];
+	view[0] = 1 / display.aspect;
+	
+	model[12] = offs[0];
+	model[13] = offs[1];
+	model[14] = offs[2];
 	
 	shader.use();
 	
@@ -90,11 +99,12 @@ function drawQuad(offs, tex)
 	shader.uniform3fv("offs", offs);
 	*/
 	
-	shader.uniformMatrix4fv("mat", mat);
+	shader.uniformMatrix4fv("view", view);
+	shader.uniformMatrix4fv("model", model);
 	shader.uniformTex("tex", tex, 0);
 	
-	shader.vertexAttrib("pos",      buf, 3, 4 * 5, 4 * 0);
-	shader.vertexAttrib("texcoord", buf, 2, 4 * 5, 4 * 3);
+	shader.vertexAttrib("pos",      buf, 3, 5, 0);
+	shader.vertexAttrib("texcoord", buf, 2, 5, 3);
 	
 	gl.drawArrays(gl.TRIANGLES, 0, 6);
 }

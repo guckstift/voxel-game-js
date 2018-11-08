@@ -63,7 +63,7 @@ export class Shader
 		
 		gl.enableVertexAttribArray(this.vars[name]);
 		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-		gl.vertexAttribPointer(this.getAttrib(name), size, gl.FLOAT, false, stride, offset);
+		gl.vertexAttribPointer(this.getAttrib(name), size, gl.FLOAT, false, 4*stride, 4*offset);
 	}
 	
 	uniform1f(name, value)
