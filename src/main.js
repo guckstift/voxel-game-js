@@ -15,6 +15,7 @@ let shader = display.createShader(`
 	
 	uniform mat4 view;
 	uniform mat4 model;
+	uniform mat4 rota;
 
 	attribute vec3 pos;
 	attribute vec2 texcoord;
@@ -34,7 +35,7 @@ let shader = display.createShader(`
 		gl_Position.x /= aspect;
 		*/
 		
-		gl_Position = view * model * vec4(pos, 1.0);
+		gl_Position = view * model * rota * vec4(pos, 1.0);
 		
 		vTexcoord = texcoord;
 	}
@@ -67,6 +68,7 @@ let tex2 = display.createTexture("gfx/stone.png");
 
 let view = matrix.identity();
 let model = matrix.identity();
+let rota = matrix.identity();
 
 display.onRender = () => {
 	drawQuad([0, 0, 0], tex1);
@@ -76,6 +78,7 @@ display.onRender = () => {
 function drawQuad(offs, tex)
 {
 	matrix.scaling(1 / display.aspect, 1, 1, view);
+	matrix.rotationZ(angle, rota);
 	matrix.translation(...offs, model);
 	
 	shader.use();
@@ -88,12 +91,15 @@ function drawQuad(offs, tex)
 	
 	shader.uniformMatrix4fv("view", view);
 	shader.uniformMatrix4fv("model", model);
+	shader.uniformMatrix4fv("rota", rota);
 	shader.uniformTex("tex", tex, 0);
 	
 	shader.vertexAttrib("pos",      buf, 3, 5, 0);
 	shader.vertexAttrib("texcoord", buf, 2, 5, 3);
 	
 	gl.drawArrays(gl.TRIANGLES, 0, 6);
+	
+	angle += 0.01;
 }
 
 window.display = display;
