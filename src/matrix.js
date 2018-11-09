@@ -34,6 +34,21 @@ export function scaling(x = 1, y = 1, z = 1, out = new Float32Array(16))
 	return out;
 }
 
+export function rotationY(a = 0, out = new Float32Array(16))
+{
+	let s = Math.sin(a);
+	let c = Math.cos(a);
+	
+	out.set([
+		 c, 0, s, 0,
+		 0, 1, 0, 0,
+		-s, 0, c, 0,
+		 0, 0, 0, 1,
+	]);
+	
+	return out;
+}
+
 export function rotationZ(a = 0, out = new Float32Array(16))
 {
 	let s = Math.sin(a);
@@ -85,6 +100,34 @@ export function multiply(a, b, out = new Float32Array(16))
 	out[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
 	out[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
 	out[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+	
+	return out;
+}
+
+export function rotateY(m, a = 0, out = new Float32Array(16))
+{
+	let s = Math.sin(a);
+	let c = Math.cos(a);
+	
+	let a00 = m[0], a01 = m[1], a02 = m[2],  a03 = m[3];
+	let a20 = m[8], a21 = m[9], a22 = m[10], a23 = m[11];
+	
+	out[0]  =  c * a00 + s * a20;
+	out[1]  =  c * a01 + s * a21;
+	out[2]  =  c * a02 + s * a22;
+	out[3]  =  c * a03 + s * a23;
+	out[4]  =  m[4];
+	out[5]  =  m[5];
+	out[6]  =  m[6];
+	out[7]  =  m[7];
+	out[8]  = -s * a00 + c * a20;
+	out[9]  = -s * a01 + c * a21;
+	out[10] = -s * a02 + c * a22;
+	out[11] = -s * a03 + c * a23;
+	out[12] =  m[12];
+	out[13] =  m[13];
+	out[14] =  m[14];
+	out[15] =  m[15];
 	
 	return out;
 }

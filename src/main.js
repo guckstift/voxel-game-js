@@ -60,7 +60,7 @@ function drawQuad(offs, tex)
 {
 	matrix.scaling(1 / display.aspect, 1, 1, view);
 	matrix.translation(...offs, model);
-	matrix.rotateZ(model, angle, model);
+	matrix.rotateY(model, angle, model);
 	
 	shader.use();
 	
