@@ -88,3 +88,31 @@ export function multiply(a, b, out = new Float32Array(16))
 	
 	return out;
 }
+
+export function rotateZ(m, a = 0, out = new Float32Array(16))
+{
+	let s = Math.sin(a);
+	let c = Math.cos(a);
+	
+	let a00 = m[0], a01 = m[1], a02 = m[2], a03 = m[3];
+	let a10 = m[4], a11 = m[5], a12 = m[6], a13 = m[7];
+	
+	out[0]  =  c * a00 + s * a10;
+	out[1]  =  c * a01 + s * a11;
+	out[2]  =  c * a02 + s * a12;
+	out[3]  =  c * a03 + s * a13;
+	out[4]  = -s * a00 + c * a10;
+	out[5]  = -s * a01 + c * a11;
+	out[6]  = -s * a02 + c * a12;
+	out[7]  = -s * a03 + c * a13;
+	out[8]  =  m[8];
+	out[9]  =  m[9];
+	out[10] =  m[10];
+	out[11] =  m[11];
+	out[12] =  m[12];
+	out[13] =  m[13];
+	out[14] =  m[14];
+	out[15] =  m[15];
+	
+	return out;
+}

@@ -50,7 +50,6 @@ let tex2 = display.createTexture("gfx/stone.png");
 
 let view = matrix.identity();
 let model = matrix.identity();
-let rota = matrix.identity();
 
 display.onRender = () => {
 	drawQuad([0, 0, 0], tex1);
@@ -60,9 +59,8 @@ display.onRender = () => {
 function drawQuad(offs, tex)
 {
 	matrix.scaling(1 / display.aspect, 1, 1, view);
-	matrix.rotationZ(angle, rota);
 	matrix.translation(...offs, model);
-	matrix.multiply(model, rota, model);
+	matrix.rotateZ(model, angle, model);
 	
 	shader.use();
 	
