@@ -137,6 +137,32 @@ export function multiply(a, b, out = new Float32Array(16))
 	return out;
 }
 
+export function translate(m, x = 0, y = 0, z = 0, out = new Float32Array(16))
+{
+	let a00 = m[0], a01 = m[1], a02 = m[2],  a03 = m[3];
+	let a10 = m[4], a11 = m[5], a12 = m[6],  a13 = m[7];
+	let a20 = m[8], a21 = m[9], a22 = m[10], a23 = m[11];
+	
+	out[0]  = a00;
+	out[1]  = a01;
+	out[2]  = a02;
+	out[3]  = a03;
+	out[4]  = a10;
+	out[5]  = a11;
+	out[6]  = a12;
+	out[7]  = a13;
+	out[8]  = a20;
+	out[9]  = a21;
+	out[10] = a22;
+	out[11] = a23;
+	out[12] = x * a00 + y * a10 + z * a20 + m[12];
+	out[13] = x * a01 + y * a11 + z * a21 + m[13];
+	out[14] = x * a02 + y * a12 + z * a22 + m[14];
+	out[15] = x * a03 + y * a13 + z * a23 + m[15];
+	
+	return out;
+}
+
 export function rotateX(m, a, out = new Float32Array(16))
 {
 	let s = Math.sin(a);
