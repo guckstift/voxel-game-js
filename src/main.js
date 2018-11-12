@@ -1,8 +1,10 @@
 import {Display} from "./display.js";
+import {Camera} from "./camera.js";
 import * as matrix from "./matrix.js";
 import * as vector from "./vector.js";
 
 let display = new Display();
+let camera = new Camera(display);
 let gl = display.gl;
 
 document.body.appendChild(display.canvas);
@@ -45,7 +47,8 @@ let front = new Float32Array([
 	1, 1, 0, 1,  1, 0,
 ]);
 
-let buf = display.createStaticFloatBuffer(createCube());
+let grass = display.createStaticFloatBuffer(createCube([2, 2, 2, 2, 0, 1]));
+let stone = display.createStaticFloatBuffer(createCube([3, 3, 3, 3, 3, 3]));
 
 let angle = 0.0;
 
@@ -53,20 +56,16 @@ let atlas = display.createTexture("gfx/atlas.png");
 let tex1 = display.createTexture("gfx/grass.png");
 let tex2 = display.createTexture("gfx/stone.png");
 
-let proj = matrix.identity();
-let view = matrix.identity();
 let model = matrix.identity();
 
 display.onRender = () => {
-	matrix.perspective(90 * Math.PI / 180, display.aspect, 0.1, 100, proj);
-	
 	shader.use();
 	
-	shader.uniformMatrix4fv("proj", proj);
-	shader.uniformMatrix4fv("view", view);
+	shader.uniformMatrix4fv("proj", camera.getProjection());
+	shader.uniformMatrix4fv("view", camera.getView());
 	
-	drawTriangles(buf, 6 * 6,  0, 0, 3,  angle, atlas);
-	drawTriangles(buf, 6 * 6, -1,-1, 3,  angle, atlas);
+	drawTriangles(grass, 6 * 6,  0, 0, 3,  angle, atlas);
+	drawTriangles(stone, 6 * 6,  1, 1, 4,  angle, atlas);
 	
 	angle += 0.01;
 }
@@ -86,17 +85,17 @@ function drawTriangles(buf, vertnum, x, y, z, a, tex)
 	gl.drawArrays(gl.TRIANGLES, 0, vertnum);
 }
 
-function createCube(out = new Float32Array(6 * 6 * 6))
+function createCube(slots, out = new Float32Array(6 * 6 * 6))
 {
 	let r = Math.PI / 2;
 	let s = Math.PI;
 	
-	createQuad(0, 0, 0,  0, 0, 0,  2, out.subarray(6 * 6 * 0)); // front
-	createQuad(1, 0, 0,  0, r, 0,  2, out.subarray(6 * 6 * 1)); // right
-	createQuad(1, 0, 1,  0, s, 0,  2, out.subarray(6 * 6 * 2)); // back
-	createQuad(0, 0, 1,  0,-r, 0,  2, out.subarray(6 * 6 * 3)); // left
-	createQuad(0, 1, 0,  r, 0, 0,  0, out.subarray(6 * 6 * 4)); // top
-	createQuad(0, 0, 1, -r, 0, 0,  1, out.subarray(6 * 6 * 5)); // bottom
+	createQuad(0, 0, 0,  0, 0, 0,  slots[0], out.subarray(6 * 6 * 0)); // front
+	createQuad(1, 0, 0,  0, r, 0,  slots[1], out.subarray(6 * 6 * 1)); // right
+	createQuad(1, 0, 1,  0, s, 0,  slots[2], out.subarray(6 * 6 * 2)); // back
+	createQuad(0, 0, 1,  0,-r, 0,  slots[3], out.subarray(6 * 6 * 3)); // left
+	createQuad(0, 1, 0,  r, 0, 0,  slots[4], out.subarray(6 * 6 * 4)); // top
+	createQuad(0, 0, 1, -r, 0, 0,  slots[5], out.subarray(6 * 6 * 5)); // bottom
 	
 	return out;
 }
@@ -128,3 +127,4 @@ function createQuad(x, y, z, ax, ay, az, slot, out = new Float32Array(6 * 6))
 }
 
 window.display = display;
+window.camera = camera;
