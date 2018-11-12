@@ -79,6 +79,24 @@ export function rotationZ(a = 0, out = new Float32Array(16))
 	return out;
 }
 
+export function perspective(fovy, aspect, near, far, out = new Float32Array(16))
+{
+	let fy = 1 / Math.tan(fovy / 2);
+	let fx = fy / aspect;
+	let nf = 1 / (near - far);
+	let a  = -(near + far) * nf;
+	let b  = 2 * far * near * nf;
+	
+	out.set([
+		fx, 0,  0, 0,
+		0,  fy, 0, 0,
+		0,  0,  a, 1,
+		0,  0,  b, 0,
+	]);
+	
+	return out;
+}
+
 export function multiply(a, b, out = new Float32Array(16))
 {
 	let a00 = a[0],  a01 = a[1],  a02 = a[2],  a03 = a[3];
