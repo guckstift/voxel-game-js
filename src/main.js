@@ -62,16 +62,16 @@ let keymap = {};
 let panning = false;
 
 display.onRender = () => {
-	if(keymap.ArrowLeft) {
+	if(keymap.a) {
 		camera.moveLeft(speed);
 	}
-	if(keymap.ArrowRight) {
+	if(keymap.d) {
 		camera.moveRight(speed);
 	}
-	if(keymap.ArrowDown) {
+	if(keymap.s) {
 		camera.moveBackward(speed);
 	}
-	if(keymap.ArrowUp) {
+	if(keymap.w) {
 		camera.moveForward(speed);
 	}
 	
@@ -105,6 +105,7 @@ display.canvas.onmouseup = e => {
 display.canvas.onmousemove = e => {
 	if(panning) {
 		camera.turnHori(e.movementX / 100);
+		camera.turnVert(-e.movementY / 100);
 	}
 };
 
