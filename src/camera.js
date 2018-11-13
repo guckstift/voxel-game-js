@@ -6,6 +6,7 @@ export class Camera
 	{
 		this.display = display;
 		this.pos = [0, 0, 0];
+		this.hangle = 0;
 		this.proj = matrix.identity();
 		this.view = matrix.identity();
 	}
@@ -19,7 +20,9 @@ export class Camera
 	
 	getView()
 	{
-		matrix.translation(-this.pos[0], -this.pos[1], -this.pos[2], this.view);
+		matrix.identity(this.view);
+		matrix.rotateY(this.view, this.hangle, this.view);
+		matrix.translate(this.view, -this.pos[0], -this.pos[1], -this.pos[2], this.view);
 		
 		return this.view;
 	}
@@ -42,5 +45,10 @@ export class Camera
 	moveRight(speed)
 	{
 		this.pos[0] += speed;
+	}
+	
+	turnHori(angle)
+	{
+		this.hangle += angle;
 	}
 }

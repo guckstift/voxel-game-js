@@ -59,6 +59,7 @@ let tex2 = display.createTexture("gfx/stone.png");
 let model = matrix.identity();
 let speed = 0.1;
 let keymap = {};
+let panning = false;
 
 display.onRender = () => {
 	if(keymap.ArrowLeft) {
@@ -81,8 +82,6 @@ display.onRender = () => {
 	
 	drawTriangles(grass, 6 * 6,  0, 0, 3,  angle, atlas);
 	drawTriangles(stone, 6 * 6,  1, 1, 4,  angle, atlas);
-	
-	angle += 0.01;
 }
 
 document.onkeydown = e => {
@@ -91,6 +90,22 @@ document.onkeydown = e => {
 
 document.onkeyup = e => {
 	keymap[e.key] = false;
+};
+
+display.canvas.onmousedown = e => {
+	display.canvas.requestPointerLock();
+	panning = true;
+};
+
+display.canvas.onmouseup = e => {
+	document.exitPointerLock();
+	panning = false;
+};
+
+display.canvas.onmousemove = e => {
+	if(panning) {
+		camera.turnHori(e.movementX / 100);
+	}
 };
 
 function drawTriangles(buf, vertnum, x, y, z, a, tex)
