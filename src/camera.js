@@ -23,4 +23,24 @@ export class Camera
 		
 		return this.view;
 	}
+	
+	moveForward(speed)
+	{
+		this.pos[2] += speed;
+	}
+	
+	moveBackward(speed)
+	{
+		this.pos[2] -= speed;
+	}
+	
+	moveLeft(speed)
+	{
+		this.pos[0] -= speed;
+	}
+	
+	moveRight(speed)
+	{
+		this.pos[0] += speed;
+	}
 }

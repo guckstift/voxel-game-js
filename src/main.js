@@ -57,8 +57,23 @@ let tex1 = display.createTexture("gfx/grass.png");
 let tex2 = display.createTexture("gfx/stone.png");
 
 let model = matrix.identity();
+let speed = 0.1;
+let keymap = {};
 
 display.onRender = () => {
+	if(keymap.ArrowLeft) {
+		camera.moveLeft(speed);
+	}
+	if(keymap.ArrowRight) {
+		camera.moveRight(speed);
+	}
+	if(keymap.ArrowDown) {
+		camera.moveBackward(speed);
+	}
+	if(keymap.ArrowUp) {
+		camera.moveForward(speed);
+	}
+	
 	shader.use();
 	
 	shader.uniformMatrix4fv("proj", camera.getProjection());
@@ -69,6 +84,14 @@ display.onRender = () => {
 	
 	angle += 0.01;
 }
+
+document.onkeydown = e => {
+	keymap[e.key] = true;
+};
+
+document.onkeyup = e => {
+	keymap[e.key] = false;
+};
 
 function drawTriangles(buf, vertnum, x, y, z, a, tex)
 {
