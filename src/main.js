@@ -74,6 +74,12 @@ display.onRender = () => {
 	if(keymap.w) {
 		camera.moveForward(speed);
 	}
+	if(keymap.Shift) {
+		camera.moveUp(speed);
+	}
+	if(keymap[" "]) {
+		camera.moveDown(speed);
+	}
 	
 	shader.use();
 	

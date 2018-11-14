@@ -1,3 +1,13 @@
+export function create(x = 0, y = 0, z = 0, w = 1, out = new Float32Array(4))
+{
+	out[0] = x;
+	out[1] = y;
+	out[2] = z;
+	out[3] = w;
+	
+	return out;
+}
+
 export function transform(v, m, out = new Float32Array(4))
 {
 	let x = v[0], y = v[1], z = v[2], w = v[3];
@@ -18,6 +28,36 @@ export function round(v, out = new Float32Array(4))
 	out[1] = Math.round(v[1]);
 	out[2] = Math.round(v[2]);
 	out[3] = Math.round(v[3]);
+	
+	return out;
+}
+
+export function add(a, b, out = new Float32Array(4))
+{
+	out[0] = a[0] + b[0];
+	out[1] = a[1] + b[1];
+	out[2] = a[2] + b[2];
+	out[3] = a[3] + b[3];
+	
+	return out;
+}
+
+export function sub(a, b, out = new Float32Array(4))
+{
+	out[0] = a[0] - b[0];
+	out[1] = a[1] - b[1];
+	out[2] = a[2] - b[2];
+	out[3] = a[3] - b[3];
+	
+	return out;
+}
+
+export function multiply(a, b, out = new Float32Array(4))
+{
+	out[0] = a[0] * b[0];
+	out[1] = a[1] * b[1];
+	out[2] = a[2] * b[2];
+	out[3] = a[3] * b[3];
 	
 	return out;
 }

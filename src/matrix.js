@@ -163,6 +163,28 @@ export function translate(m, x = 0, y = 0, z = 0, out = new Float32Array(16))
 	return out;
 }
 
+export function scale(m, x = 1, y = 1, z = 1, out = new Float32Array(16))
+{
+	out[0]  = x * m[0];
+	out[1]  = x * m[1];
+	out[2]  = x * m[2];
+	out[3]  = x * m[3];
+	out[4]  = y * m[4];
+	out[5]  = y * m[5];
+	out[6]  = y * m[6];
+	out[7]  = y * m[7];
+	out[8]  = z * m[8];
+	out[9]  = z * m[9];
+	out[10] = z * m[10];
+	out[11] = z * m[11];
+	out[12] = m[12];
+	out[13] = m[13];
+	out[14] = m[14];
+	out[15] = m[15];
+	
+	return out;
+}
+
 export function rotateX(m, a, out = new Float32Array(16))
 {
 	let s = Math.sin(a);
