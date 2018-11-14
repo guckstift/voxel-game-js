@@ -7,11 +7,23 @@ export class Input
 		this.onMove = () => {};
 		
 		document.onkeydown = e => {
-			this.keymap[e.key] = true;
+			let key = e.key.toLowerCase();
+			
+			if(key === " ") {
+				key = "space";
+			}
+			
+			this.keymap[key] = true;
 		};
 
 		document.onkeyup = e => {
-			this.keymap[e.key] = false;
+			let key = e.key.toLowerCase();
+			
+			if(key === " ") {
+				key = "space";
+			}
+			
+			this.keymap[key] = false;
 		};
 
 		target.onmousedown = e => {

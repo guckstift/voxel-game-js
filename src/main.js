@@ -59,10 +59,10 @@ display.onRender = () => {
 	if(input.keymap.w) {
 		camera.moveForward(speed);
 	}
-	if(input.keymap.Shift) {
+	if(input.keymap.shift) {
 		camera.moveUp(speed);
 	}
-	if(input.keymap[" "]) {
+	if(input.keymap.space) {
 		camera.moveDown(speed);
 	}
 	
