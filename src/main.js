@@ -1,13 +1,14 @@
 import {Display} from "./display.js";
 import {Camera} from "./camera.js";
 import {Chunk} from "./chunk.js";
+import {Input} from "./input.js";
 import * as matrix from "./matrix.js";
-import * as vector from "./vector.js";
 
 let display = new Display();
 let camera = new Camera(display);
 let gl = display.gl;
 let chunk = new Chunk(display);
+let input = new Input(display.canvas);
 
 document.body.appendChild(display.canvas);
 
@@ -41,31 +42,27 @@ let shader = display.createShader(`
 `);
 
 let angle = 0.0;
-
 let atlas = display.createTexture("gfx/atlas.png");
-
 let model = matrix.identity();
 let speed = 0.1;
-let keymap = {};
-let panning = false;
 
 display.onRender = () => {
-	if(keymap.a) {
+	if(input.keymap.a) {
 		camera.moveLeft(speed);
 	}
-	if(keymap.d) {
+	if(input.keymap.d) {
 		camera.moveRight(speed);
 	}
-	if(keymap.s) {
+	if(input.keymap.s) {
 		camera.moveBackward(speed);
 	}
-	if(keymap.w) {
+	if(input.keymap.w) {
 		camera.moveForward(speed);
 	}
-	if(keymap.Shift) {
+	if(input.keymap.Shift) {
 		camera.moveUp(speed);
 	}
-	if(keymap[" "]) {
+	if(input.keymap[" "]) {
 		camera.moveDown(speed);
 	}
 	
@@ -77,26 +74,8 @@ display.onRender = () => {
 	drawTriangles(chunk.buf,  16 ** 3 * 6 * 2 * 3,  0,0,3,  0,  atlas);
 }
 
-document.onkeydown = e => {
-	keymap[e.key] = true;
-};
-
-document.onkeyup = e => {
-	keymap[e.key] = false;
-};
-
-display.canvas.onmousedown = e => {
-	display.canvas.requestPointerLock();
-	panning = true;
-};
-
-display.canvas.onmouseup = e => {
-	document.exitPointerLock();
-	panning = false;
-};
-
-display.canvas.onmousemove = e => {
-	if(panning) {
+input.onMove = e => {
+	if(input.panning) {
 		camera.turnHori(e.movementX / 100);
 		camera.turnVert(-e.movementY / 100);
 	}
