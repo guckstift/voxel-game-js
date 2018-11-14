@@ -7,8 +7,11 @@ import * as matrix from "./matrix.js";
 let display = new Display();
 let camera = new Camera(display);
 let gl = display.gl;
-let chunk = new Chunk(display);
 let input = new Input(display.canvas);
+let chunk1 = new Chunk( 0, 0, 0, display);
+let chunk2 = new Chunk(-1, 0, 0, display);
+
+camera.moveBackward(3);
 
 document.body.appendChild(display.canvas);
 
@@ -71,7 +74,8 @@ display.onRender = () => {
 	shader.uniformMatrix4fv("proj", camera.getProjection());
 	shader.uniformMatrix4fv("view", camera.getView());
 	
-	drawTriangles(chunk.buf,  16 ** 3 * 6 * 2 * 3,  0,0,3,  0,  atlas);
+	drawChunk(chunk1);
+	drawChunk(chunk2);
 }
 
 input.onMove = e => {
@@ -80,6 +84,15 @@ input.onMove = e => {
 		camera.turnVert(-e.movementY / 100);
 	}
 };
+
+function drawChunk(chunk)
+{
+	drawTriangles(
+		chunk.buf,  16 ** 3 * 6 * 2 * 3,
+		chunk.x * 16, chunk.y * 16, chunk.z * 16,
+		0,  atlas
+	);
+}
 
 function drawTriangles(buf, vertnum, x, y, z, a, tex)
 {

@@ -3,8 +3,11 @@ import * as vector from "./vector.js";
 
 export class Chunk
 {
-	constructor(display)
+	constructor(x, y, z, display)
 	{
+		this.x = x;
+		this.y = y;
+		this.z = z;
 		this.data = new Uint8Array(16 ** 3);
 
 		for(let i=0; i<16**3; i++) {
