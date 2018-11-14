@@ -66,6 +66,17 @@ export class Display
 		return buf;
 	}
 	
+	createStaticByteBuffer(data)
+	{
+		let gl = this.gl;
+		let buf = gl.createBuffer();
+		
+		gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+		gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(data), gl.STATIC_DRAW);
+		
+		return buf;
+	}
+	
 	createTexture(url)
 	{
 		return new Texture(this, url);

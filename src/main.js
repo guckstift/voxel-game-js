@@ -29,7 +29,7 @@ let shader = display.createShader(`
 	{
 		gl_Position = proj * view * model * pos;
 		
-		vTexcoord = texcoord;
+		vTexcoord = texcoord / 16.0;
 	}
 `,`
 	precision highp float;
@@ -62,10 +62,10 @@ display.onRender = () => {
 	if(input.keymap.w) {
 		camera.moveForward(speed);
 	}
-	if(input.keymap.shift) {
+	if(input.keymap.space) {
 		camera.moveUp(speed);
 	}
-	if(input.keymap.space) {
+	if(input.keymap.shift) {
 		camera.moveDown(speed);
 	}
 	
@@ -103,11 +103,12 @@ function drawTriangles(buf, vertnum, x, y, z, a, tex)
 	shader.uniformMatrix4fv("model", model);
 	shader.uniformTex("tex", tex, 0);
 	
-	shader.vertexAttrib("pos",      buf, 4, 6, 0);
-	shader.vertexAttrib("texcoord", buf, 2, 6, 4);
+	shader.vertexAttrib("pos",      buf, 4, true, 6, 0);
+	shader.vertexAttrib("texcoord", buf, 2, true, 6, 4);
 	
 	gl.drawArrays(gl.TRIANGLES, 0, vertnum);
 }
 
 window.display = display;
 window.camera = camera;
+window.chunk1 = chunk1;

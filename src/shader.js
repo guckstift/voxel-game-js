@@ -57,13 +57,18 @@ export class Shader
 		return this.vars[name];
 	}
 	
-	vertexAttrib(name, buffer, size, stride = 0, offset = 0)
+	vertexAttrib(name, buffer, size, isbyte = false, stride = 0, offset = 0)
 	{
 		let gl = this.gl;
+		let gltype = isbyte ? gl.UNSIGNED_BYTE : gl.FLOAT;
+		let datasize = isbyte ? 1 : 4;
 		
 		gl.enableVertexAttribArray(this.vars[name]);
 		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-		gl.vertexAttribPointer(this.getAttrib(name), size, gl.FLOAT, false, 4*stride, 4*offset);
+		
+		gl.vertexAttribPointer(
+			this.getAttrib(name), size, gltype, false, datasize * stride, datasize * offset
+		);
 	}
 	
 	uniform1f(name, value)

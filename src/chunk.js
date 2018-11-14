@@ -40,7 +40,7 @@ export class Chunk
 	
 	createMesh()
 	{
-		this.mesh = new Float32Array(16 ** 3 * 6 * 2 * 3 * 6);
+		this.mesh = new Uint8Array(16 ** 3 * 6 * 2 * 3 * 6);
 		this.meshsize = 0;
 		this.vertnum = 0;
 
@@ -61,7 +61,7 @@ export class Chunk
 			}
 		}
 		
-		this.buf = this.display.createStaticFloatBuffer(this.mesh.subarray(0, this.meshsize));
+		this.buf = this.display.createStaticByteBuffer(this.mesh.subarray(0, this.meshsize));
 	}
 	
 	addFaceIfVisible(block, x, y, z, ax, ay, az, faceid)
@@ -101,6 +101,21 @@ function createCube(slots, out = new Float32Array(6 * 6 * 6))
 	return out;
 }
 
+function createByteCube(slots, out = new Uint8Array(6 * 6 * 6))
+{
+	let r = Math.PI / 2;
+	let s = Math.PI;
+	
+	createByteQuad(0, 0, 0,  0, 0, 0,  slots[0], out.subarray(6 * 6 * 0)); // front
+	createByteQuad(1, 0, 0,  0, r, 0,  slots[1], out.subarray(6 * 6 * 1)); // right
+	createByteQuad(1, 0, 1,  0, s, 0,  slots[2], out.subarray(6 * 6 * 2)); // back
+	createByteQuad(0, 0, 1,  0,-r, 0,  slots[3], out.subarray(6 * 6 * 3)); // left
+	createByteQuad(0, 1, 0,  r, 0, 0,  slots[4], out.subarray(6 * 6 * 4)); // top
+	createByteQuad(0, 0, 1, -r, 0, 0,  slots[5], out.subarray(6 * 6 * 5)); // bottom
+	
+	return out;
+}
+
 let front = new Float32Array([
 	0, 0, 0, 1,  0, 1,
 	1, 0, 0, 1,  1, 1,
@@ -109,6 +124,23 @@ let front = new Float32Array([
 	1, 0, 0, 1,  1, 1,
 	1, 1, 0, 1,  1, 0,
 ]);
+
+function createByteQuad(x, y, z, ax, ay, az, slot, out = new Uint8Array(6 * 6))
+{
+	let floatquad = createQuad(x, y, z, ax, ay, az, slot);
+	
+	for(let i=0; i<6; i++) {
+		let o = i * 6;
+		let v = out.subarray(o);
+		let f = floatquad.subarray(o);
+		
+		v.set(f.subarray(0, 4));
+		v[4] = Math.floor(f[4] * 16);
+		v[5] = Math.floor(f[5] * 16);
+	}
+	
+	return out;
+}
 
 function createQuad(x, y, z, ax, ay, az, slot, out = new Float32Array(6 * 6))
 {
@@ -138,7 +170,7 @@ function createQuad(x, y, z, ax, ay, az, slot, out = new Float32Array(6 * 6))
 
 let blocks = [
 	null, // air
-	createCube([2, 2, 2, 2, 0, 1]), // grass
-	createCube([3, 3, 3, 3, 3, 3]), // stone
-	createCube([1, 1, 1, 1, 1, 1]), // dirt
+	createByteCube([2, 2, 2, 2, 0, 1]), // grass
+	createByteCube([3, 3, 3, 3, 3, 3]), // stone
+	createByteCube([1, 1, 1, 1, 1, 1]), // dirt
 ];
