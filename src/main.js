@@ -47,8 +47,45 @@ let front = new Float32Array([
 	1, 1, 0, 1,  1, 0,
 ]);
 
-let grass = display.createStaticFloatBuffer(createCube([2, 2, 2, 2, 0, 1]));
-let stone = display.createStaticFloatBuffer(createCube([3, 3, 3, 3, 3, 3]));
+let blocks = [
+	null, // air
+	createCube([2, 2, 2, 2, 0, 1]), // grass
+	createCube([3, 3, 3, 3, 3, 3]), // stone
+];
+
+let chunk = new Uint8Array(16 ** 3);
+
+for(let i=0; i<16**3; i++) {
+	chunk[i] = Math.floor(Math.random() * 3);
+}
+
+let mesh = new Float32Array(16 ** 3 * 6 * 2 * 3 * 6);
+
+for(let z=0; z<16; z++) {
+	for(let y=0; y<16; y++) {
+		for(let x=0; x<16; x++) {
+			let i = x + y * 16 + z * 16 * 16;
+			let t = chunk[i];
+			let block = blocks[t];
+			
+			if(block) {
+				let target = mesh.subarray(i * 6 * 2 * 3 * 6);
+				
+				target.set(block);
+				
+				for(let k=0; k < 6 * 2 * 3; k++) {
+					let vertex = target.subarray(k * 6);
+					
+					vertex[0] += x;
+					vertex[1] += y;
+					vertex[2] += z;
+				}
+			}
+		}
+	}
+}
+
+let meshbuf = display.createStaticFloatBuffer(mesh);
 
 let angle = 0.0;
 
@@ -86,8 +123,7 @@ display.onRender = () => {
 	shader.uniformMatrix4fv("proj", camera.getProjection());
 	shader.uniformMatrix4fv("view", camera.getView());
 	
-	drawTriangles(grass, 6 * 6,  0, 0, 3,  angle, atlas);
-	drawTriangles(stone, 6 * 6,  1, 1, 4,  angle, atlas);
+	drawTriangles(meshbuf,  16 ** 3 * 6 * 2 * 3,  0,0,3,  0,  atlas);
 }
 
 document.onkeydown = e => {
