@@ -88,7 +88,7 @@ input.onMove = e => {
 function drawChunk(chunk)
 {
 	drawTriangles(
-		chunk.buf,  16 ** 3 * 6 * 2 * 3,
+		chunk.buf,  chunk.vertnum,
 		chunk.x * 16, chunk.y * 16, chunk.z * 16,
 		0,  atlas
 	);

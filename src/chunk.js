@@ -8,39 +8,81 @@ export class Chunk
 		this.x = x;
 		this.y = y;
 		this.z = z;
+		this.display = display;
 		this.data = new Uint8Array(16 ** 3);
+		this.meshsize = 0;
+		this.vertnum = 0;
 
 		for(let i=0; i<16**3; i++) {
-			this.data[i] = Math.floor(Math.random() * 3);
+			this.data[i] = Math.floor(Math.random() * 4);
 		}
-
+		
+		this.createMesh();
+	}
+	
+	getLinearBlockIndex(x, y, z)
+	{
+		return x + y * 16 + z * 16 * 16;
+	}
+	
+	getBlock(x, y, z)
+	{
+		if(x < 0 || y < 0 || z < 0 || x >= 16 || y >= 16 || z >= 16) {
+			return blocks[0];
+		}
+		
+		let i = this.getLinearBlockIndex(x, y, z);
+		let t = this.data[i];
+		let block = blocks[t];
+		
+		return block;
+	}
+	
+	createMesh()
+	{
 		this.mesh = new Float32Array(16 ** 3 * 6 * 2 * 3 * 6);
+		this.meshsize = 0;
+		this.vertnum = 0;
 
 		for(let z=0; z<16; z++) {
 			for(let y=0; y<16; y++) {
 				for(let x=0; x<16; x++) {
-					let i = x + y * 16 + z * 16 * 16;
-					let t = this.data[i];
-					let block = blocks[t];
+					let block = this.getBlock(x, y, z);
 			
 					if(block) {
-						let target = this.mesh.subarray(i * 6 * 2 * 3 * 6);
-				
-						target.set(block);
-				
-						for(let k=0; k < 6 * 2 * 3; k++) {
-							let vertex = target.subarray(k * 6);
-					
-							vertex[0] += x;
-							vertex[1] += y;
-							vertex[2] += z;
-						}
+						this.addFaceIfVisible(block, x,y,z,  0, 0,-1, 0); // front
+						this.addFaceIfVisible(block, x,y,z, +1, 0, 0, 1); // right
+						this.addFaceIfVisible(block, x,y,z,  0, 0,+1, 2); // back
+						this.addFaceIfVisible(block, x,y,z, -1, 0, 0, 3); // left
+						this.addFaceIfVisible(block, x,y,z,  0,+1, 0, 4); // top
+						this.addFaceIfVisible(block, x,y,z,  0,-1, 0, 5); // bottom
 					}
 				}
 			}
 		}
+		
+		this.buf = this.display.createStaticFloatBuffer(this.mesh.subarray(0, this.meshsize));
+	}
+	
+	addFaceIfVisible(block, x, y, z, ax, ay, az, faceid)
+	{
+		if(!this.getBlock(x + ax, y + ay, z + az)) {
+			let target = this.mesh.subarray(this.meshsize);
+			let face = block.subarray(6 * 6 * faceid,  6 * 6 * (faceid + 1));
 
-		this.buf = display.createStaticFloatBuffer(this.mesh);
+			target.set(face);
+
+			for(let k=0; k<6; k++) {
+				let vertex = target.subarray(k * 6);
+
+				vertex[0] += x;
+				vertex[1] += y;
+				vertex[2] += z;
+			}
+		
+			this.meshsize += 6 * 6;
+			this.vertnum += 6;
+		}
 	}
 }
 
@@ -98,4 +140,5 @@ let blocks = [
 	null, // air
 	createCube([2, 2, 2, 2, 0, 1]), // grass
 	createCube([3, 3, 3, 3, 3, 3]), // stone
+	createCube([1, 1, 1, 1, 1, 1]), // dirt
 ];
