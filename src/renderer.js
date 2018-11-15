@@ -1,4 +1,5 @@
 import * as matrix from "./matrix.js";
+import {VERT_SIZE, CHUNK_WIDTH} from "./chunk.js";
 
 let vertSrc = `
 	uniform mat4 proj;
@@ -52,7 +53,7 @@ export class Renderer
 	{
 		this.drawTriangles(
 			chunk.buf,  chunk.vertnum,
-			chunk.x * 16, chunk.y * 16, chunk.z * 16,
+			chunk.x * CHUNK_WIDTH, chunk.y * CHUNK_WIDTH, chunk.z * CHUNK_WIDTH,
 			0,  this.atlas
 		);
 	}
@@ -68,8 +69,8 @@ export class Renderer
 		this.shader.uniformMatrix4fv("model", this.model);
 		this.shader.uniformTex("tex", tex, 0);
 	
-		this.shader.vertexAttrib("pos",      buf, 4, true, 6, 0);
-		this.shader.vertexAttrib("texcoord", buf, 2, true, 6, 4);
+		this.shader.vertexAttrib("pos",      buf, 4, true, VERT_SIZE, 0);
+		this.shader.vertexAttrib("texcoord", buf, 2, true, VERT_SIZE, 4);
 	
 		gl.drawArrays(gl.TRIANGLES, 0, vertnum);
 	}
