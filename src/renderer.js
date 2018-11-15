@@ -8,7 +8,7 @@ let vertSrc = `
 	uniform mat4 model;
 	uniform vec3 sun;
 
-	attribute vec4 pos;
+	attribute vec3 pos;
 	attribute vec2 texcoord;
 	attribute float faceid;
 
@@ -17,7 +17,7 @@ let vertSrc = `
 
 	void main()
 	{
-		gl_Position = proj * view * model * pos;
+		gl_Position = proj * view * model * vec4(pos, 1.0);
 
 		vTexcoord = texcoord / 16.0;
 		
@@ -91,9 +91,9 @@ export class Renderer
 		this.shader.uniformMatrix4fv("model", this.model);
 		this.shader.uniformTex("tex", tex, 0);
 	
-		this.shader.vertexAttrib("pos",      buf, 4, true, VERT_SIZE, 0);
-		this.shader.vertexAttrib("texcoord", buf, 2, true, VERT_SIZE, 4);
-		this.shader.vertexAttrib("faceid",   buf, 1, true, VERT_SIZE, 6);
+		this.shader.vertexAttrib("pos",      buf, 3, true, VERT_SIZE, 0);
+		this.shader.vertexAttrib("texcoord", buf, 2, true, VERT_SIZE, 3);
+		this.shader.vertexAttrib("faceid",   buf, 1, true, VERT_SIZE, 5);
 	
 		gl.drawArrays(gl.TRIANGLES, 0, vertnum);
 	}

@@ -1,11 +1,13 @@
 import * as matrix from "./matrix.js";
 import * as vector from "./vector.js";
 
-export const VERT_SIZE = 7;
+export const RAW_VERT_SIZE = 7;
+export const VERT_SIZE = 6;
 export const FACE_VERTS = 6;
 export const BLOCK_FACES = 6;
 export const CHUNK_WIDTH = 16;
 
+export const RAW_FACE_SIZE = FACE_VERTS * RAW_VERT_SIZE;
 export const FACE_SIZE = FACE_VERTS * VERT_SIZE;
 export const BLOCK_SIZE = BLOCK_FACES * FACE_SIZE;
 
@@ -138,20 +140,21 @@ function createByteQuad(x, y, z, ax, ay, az, slot, faceid, out = new Uint8Array(
 	let floatquad = createQuad(x, y, z, ax, ay, az, slot, faceid);
 	
 	for(let i=0; i < FACE_VERTS; i++) {
-		let o = i * VERT_SIZE;
+		let o  = i * VERT_SIZE;
+		let o2 = i * RAW_VERT_SIZE;
 		let v = out.subarray(o);
-		let f = floatquad.subarray(o);
+		let f = floatquad.subarray(o2);
 		
-		v.set(f.subarray(0, 4));
-		v[4] = f[4] * 16;
-		v[5] = f[5] * 16;
-		v[6] = f[6];
+		v.set(f.subarray(0, 3));
+		v[3] = f[4] * 16;
+		v[4] = f[5] * 16;
+		v[5] = f[6];
 	}
 	
 	return out;
 }
 
-function createQuad(x, y, z, ax, ay, az, slot, faceid, out = new Float32Array(FACE_SIZE))
+function createQuad(x, y, z, ax, ay, az, slot, faceid, out = new Float32Array(RAW_FACE_SIZE))
 {
 	let m = matrix.identity();
 	let sx = slot % 16;
@@ -163,11 +166,11 @@ function createQuad(x, y, z, ax, ay, az, slot, faceid, out = new Float32Array(FA
 	matrix.rotateZ(m, az, m);
 	
 	for(let i=0; i < FACE_VERTS; i++) {
-		let o = i * VERT_SIZE;
+		let o = i * RAW_VERT_SIZE;
 		let v = out.subarray(o);
 		let t = v.subarray(4);
 		
-		v.set(front.subarray(o, o + VERT_SIZE));
+		v.set(front.subarray(o, o + RAW_VERT_SIZE));
 		vector.transform(v, m, v);
 		vector.round(v, v);
 		t[0] = (sx + t[0]) / 16;
