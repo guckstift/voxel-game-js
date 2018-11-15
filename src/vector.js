@@ -61,3 +61,45 @@ export function multiply(a, b, out = new Float32Array(4))
 	
 	return out;
 }
+
+export function rotateX(v, a, out = new Float32Array(4))
+{
+	let s = Math.sin(a);
+	let c = Math.cos(a);
+	
+	return create(
+		v[0],
+		v[1] * c - v[2] * s,
+		v[1] * s + v[2] * c,
+		v[3],
+		out,
+	);
+}
+
+export function rotateY(v, a, out = new Float32Array(4))
+{
+	let s = Math.sin(a);
+	let c = Math.cos(a);
+	
+	return create(
+		v[0] * c - v[2] * s,
+		v[1],
+		v[0] * s + v[2] * c,
+		v[3],
+		out,
+	);
+}
+
+export function rotateZ(v, a, out = new Float32Array(4))
+{
+	let s = Math.sin(a);
+	let c = Math.cos(a);
+	
+	return create(
+		v[0] * c - v[1] * s,
+		v[0] * s + v[1] * c,
+		v[2],
+		v[3],
+		out,
+	);
+}

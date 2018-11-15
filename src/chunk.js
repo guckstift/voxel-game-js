@@ -1,7 +1,7 @@
 import * as matrix from "./matrix.js";
 import * as vector from "./vector.js";
 
-export const VERT_SIZE = 6;
+export const VERT_SIZE = 7;
 export const FACE_VERTS = 6;
 export const BLOCK_FACES = 6;
 export const CHUNK_WIDTH = 16;
@@ -22,7 +22,7 @@ export class Chunk
 		this.vertnum = 0;
 
 		for(let i=0; i < CHUNK_WIDTH ** 3; i++) {
-			this.data[i] = Math.floor(Math.random() * 4);
+			this.data[i] = Math.random() * 4;
 		}
 		
 		this.createMesh();
@@ -76,11 +76,7 @@ export class Chunk
 	{
 		if(!this.getBlock(x + ax, y + ay, z + az)) {
 			let target = this.mesh.subarray(this.meshsize);
-			
-			let face = block.subarray(
-				FACE_VERTS * VERT_SIZE * faceid,
-				FACE_VERTS * VERT_SIZE * (faceid + 1)
-			);
+			let face = block.subarray(FACE_SIZE * faceid, FACE_SIZE * (faceid + 1));
 
 			target.set(face);
 
@@ -92,7 +88,7 @@ export class Chunk
 				vertex[2] += z;
 			}
 		
-			this.meshsize += FACE_VERTS * VERT_SIZE;
+			this.meshsize += FACE_SIZE;
 			this.vertnum += FACE_VERTS;
 		}
 	}
@@ -118,28 +114,28 @@ function createByteCube(slots, out = new Uint8Array(BLOCK_SIZE))
 	let r = Math.PI / 2;
 	let s = Math.PI;
 	
-	createByteQuad(0, 0, 0,  0, 0, 0,  slots[0], out.subarray(FACE_SIZE * 0)); // front
-	createByteQuad(1, 0, 0,  0, r, 0,  slots[1], out.subarray(FACE_SIZE * 1)); // right
-	createByteQuad(1, 0, 1,  0, s, 0,  slots[2], out.subarray(FACE_SIZE * 2)); // back
-	createByteQuad(0, 0, 1,  0,-r, 0,  slots[3], out.subarray(FACE_SIZE * 3)); // left
-	createByteQuad(0, 1, 0,  r, 0, 0,  slots[4], out.subarray(FACE_SIZE * 4)); // top
-	createByteQuad(0, 0, 1, -r, 0, 0,  slots[5], out.subarray(FACE_SIZE * 5)); // bottom
+	createByteQuad(0, 0, 0,  0, 0, 0,  slots[0], 0, out.subarray(FACE_SIZE * 0)); // front
+	createByteQuad(1, 0, 0,  0, r, 0,  slots[1], 1, out.subarray(FACE_SIZE * 1)); // right
+	createByteQuad(1, 0, 1,  0, s, 0,  slots[2], 2, out.subarray(FACE_SIZE * 2)); // back
+	createByteQuad(0, 0, 1,  0,-r, 0,  slots[3], 3, out.subarray(FACE_SIZE * 3)); // left
+	createByteQuad(0, 1, 0,  r, 0, 0,  slots[4], 4, out.subarray(FACE_SIZE * 4)); // top
+	createByteQuad(0, 0, 1, -r, 0, 0,  slots[5], 5, out.subarray(FACE_SIZE * 5)); // bottom
 	
 	return out;
 }
 
 let front = new Float32Array([
-	0, 0, 0, 1,  0, 1,
-	1, 0, 0, 1,  1, 1,
-	0, 1, 0, 1,  0, 0,
-	0, 1, 0, 1,  0, 0,
-	1, 0, 0, 1,  1, 1,
-	1, 1, 0, 1,  1, 0,
+	0, 0, 0, 1,  0, 1,  0,
+	1, 0, 0, 1,  1, 1,  0,
+	0, 1, 0, 1,  0, 0,  0,
+	0, 1, 0, 1,  0, 0,  0,
+	1, 0, 0, 1,  1, 1,  0,
+	1, 1, 0, 1,  1, 0,  0,
 ]);
 
-function createByteQuad(x, y, z, ax, ay, az, slot, out = new Uint8Array(FACE_SIZE))
+function createByteQuad(x, y, z, ax, ay, az, slot, faceid, out = new Uint8Array(FACE_SIZE))
 {
-	let floatquad = createQuad(x, y, z, ax, ay, az, slot);
+	let floatquad = createQuad(x, y, z, ax, ay, az, slot, faceid);
 	
 	for(let i=0; i < FACE_VERTS; i++) {
 		let o = i * VERT_SIZE;
@@ -147,14 +143,15 @@ function createByteQuad(x, y, z, ax, ay, az, slot, out = new Uint8Array(FACE_SIZ
 		let f = floatquad.subarray(o);
 		
 		v.set(f.subarray(0, 4));
-		v[4] = Math.floor(f[4] * 16);
-		v[5] = Math.floor(f[5] * 16);
+		v[4] = f[4] * 16;
+		v[5] = f[5] * 16;
+		v[6] = f[6];
 	}
 	
 	return out;
 }
 
-function createQuad(x, y, z, ax, ay, az, slot, out = new Float32Array(FACE_SIZE))
+function createQuad(x, y, z, ax, ay, az, slot, faceid, out = new Float32Array(FACE_SIZE))
 {
 	let m = matrix.identity();
 	let sx = slot % 16;
@@ -175,6 +172,7 @@ function createQuad(x, y, z, ax, ay, az, slot, out = new Float32Array(FACE_SIZE)
 		vector.round(v, v);
 		t[0] = (sx + t[0]) / 16;
 		t[1] = (sy + t[1]) / 16;
+		t[2] = faceid;
 	}
 	
 	return out;
