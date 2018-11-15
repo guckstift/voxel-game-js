@@ -70,6 +70,23 @@ export class Renderer
 		this.shader.uniformMatrix4fv("view", camera.getView());
 		this.shader.uniform3fv("sun", sun.subarray(0, 3));
 	}
+	
+	drawWorld(world)
+	{
+		for(let z in world.chunks) {
+			let slice = world.chunks[z];
+			
+			for(let y in slice) {
+				let column = slice[y];
+				
+				for(let x in column) {
+					let chunk = column[x];
+					
+					this.drawChunk(chunk);
+				}
+			}
+		}
+	}
 
 	drawChunk(chunk)
 	{

@@ -1,22 +1,27 @@
 import {Display} from "./display.js";
 import {Camera} from "./camera.js";
-import {Chunk} from "./chunk.js";
+import {World} from "./world.js";
 import {Input} from "./input.js";
 import {Renderer} from "./renderer.js";
 
 let display = new Display();
 let camera = new Camera(display);
-let gl = display.gl;
 let input = new Input(display.canvas);
-let chunk1 = new Chunk( 0, 0, 0, display);
-let chunk2 = new Chunk(-1, 0, 0, display);
+let world = new World(display);
 let renderer = new Renderer(display);
 
-camera.moveBackward(3);
+world.touchChunk( 0, 0, 0);
+world.touchChunk( 1, 0, 0);
+world.touchChunk( 0, 1, 0);
+world.touchChunk( 0, 0, 1);
+world.touchChunk(-1, 0, 0);
+world.touchChunk( 0,-1, 0);
+world.touchChunk( 0, 0,-1);
+camera.pos.set([-13, 32, -13]);
+camera.hangle = 0.75;
+camera.vangle = -0.7;
 document.body.appendChild(display.canvas);
 
-let angle = 0.0;
-let atlas = display.createTexture("gfx/atlas.png");
 let speed = 0.1;
 
 display.onRender = () =>
@@ -41,8 +46,7 @@ display.onRender = () =>
 	}
 	
 	renderer.begin(camera);
-	renderer.drawChunk(chunk1);
-	renderer.drawChunk(chunk2);
+	renderer.drawWorld(world);
 };
 
 input.onMove = e =>
@@ -55,4 +59,4 @@ input.onMove = e =>
 
 window.display = display;
 window.camera = camera;
-window.chunk1 = chunk1;
+window.world = world;
