@@ -9,6 +9,7 @@ let camera = new Camera(display);
 let input = new Input(display.canvas);
 let world = new World(display);
 let renderer = new Renderer(display);
+let gl = display.gl;
 
 world.touchChunk( 0, 0, 0);
 world.touchChunk( 1, 0, 0);
@@ -23,6 +24,35 @@ camera.vangle = -0.7;
 document.body.appendChild(display.canvas);
 
 let speed = 0.1;
+
+let axis = display.createStaticByteBuffer([
+	0,0,0, 1,0,0,
+	1,0,0, 1,0,0,
+	0,0,0, 0,1,0,
+	0,1,0, 0,1,0,
+	0,0,0, 0,0,1,
+	0,0,1, 0,0,1,
+]);
+
+let axisShader = display.createShader(`
+	uniform mat4 proj;
+	uniform mat4 view;
+	attribute vec3 pos;
+	attribute vec3 col;
+	varying vec3 vCol;
+	void main()
+	{
+		gl_Position = proj * view * vec4(pos, 1.0);
+		vCol = col;
+	}
+`,`
+	precision highp float;
+	varying vec3 vCol;
+	void main()
+	{
+		gl_FragColor = vec4(vCol, 1.0);
+	}
+`);
 
 display.onRender = () =>
 {
@@ -47,6 +77,16 @@ display.onRender = () =>
 	
 	renderer.begin(camera);
 	renderer.drawWorld(world);
+	
+	gl.disable(gl.DEPTH_TEST);
+	gl.lineWidth(2);
+	axisShader.use();
+	axisShader.uniformMatrix4fv("proj", camera.getProjection());
+	axisShader.uniformMatrix4fv("view", camera.getView());
+	axisShader.vertexAttrib("pos", axis, 3, true, 6, 0);
+	axisShader.vertexAttrib("col", axis, 3, true, 6, 3);
+	gl.drawArrays(gl.LINES, 0, 6);
+	gl.enable(gl.DEPTH_TEST);
 };
 
 input.onMove = e =>
