@@ -6,7 +6,6 @@ import {Renderer} from "./renderer.js";
 
 let display = new Display();
 let camera = new Camera(display);
-let input = new Input(display.canvas);
 let world = new World(display);
 let renderer = new Renderer(display);
 let gl = display.gl;
@@ -21,8 +20,23 @@ world.touchChunk( 0, 0,-1);
 camera.pos.set([-13, 32, -13]);
 camera.hangle = 0.75;
 camera.vangle = -0.7;
-document.body.appendChild(display.canvas);
 
+let container = document.createElement("div");
+let crosshairs = document.createElement("img");
+
+crosshairs.src = "gfx/crosshairs.png";
+crosshairs.style.position = "absolute";
+crosshairs.style.left = "50%";
+crosshairs.style.top = "50%";
+crosshairs.style.transform = "translateX(-50%) translateY(-50%)";
+display.canvas.style.display = "block";
+container.style.display = "inline-block";
+container.style.position = "relative";
+container.appendChild(display.canvas);
+container.appendChild(crosshairs);
+document.body.appendChild(container);
+
+let input = new Input(container);
 let speed = 0.1;
 
 let axis = display.createStaticByteBuffer([
