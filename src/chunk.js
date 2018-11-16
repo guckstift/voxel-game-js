@@ -38,7 +38,7 @@ export class Chunk
 	getBlock(x, y, z)
 	{
 		if(x < 0 || y < 0 || z < 0 || x >= CHUNK_WIDTH || y >= CHUNK_WIDTH || z >= CHUNK_WIDTH) {
-			return blocks[0];
+			return null;
 		}
 		
 		let i = this.getLinearBlockIndex(x, y, z);

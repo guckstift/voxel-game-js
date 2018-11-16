@@ -108,6 +108,7 @@ input.onMove = e =>
 	if(input.panning) {
 		camera.turnHori(e.movementX / 100);
 		camera.turnVert(-e.movementY / 100);
+		console.log(world.hitBlock(camera));
 	}
 };
 

@@ -13,6 +13,7 @@ export class Camera
 		this.view = matrix.identity();
 		this.rota = matrix.identity();
 		this.forward = vector.create();
+		this.dirvec = vector.create();
 	}
 	
 	getProjection()
@@ -40,6 +41,15 @@ export class Camera
 		vector.transform(this.forward, this.rota, this.forward);
 		
 		return this.forward;
+	}
+	
+	getDirVec()
+	{
+		vector.create(0, 0, 1, 1, this.dirvec);
+		vector.rotateX(this.dirvec, -this.vangle, this.dirvec);
+		vector.rotateY(this.dirvec, -this.hangle, this.dirvec);
+		
+		return this.dirvec;
 	}
 	
 	moveForward(speed)
