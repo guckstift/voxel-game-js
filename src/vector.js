@@ -8,6 +8,16 @@ export function create(x = 0, y = 0, z = 0, w = 1, out = new Float32Array(4))
 	return out;
 }
 
+export function copy(src, out = new Float32Array(4))
+{
+	out[0] = src[0];
+	out[1] = src[1];
+	out[2] = src[2];
+	out[3] = src[3];
+	
+	return out;
+}
+
 export function transform(v, m, out = new Float32Array(4))
 {
 	let x = v[0], y = v[1], z = v[2], w = v[3];

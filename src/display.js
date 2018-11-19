@@ -8,8 +8,11 @@ export class Display
 		let canvas = document.createElement("canvas");
 		let gl = canvas.getContext("webgl", {alpha: false, antialias: false});
 
+		gl.enable(gl.BLEND);
 		gl.enable(gl.CULL_FACE);
 		gl.enable(gl.DEPTH_TEST);
+		
+		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		
 		this.canvas = canvas;
 		this.gl = gl;

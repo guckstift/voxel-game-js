@@ -28,12 +28,15 @@ export class Input
 
 		target.onmousedown = e => {
 			target.requestPointerLock();
-			this.panning = true;
 		};
-
-		target.onmouseup = e => {
-			document.exitPointerLock();
-			this.panning = false;
+		
+		document.onpointerlockchange = e => {
+			if(document.pointerLockElement === target) {
+				this.panning = true;
+			}
+			else {
+				this.panning = false;
+			}
 		};
 
 		target.onmousemove = e => {

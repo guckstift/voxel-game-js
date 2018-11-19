@@ -86,7 +86,8 @@ export class World
 	hitBlock(camera, steps = 8)
 	{
 		let dirvec = camera.getDirVec();
-		let sample = camera.pos.slice();
+		let sample = vector.copy(camera.pos);
+		let ahead  = vector.create();
 		let diry_dirx = dirvec[1] / dirvec[0];
 		let dirz_dirx = dirvec[2] / dirvec[0];
 		let dirx_diry = dirvec[0] / dirvec[1];
@@ -96,8 +97,10 @@ export class World
 		let results = [];
 		
 		for(let i=0; i<steps; i++) {
-			// left or right face hit
-			if(dirvec[0] !== 0) {
+			vector.add(sample, dirvec, ahead);
+			
+			// possible left or right face hit
+			if(dirvec[0] !== 0 && Math.floor(sample[0]) !== Math.floor(ahead[0])) {
 				let isleft  = dirvec[0] > 0;
 				let isright = dirvec[0] < 0;
 				let isecx = isleft ? Math.ceil(sample[0]) : Math.floor(sample[0]);
@@ -119,8 +122,8 @@ export class World
 				}
 			}
 			
-			// bottom or top face hit
-			if(dirvec[1] !== 0) {
+			// possible bottom or top face hit
+			if(dirvec[1] !== 0 && Math.floor(sample[1]) !== Math.floor(ahead[1])) {
 				let isbot = dirvec[1] > 0;
 				let istop = dirvec[1] < 0;
 				let isecy = isbot ? Math.ceil(sample[1]) : Math.floor(sample[1]);
@@ -142,8 +145,8 @@ export class World
 				}
 			}
 			
-			// front or back face hit
-			if(dirvec[2] !== 0) {
+			// possible front or back face hit
+			if(dirvec[2] !== 0 && Math.floor(sample[2]) !== Math.floor(ahead[2])) {
 				let isfront = dirvec[2] > 0;
 				let isback  = dirvec[2] < 0;
 				let isecz = isfront ? Math.ceil(sample[2]) : Math.floor(sample[2]);
@@ -169,7 +172,7 @@ export class World
 				break;
 			}
 			
-			vector.add(sample, dirvec, sample);
+			vector.copy(ahead, sample);
 		}
 		
 		if(results.length) {
