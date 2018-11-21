@@ -12,11 +12,11 @@ let renderer = new Renderer(display);
 let gl = display.gl;
 
 world.touchChunk( 0, 0, 0);
-world.touchChunk( 1, 0, 0);
-world.touchChunk( 0, 1, 0);
-world.touchChunk( 0, 0, 1);
-world.touchChunk(-1, 0, 0);
-world.touchChunk( 0,-1, 0);
+//world.touchChunk( 1, 0, 0);
+//world.touchChunk( 0, 1, 0);
+//world.touchChunk( 0, 0, 1);
+//world.touchChunk(-1, 0, 0);
+//world.touchChunk( 0,-1, 0);
 //world.touchChunk( 0, 0,-1);
 //camera.pos.set([-13, 32, -13]);
 //camera.hangle = 0.75;
@@ -170,7 +170,7 @@ input.onMove = e =>
 {
 	camera.turnHori(e.movementX / 100);
 	camera.turnVert(-e.movementY / 100);
-	blockHit = world.hitBlock(camera);
+	blockHit = world.hitBlock(camera.getDirVec(), camera.pos);
 };
 
 input.onClick = e =>

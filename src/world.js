@@ -96,10 +96,9 @@ export class World
 		chunk.setBlock(...localPos, t);
 	}
 	
-	hitBlock(camera, steps = 8)
+	hitBlock(dirvec, pos, raylength = 8)
 	{
-		let dirvec = camera.getDirVec();
-		let sample = vector.copy(camera.pos);
+		let sample = vector.copy(pos);
 		let ahead  = vector.create();
 		let diry_dirx = dirvec[1] / dirvec[0];
 		let dirz_dirx = dirvec[2] / dirvec[0];
@@ -108,14 +107,21 @@ export class World
 		let dirx_dirz = dirvec[0] / dirvec[2];
 		let diry_dirz = dirvec[1] / dirvec[2];
 		let results = [];
+		let isleft  = dirvec[0] > 0;
+		let isright = dirvec[0] < 0;
+		let isleftright = isleft || isright;
+		let isbot = dirvec[1] > 0;
+		let istop = dirvec[1] < 0;
+		let isbottop = isbot || istop;
+		let isfront = dirvec[2] > 0;
+		let isback  = dirvec[2] < 0;
+		let isfrontback = isfront || isback;
 		
-		for(let i=0; i<steps; i++) {
+		for(let i=0; i<raylength; i++) {
 			vector.add(sample, dirvec, ahead);
 			
 			// possible left or right face hit
-			if(dirvec[0] !== 0 && Math.floor(sample[0]) !== Math.floor(ahead[0])) {
-				let isleft  = dirvec[0] > 0;
-				let isright = dirvec[0] < 0;
+			if(isleftright && Math.floor(sample[0]) !== Math.floor(ahead[0])) {
 				let isecx = isleft ? Math.ceil(sample[0]) : Math.floor(sample[0]);
 				let dx    = isecx - sample[0];
 				let isecy = sample[1] + diry_dirx * dx;
@@ -128,7 +134,7 @@ export class World
 				if(!blockBefore && blockAfter) {
 					let isec = [isecx, isecy, isecz];
 					let blockpos = [isecx - isright, blocky, blockz];
-					let sqdist = vector3.squareDist(camera.pos, isec);
+					let sqdist = vector3.squareDist(pos, isec);
 					let faceid = isleft ? 3 : 1;
 					
 					results.push({isec, blockpos, sqdist, faceid});
@@ -136,9 +142,7 @@ export class World
 			}
 			
 			// possible bottom or top face hit
-			if(dirvec[1] !== 0 && Math.floor(sample[1]) !== Math.floor(ahead[1])) {
-				let isbot = dirvec[1] > 0;
-				let istop = dirvec[1] < 0;
+			if(isbottop && Math.floor(sample[1]) !== Math.floor(ahead[1])) {
 				let isecy = isbot ? Math.ceil(sample[1]) : Math.floor(sample[1]);
 				let dy    = isecy - sample[1];
 				let isecx = sample[0] + dirx_diry * dy;
@@ -151,7 +155,7 @@ export class World
 				if(!blockBefore && blockAfter) {
 					let isec = [isecx, isecy, isecz];
 					let blockpos = [blockx, isecy - istop, blockz];
-					let sqdist = vector3.squareDist(camera.pos, isec);
+					let sqdist = vector3.squareDist(pos, isec);
 					let faceid = isbot ? 5 : 4;
 					
 					results.push({isec, blockpos, sqdist, faceid});
@@ -159,9 +163,7 @@ export class World
 			}
 			
 			// possible front or back face hit
-			if(dirvec[2] !== 0 && Math.floor(sample[2]) !== Math.floor(ahead[2])) {
-				let isfront = dirvec[2] > 0;
-				let isback  = dirvec[2] < 0;
+			if(isfrontback && Math.floor(sample[2]) !== Math.floor(ahead[2])) {
 				let isecz = isfront ? Math.ceil(sample[2]) : Math.floor(sample[2]);
 				let dz    = isecz - sample[2];
 				let isecx = sample[0] + dirx_dirz * dz;
@@ -174,7 +176,7 @@ export class World
 				if(!blockBefore && blockAfter) {
 					let isec = [isecx, isecy, isecz];
 					let blockpos = [blockx, blocky, isecz - isback];
-					let sqdist = vector3.squareDist(camera.pos, isec);
+					let sqdist = vector3.squareDist(pos, isec);
 					let faceid = isfront ? 0 : 2;
 					
 					results.push({isec, blockpos, sqdist, faceid});
@@ -189,7 +191,13 @@ export class World
 		}
 		
 		if(results.length) {
-			return results.reduce((min, cur) => cur.sqdist < min.sqdist ? cur : min);
+			let winner = results.reduce((min, cur) => cur.sqdist < min.sqdist ? cur : min);
+			
+			winner.dist = Math.sqrt(winner.sqdist);
+			
+			if(winner.dist <= raylength) {
+				return winner;
+			}
 		}
 		
 		return null;
