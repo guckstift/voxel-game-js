@@ -168,10 +168,16 @@ display.onRender = () =>
 
 input.onMove = e =>
 {
-	if(input.panning) {
-		camera.turnHori(e.movementX / 100);
-		camera.turnVert(-e.movementY / 100);
-		blockHit = world.hitBlock(camera);
+	camera.turnHori(e.movementX / 100);
+	camera.turnVert(-e.movementY / 100);
+	blockHit = world.hitBlock(camera);
+};
+
+input.onClick = e =>
+{
+	if(blockHit) {
+		world.setBlock(...blockHit.blockpos, 0);
+		console.log(blockHit);
 	}
 };
 

@@ -83,6 +83,19 @@ export class World
 		return chunk.getBlock(...localPos);
 	}
 	
+	setBlock(x, y, z, t)
+	{
+		let chunkPos = this.getChunkPos(x, y, z);
+		let localPos = this.getLocalPos(x, y, z);
+		let chunk = this.getChunk(...chunkPos);
+		
+		if(!chunk) {
+			return;
+		}
+		
+		chunk.setBlock(...localPos, t);
+	}
+	
 	hitBlock(camera, steps = 8)
 	{
 		let dirvec = camera.getDirVec();

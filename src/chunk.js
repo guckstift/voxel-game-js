@@ -19,15 +19,17 @@ export class Chunk
 		this.y = y;
 		this.z = z;
 		this.display = display;
-		this.data = new Uint8Array(CHUNK_WIDTH ** 3);
 		this.meshsize = 0;
 		this.vertnum = 0;
+		this.data = new Uint8Array(CHUNK_WIDTH ** 3);
+		this.mesh = new Uint8Array(CHUNK_WIDTH ** 3 * BLOCK_SIZE);
+		this.buf = this.display.createStaticByteBuffer(this.mesh);
 
 		for(let i=0; i < CHUNK_WIDTH ** 3; i++) {
 			this.data[i] = Math.random() * 4;
 		}
 		
-		this.createMesh();
+		this.updateMesh();
 	}
 	
 	getLinearBlockIndex(x, y, z)
@@ -48,9 +50,22 @@ export class Chunk
 		return block;
 	}
 	
-	createMesh()
+	setBlock(x, y, z, t)
 	{
-		this.mesh = new Uint8Array(CHUNK_WIDTH ** 3 * BLOCK_SIZE);
+		if(x < 0 || y < 0 || z < 0 || x >= CHUNK_WIDTH || y >= CHUNK_WIDTH || z >= CHUNK_WIDTH) {
+			return;
+		}
+		
+		let i = this.getLinearBlockIndex(x, y, z);
+		
+		this.data[i] = t;
+		this.updateMesh();
+	}
+	
+	updateMesh()
+	{
+		let gl = this.display.gl;
+		
 		this.meshsize = 0;
 		this.vertnum = 0;
 
@@ -71,7 +86,8 @@ export class Chunk
 			}
 		}
 		
-		this.buf = this.display.createStaticByteBuffer(this.mesh.subarray(0, this.meshsize));
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.buf);
+		gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.mesh.subarray(0, this.meshsize));
 	}
 	
 	addFaceIfVisible(block, x, y, z, ax, ay, az, faceid)

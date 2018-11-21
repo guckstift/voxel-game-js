@@ -5,6 +5,7 @@ export class Input
 		this.keymap = {};
 		this.panning = false;
 		this.onMove = () => {};
+		this.onClick = () => {};
 		
 		document.onkeydown = e => {
 			let key = e.key.toLowerCase();
@@ -27,7 +28,12 @@ export class Input
 		};
 
 		target.onmousedown = e => {
-			target.requestPointerLock();
+			if(this.panning) {
+				this.onClick();
+			}
+			else {
+				target.requestPointerLock();
+			}
 		};
 		
 		document.onpointerlockchange = e => {
@@ -40,7 +46,9 @@ export class Input
 		};
 
 		target.onmousemove = e => {
-			this.onMove(e);
+			if(this.panning) {
+				this.onMove(e);
+			}
 		};
 	}
 }
