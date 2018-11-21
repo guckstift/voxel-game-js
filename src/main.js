@@ -33,7 +33,9 @@ crosshairs.style.top = "50%";
 crosshairs.style.transform = "translateX(-50%) translateY(-50%)";
 display.canvas.style.display = "block";
 container.style.display = "inline-block";
-container.style.position = "relative";
+container.style.position = "absolute";
+container.style.left = "0";
+container.style.top = "0";
 container.appendChild(display.canvas);
 container.appendChild(crosshairs);
 document.body.appendChild(container);
@@ -109,7 +111,7 @@ display.onRender = () =>
 		camera.moveBackward(speed);
 	}
 	if(input.keymap.w) {
-		if(!world.hitBlock(camera.getForward(speed + 1), camera.pos, speed + 1)) {
+		if(!world.hitBlock(camera.getForward(1), camera.pos, speed + 1)) {
 			camera.moveForward(speed);
 		}
 	}
@@ -182,6 +184,13 @@ input.onClick = e =>
 		console.log(blockHit);
 	}
 };
+
+input.onResize = e =>
+{
+	display.resize(window.innerWidth, window.innerHeight);
+};
+
+input.onResize();
 
 window.display = display;
 window.camera = camera;

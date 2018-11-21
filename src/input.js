@@ -6,6 +6,11 @@ export class Input
 		this.panning = false;
 		this.onMove = () => {};
 		this.onClick = () => {};
+		this.onResize = () => {};
+		
+		window.onresize = e => {
+			this.onResize();
+		};
 		
 		document.onkeydown = e => {
 			let key = e.key.toLowerCase();
