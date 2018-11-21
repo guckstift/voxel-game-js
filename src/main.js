@@ -109,7 +109,9 @@ display.onRender = () =>
 		camera.moveBackward(speed);
 	}
 	if(input.keymap.w) {
-		camera.moveForward(speed);
+		if(!world.hitBlock(camera.getForward(speed + 1), camera.pos, speed + 1)) {
+			camera.moveForward(speed);
+		}
 	}
 	if(input.keymap.space) {
 		camera.moveUp(speed);

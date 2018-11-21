@@ -43,6 +43,14 @@ export class Camera
 		return this.forward;
 	}
 	
+	getLeftward(speed)
+	{
+		this.getForward(speed);
+		this.forward.set([-this.forward[2], this.forward[1], this.forward[0]]);
+		
+		return this.forward;
+	}
+	
 	getDirVec()
 	{
 		vector.create(0, 0, 1, 1, this.dirvec);
@@ -54,32 +62,22 @@ export class Camera
 	
 	moveForward(speed)
 	{
-		let forward = this.getForward(speed);
-		
-		vector.add(this.pos, forward, this.pos);
+		vector.add(this.pos, this.getForward(speed), this.pos);
 	}
 	
 	moveBackward(speed)
 	{
-		let forward = this.getForward(speed);
-		
-		vector.sub(this.pos, forward, this.pos);
+		vector.sub(this.pos, this.getForward(speed), this.pos);
 	}
 	
 	moveLeft(speed)
 	{
-		let forward = this.getForward(speed);
-		
-		forward.set([-forward[2], forward[1], forward[0]]);
-		vector.add(this.pos, forward, this.pos);
+		vector.add(this.pos, this.getLeftward(speed), this.pos);
 	}
 	
 	moveRight(speed)
 	{
-		let forward = this.getForward(-speed);
-		
-		forward.set([-forward[2], forward[1], forward[0]]);
-		vector.add(this.pos, forward, this.pos);
+		vector.add(this.pos, this.getLeftward(-speed), this.pos);
 	}
 	
 	moveUp(speed)
