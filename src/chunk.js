@@ -26,7 +26,7 @@ export class Chunk
 		this.buf = this.display.createStaticByteBuffer(this.mesh);
 
 		for(let i=0; i < CHUNK_WIDTH ** 3; i++) {
-			this.data[i] = Math.random() * 4;
+			this.data[i] = 1 + Math.random() * 3;
 		}
 		
 		this.updateMesh();

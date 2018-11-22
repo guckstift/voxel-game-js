@@ -3,12 +3,14 @@ import {Camera} from "./camera.js";
 import {World} from "./world.js";
 import {Input} from "./input.js";
 import {Renderer} from "./renderer.js";
+import {Body} from "./body.js";
 import * as matrix from "./matrix.js";
 
 let display = new Display();
 let camera = new Camera(display);
 let world = new World(display);
 let renderer = new Renderer(display);
+let body = new Body(world);
 let gl = display.gl;
 
 world.touchChunk( 0, 0, 0);
@@ -21,7 +23,11 @@ world.touchChunk( 0, 0, 0);
 //camera.pos.set([-13, 32, -13]);
 //camera.hangle = 0.75;
 //camera.vangle = -0.7;
-camera.pos.set([0,0,-3]);
+camera.pos.set([8,17,8]);
+
+body.pos.set(camera.pos.subarray(0,3));
+body.acc[1] = -1;
+//body.vel[2] = 1;
 
 let container = document.createElement("div");
 let crosshairs = document.createElement("img");
@@ -122,6 +128,11 @@ display.onRender = () =>
 		camera.moveDown(speed);
 	}
 	
+	body.update(1 / 60);
+	
+	camera.setPos(body.pos);
+	camera.pos[1] += 1;
+	
 	renderer.begin(camera);
 	renderer.drawWorld(world);
 	
@@ -196,3 +207,4 @@ window.display = display;
 window.camera = camera;
 window.world = world;
 window.input = input;
+window.body = body;

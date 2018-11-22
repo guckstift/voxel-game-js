@@ -1,5 +1,4 @@
 import {Chunk, CHUNK_WIDTH} from "./chunk.js";
-import * as vector from "./vector.js";
 import * as vector3 from "./vector3.js";
 
 export class World
@@ -98,8 +97,8 @@ export class World
 	
 	hitBlock(dirvec, pos, raylength = 8)
 	{
-		let sample = vector.copy(pos);
-		let ahead  = vector.create();
+		let sample = vector3.copy(pos);
+		let ahead  = vector3.create();
 		let diry_dirx = dirvec[1] / dirvec[0];
 		let dirz_dirx = dirvec[2] / dirvec[0];
 		let dirx_diry = dirvec[0] / dirvec[1];
@@ -118,7 +117,7 @@ export class World
 		let isfrontback = isfront || isback;
 		
 		for(let i=0; i<raylength; i++) {
-			vector.add(sample, dirvec, ahead);
+			vector3.add(sample, dirvec, ahead);
 			
 			// possible left or right face hit
 			if(isleftright && Math.floor(sample[0]) !== Math.floor(ahead[0])) {
@@ -136,8 +135,9 @@ export class World
 					let blockpos = [isecx - isright, blocky, blockz];
 					let sqdist = vector3.squareDist(pos, isec);
 					let faceid = isleft ? 3 : 1;
+					let axis = 0;
 					
-					results.push({isec, blockpos, sqdist, faceid});
+					results.push({isec, blockpos, sqdist, faceid, axis});
 				}
 			}
 			
@@ -157,8 +157,9 @@ export class World
 					let blockpos = [blockx, isecy - istop, blockz];
 					let sqdist = vector3.squareDist(pos, isec);
 					let faceid = isbot ? 5 : 4;
+					let axis = 1;
 					
-					results.push({isec, blockpos, sqdist, faceid});
+					results.push({isec, blockpos, sqdist, faceid, axis});
 				}
 			}
 			
@@ -178,8 +179,9 @@ export class World
 					let blockpos = [blockx, blocky, isecz - isback];
 					let sqdist = vector3.squareDist(pos, isec);
 					let faceid = isfront ? 0 : 2;
+					let axis = 2;
 					
-					results.push({isec, blockpos, sqdist, faceid});
+					results.push({isec, blockpos, sqdist, faceid, axis});
 				}
 			}
 			
@@ -187,7 +189,7 @@ export class World
 				break;
 			}
 			
-			vector.copy(ahead, sample);
+			vector3.copy(ahead, sample);
 		}
 		
 		if(results.length) {

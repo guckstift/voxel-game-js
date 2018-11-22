@@ -1,5 +1,6 @@
 import * as matrix from "./matrix.js";
 import * as vector from "./vector.js";
+import * as vector3 from "./vector3.js";
 
 export class Camera
 {
@@ -58,6 +59,11 @@ export class Camera
 		vector.rotateY(this.dirvec, -this.hangle, this.dirvec);
 		
 		return this.dirvec;
+	}
+	
+	setPos(pos)
+	{
+		vector3.copy(pos, this.pos);
 	}
 	
 	moveForward(speed)
