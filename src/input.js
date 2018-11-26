@@ -1,12 +1,16 @@
+const noop = () => {};
+
 export class Input
 {
 	constructor(target)
 	{
 		this.keymap = {};
 		this.panning = false;
-		this.onMove = () => {};
-		this.onClick = () => {};
-		this.onResize = () => {};
+		this.onMove = noop;
+		this.onClick = noop;
+		this.onResize = noop;
+		this.onKeyDown = noop;
+		this.onKeyUp = noop;
 		
 		window.onresize = e => {
 			this.onResize();
@@ -20,6 +24,7 @@ export class Input
 			}
 			
 			this.keymap[key] = true;
+			this.onKeyDown();
 		};
 
 		document.onkeyup = e => {
@@ -30,6 +35,7 @@ export class Input
 			}
 			
 			this.keymap[key] = false;
+			this.onKeyUp();
 		};
 
 		target.onmousedown = e => {
