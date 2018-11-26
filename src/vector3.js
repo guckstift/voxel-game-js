@@ -29,6 +29,42 @@ export function transform(v, m, out = new Float32Array(3))
 	return out;
 }
 
+export function floor(v, out = new Float32Array(3))
+{
+	out[0] = Math.floor(v[0]);
+	out[1] = Math.floor(v[1]);
+	out[2] = Math.floor(v[2]);
+	
+	return out;
+}
+
+export function sign(v, out = new Float32Array(3))
+{
+	out[0] = v[0] > 0 ? +1 : -1;
+	out[1] = v[1] > 0 ? +1 : -1;
+	out[2] = v[2] > 0 ? +1 : -1;
+	
+	return out;
+}
+
+export function abs(v, out = new Float32Array(3))
+{
+	out[0] = Math.abs(v[0]);
+	out[1] = Math.abs(v[1]);
+	out[2] = Math.abs(v[2]);
+	
+	return out;
+}
+
+export function reciprocal(v, out = new Float32Array(3))
+{
+	out[0] = 1 / v[0];
+	out[1] = 1 / v[1];
+	out[2] = 1 / v[2];
+	
+	return out;
+}
+
 export function squareLength(v)
 {
 	return v[0] ** 2 + v[1] ** 2 + v[2] ** 2;

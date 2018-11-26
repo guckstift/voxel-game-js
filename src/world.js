@@ -1,10 +1,12 @@
 import {Chunk, CHUNK_WIDTH} from "./chunk.js";
+import {raycast} from "./raycast.js";
 import * as vector3 from "./vector3.js";
 
 export class World
 {
 	constructor(display)
 	{
+		this.getBlock = this.getBlock.bind(this);
 		this.display = display;
 		this.chunks = {};
 	}
@@ -97,111 +99,32 @@ export class World
 	
 	hitBlock(dirvec, pos, raylength = 8)
 	{
-		let sample = vector3.copy(pos);
-		let ahead  = vector3.create();
-		let diry_dirx = dirvec[1] / dirvec[0];
-		let dirz_dirx = dirvec[2] / dirvec[0];
-		let dirx_diry = dirvec[0] / dirvec[1];
-		let dirz_diry = dirvec[2] / dirvec[1];
-		let dirx_dirz = dirvec[0] / dirvec[2];
-		let diry_dirz = dirvec[1] / dirvec[2];
-		let results = [];
-		let isleft  = dirvec[0] > 0;
-		let isright = dirvec[0] < 0;
-		let isleftright = isleft || isright;
-		let isbot = dirvec[1] > 0;
-		let istop = dirvec[1] < 0;
-		let isbottop = isbot || istop;
-		let isfront = dirvec[2] > 0;
-		let isback  = dirvec[2] < 0;
-		let isfrontback = isfront || isback;
+		let hit = raycast(
+			pos[0], pos[1], pos[2],
+			dirvec[0] * raylength,
+			dirvec[1] * raylength,
+			dirvec[2] * raylength,
+			this.getBlock,
+		);
 		
-		for(let i=0; i<raylength; i++) {
-			vector3.add(sample, dirvec, ahead);
+		if(hit) {
+			let isec = [hit.cx, hit.cy, hit.cz];
+			let blockpos = [hit.ix, hit.iy, hit.iz];
+			let sqdist = vector3.squareDist(pos, isec);
+			let dist = vector3.dist(pos, isec);
+			let axis = hit.axis;
 			
-			// possible left or right face hit
-			if(isleftright && Math.floor(sample[0]) !== Math.floor(ahead[0])) {
-				let isecx = isleft ? Math.ceil(sample[0]) : Math.floor(sample[0]);
-				let dx    = isecx - sample[0];
-				let isecy = sample[1] + diry_dirx * dx;
-				let isecz = sample[2] + dirz_dirx * dx;
-				let blocky = Math.floor(isecy);
-				let blockz = Math.floor(isecz);
-				let blockBefore = this.getBlock(isecx - isleft,  blocky, blockz);
-				let blockAfter  = this.getBlock(isecx - isright, blocky, blockz);
+			let faceid = (
+				hit.nx > 0 ? 1 :
+				hit.nx < 0 ? 3 :
+				hit.ny > 0 ? 4 :
+				hit.ny < 0 ? 5 :
+				hit.nz > 0 ? 2 :
+				hit.nz < 0 ? 0 :
+				0
+			);
 			
-				if(!blockBefore && blockAfter) {
-					let isec = [isecx, isecy, isecz];
-					let blockpos = [isecx - isright, blocky, blockz];
-					let sqdist = vector3.squareDist(pos, isec);
-					let faceid = isleft ? 3 : 1;
-					let axis = 0;
-					
-					results.push({isec, blockpos, sqdist, faceid, axis});
-				}
-			}
-			
-			// possible bottom or top face hit
-			if(isbottop && Math.floor(sample[1]) !== Math.floor(ahead[1])) {
-				let isecy = isbot ? Math.ceil(sample[1]) : Math.floor(sample[1]);
-				let dy    = isecy - sample[1];
-				let isecx = sample[0] + dirx_diry * dy;
-				let isecz = sample[2] + dirz_diry * dy;
-				let blockx = Math.floor(isecx);
-				let blockz = Math.floor(isecz);
-				let blockBefore = this.getBlock(blockx, isecy - isbot, blockz);
-				let blockAfter  = this.getBlock(blockx, isecy - istop, blockz);
-			
-				if(!blockBefore && blockAfter) {
-					let isec = [isecx, isecy, isecz];
-					let blockpos = [blockx, isecy - istop, blockz];
-					let sqdist = vector3.squareDist(pos, isec);
-					let faceid = isbot ? 5 : 4;
-					let axis = 1;
-					
-					results.push({isec, blockpos, sqdist, faceid, axis});
-				}
-			}
-			
-			// possible front or back face hit
-			if(isfrontback && Math.floor(sample[2]) !== Math.floor(ahead[2])) {
-				let isecz = isfront ? Math.ceil(sample[2]) : Math.floor(sample[2]);
-				let dz    = isecz - sample[2];
-				let isecx = sample[0] + dirx_dirz * dz;
-				let isecy = sample[1] + diry_dirz * dz;
-				let blockx = Math.floor(isecx);
-				let blocky = Math.floor(isecy);
-				let blockBefore = this.getBlock(blockx, blocky, isecz - isfront);
-				let blockAfter  = this.getBlock(blockx, blocky, isecz - isback);
-			
-				if(!blockBefore && blockAfter) {
-					let isec = [isecx, isecy, isecz];
-					let blockpos = [blockx, blocky, isecz - isback];
-					let sqdist = vector3.squareDist(pos, isec);
-					let faceid = isfront ? 0 : 2;
-					let axis = 2;
-					
-					results.push({isec, blockpos, sqdist, faceid, axis});
-				}
-			}
-			
-			if(results.length >= 3) {
-				break;
-			}
-			
-			vector3.copy(ahead, sample);
+			return {isec, blockpos, sqdist, dist, faceid, axis};
 		}
-		
-		if(results.length) {
-			let winner = results.reduce((min, cur) => cur.sqdist < min.sqdist ? cur : min);
-			
-			winner.dist = Math.sqrt(winner.sqdist);
-			
-			if(winner.dist <= raylength) {
-				return winner;
-			}
-		}
-		
-		return null;
 	}
 }
