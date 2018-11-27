@@ -6,6 +6,7 @@ export class World
 {
 	constructor(display)
 	{
+		this.solidVoxel = this.solidVoxel.bind(this);
 		this.getBlock = this.getBlock.bind(this);
 		this.display = display;
 		this.chunks = {};
@@ -84,6 +85,11 @@ export class World
 		return chunk.getBlock(...localPos);
 	}
 	
+	solidVoxel(p)
+	{
+		return !!this.getBlock(...p);
+	}
+	
 	setBlock(x, y, z, t)
 	{
 		let chunkPos = this.getChunkPos(x, y, z);
@@ -100,31 +106,36 @@ export class World
 	hitBlock(dirvec, pos, raylength = 8)
 	{
 		let hit = raycast(
-			pos[0], pos[1], pos[2],
-			dirvec[0] * raylength,
+			[pos[0], pos[1], pos[2]],
+			[dirvec[0] * raylength,
 			dirvec[1] * raylength,
-			dirvec[2] * raylength,
-			this.getBlock,
+			dirvec[2] * raylength],
+			this.solidVoxel,
 		);
 		
 		if(hit) {
-			let isec = [hit.cx, hit.cy, hit.cz];
-			let blockpos = [hit.ix, hit.iy, hit.iz];
+			let isec = hit.hitpos;
+			let blockpos = hit.voxpos;
 			let sqdist = vector3.squareDist(pos, isec);
 			let dist = vector3.dist(pos, isec);
 			let axis = hit.axis;
 			
 			let faceid = (
-				hit.nx > 0 ? 1 :
-				hit.nx < 0 ? 3 :
-				hit.ny > 0 ? 4 :
-				hit.ny < 0 ? 5 :
-				hit.nz > 0 ? 2 :
-				hit.nz < 0 ? 0 :
+				hit.normal[0] > 0 ? 1 :
+				hit.normal[0] < 0 ? 3 :
+				hit.normal[1] > 0 ? 4 :
+				hit.normal[1] < 0 ? 5 :
+				hit.normal[2] > 0 ? 2 :
+				hit.normal[2] < 0 ? 0 :
 				0
 			);
 			
 			return {isec, blockpos, sqdist, dist, faceid, axis};
 		}
+	}
+	
+	raycast(start, vec)
+	{
+		return raycast(start, vec, this.solidVoxel);
 	}
 }

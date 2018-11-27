@@ -5,6 +5,7 @@ import {Input} from "./input.js";
 import {Renderer} from "./renderer.js";
 import {Body} from "./body.js";
 import * as matrix from "./matrix.js";
+import * as vector3 from "./vector.js";
 
 let display = new Display();
 let camera = new Camera(display);
@@ -14,20 +15,9 @@ let body = new Body(world);
 let gl = display.gl;
 
 world.touchChunk( 0, 0, 0);
-//world.touchChunk( 1, 0, 0);
-//world.touchChunk( 0, 1, 0);
-//world.touchChunk( 0, 0, 1);
-//world.touchChunk(-1, 0, 0);
-//world.touchChunk( 0,-1, 0);
-//world.touchChunk( 0, 0,-1);
-//camera.pos.set([-13, 32, -13]);
-//camera.hangle = 0.75;
-//camera.vangle = -0.7;
-camera.pos.set([8,17,8]);
 
-body.pos.set(camera.pos.subarray(0,3));
-body.acc[1] = -1;
-//body.vel[2] = 1;
+body.pos.set([8.5,18,8.5]);
+body.acc[1] = -10;
 
 let container = document.createElement("div");
 let crosshairs = document.createElement("img");
@@ -47,7 +37,7 @@ container.appendChild(crosshairs);
 document.body.appendChild(container);
 
 let input = new Input(container);
-let speed = 0.1;
+let speed = 1;
 let blockHit = null;
 
 let axis = display.createStaticByteBuffer([
@@ -107,31 +97,26 @@ let selectorMat = matrix.identity();
 
 display.onRender = () =>
 {
-	if(input.keymap.a) {
-		camera.moveLeft(speed);
+	if(input.keymap.w) {
+		let vec = camera.getForward(speed);
+		body.move(vec, 1 / 60);
 	}
-	if(input.keymap.d) {
-		camera.moveRight(speed);
+	if(input.keymap.a) {
+		let vec = camera.getLeftward(speed);
+		body.move(vec, 1 / 60);
 	}
 	if(input.keymap.s) {
-		camera.moveBackward(speed);
+		let vec = camera.getForward(-speed);
+		body.move(vec, 1 / 60);
 	}
-	if(input.keymap.w) {
-		if(!world.hitBlock(camera.getForward(1), camera.pos, speed + 1)) {
-			camera.moveForward(speed);
-		}
-	}
-	if(input.keymap.space) {
-		camera.moveUp(speed);
-	}
-	if(input.keymap.shift) {
-		camera.moveDown(speed);
+	if(input.keymap.d) {
+		let vec = camera.getLeftward(-speed);
+		body.move(vec, 1 / 60);
 	}
 	
 	body.update(1 / 60);
-	
 	camera.setPos(body.pos);
-	camera.pos[1] += 1;
+	camera.pos[1] += 0.5;
 	
 	renderer.begin(camera);
 	renderer.drawWorld(world);
@@ -181,18 +166,25 @@ display.onRender = () =>
 	gl.enable(gl.DEPTH_TEST);
 };
 
+input.onKeyDown = key =>
+{
+	if(key === "space") {
+		body.accelerate([0,5,0], 1);
+	}
+};
+
 input.onMove = e =>
 {
 	camera.turnHori(e.movementX / 100);
 	camera.turnVert(-e.movementY / 100);
 	blockHit = world.hitBlock(camera.getDirVec(), camera.pos);
+	window.blockHit = blockHit;
 };
 
 input.onClick = e =>
 {
 	if(blockHit) {
 		world.setBlock(...blockHit.blockpos, 0);
-		console.log(blockHit);
 	}
 };
 

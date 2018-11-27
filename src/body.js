@@ -12,24 +12,29 @@ export class Body
 		this.speed = 0;
 	}
 	
-	update(delta)
+	accelerate(acc, delta)
 	{
-		vector3.addScaled(this.vel, this.acc, delta, this.vel);
+		vector3.addScaled(this.vel, acc, delta, this.vel);
+	}
+	
+	move(vel, delta)
+	{
+		let vec = vector3.scale(vel, delta);
+		let hit = world.raycast(this.pos, vec);
 		
-		this.speed = vector3.length(this.vel);
-		
-		vector3.scale(this.vel, 1 / this.speed, this.dir);
-		
-		let hit = this.world.hitBlock(this.dir, this.pos, this.speed * delta);
-		
-		if(hit) {
-			this.vel[hit.axis] = (hit.isec[hit.axis] - this.pos[hit.axis]) / delta;
-			
-			this.speed = vector3.length(this.vel);
-			
-			vector3.scale(this.vel, 1 / this.speed, this.dir);
+		while(hit) {
+			this.pos[hit.axis] = hit.hitpos[hit.axis];
+			vec[hit.axis] = 0;
+			vel[hit.axis] = 0;
+			hit = world.raycast(this.pos, vec);
 		}
 		
-		vector3.addScaled(this.pos, this.vel, delta, this.pos);
+		vector3.add(this.pos, vec, this.pos);
+	}
+	
+	update(delta)
+	{
+		this.accelerate(this.acc, delta);
+		this.move(this.vel, delta);
 	}
 }

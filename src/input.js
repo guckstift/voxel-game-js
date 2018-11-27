@@ -23,8 +23,10 @@ export class Input
 				key = "space";
 			}
 			
-			this.keymap[key] = true;
-			this.onKeyDown();
+			if(!this.keymap[key]) {
+				this.keymap[key] = true;
+				this.onKeyDown(key);
+			}
 		};
 
 		document.onkeyup = e => {
@@ -35,7 +37,7 @@ export class Input
 			}
 			
 			this.keymap[key] = false;
-			this.onKeyUp();
+			this.onKeyUp(key);
 		};
 
 		target.onmousedown = e => {
