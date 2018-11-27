@@ -104,5 +104,12 @@ export class Camera
 	turnVert(angle)
 	{
 		this.vangle += angle;
+		
+		if(this.vangle < -Math.PI / 2) {
+			this.vangle = -Math.PI / 2;
+		}
+		else if(this.vangle > Math.PI / 2) {
+			this.vangle = Math.PI / 2;
+		}
 	}
 }

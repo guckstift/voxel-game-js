@@ -17,7 +17,7 @@ let gl = display.gl;
 world.touchChunk( 0, 0, 0);
 
 body.pos.set([8.5,18,8.5]);
-body.acc[1] = -10;
+body.acc[1] = -12;
 
 let container = document.createElement("div");
 let crosshairs = document.createElement("img");

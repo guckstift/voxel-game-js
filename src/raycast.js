@@ -51,7 +51,7 @@ export function raycast(start, vec, getvox)
 		}
 		
 		way            = waynext[axis];
-		waynext[axis] += waydelta[axis]
+		waynext[axis] += waydelta[axis];
 		voxpos[axis]  += step[axis];
 		
 		if(way <= len && getvox(voxpos)) {
