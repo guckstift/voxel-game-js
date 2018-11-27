@@ -1,5 +1,7 @@
 import * as vector3 from "./vector3.js";
 
+let epsilon = 1 / 1024;
+
 export class Body
 {
 	constructor(world)
@@ -23,7 +25,7 @@ export class Body
 		let hit = world.raycast(this.pos, vec);
 		
 		while(hit) {
-			this.pos[hit.axis] = hit.hitpos[hit.axis];
+			this.pos[hit.axis] = hit.hitpos[hit.axis] + hit.normal[hit.axis] * epsilon;
 			vec[hit.axis] = 0;
 			vel[hit.axis] = 0;
 			hit = world.raycast(this.pos, vec);
