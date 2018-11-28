@@ -7,6 +7,10 @@ import {Body} from "./body.js";
 import * as matrix from "./matrix.js";
 import * as vector3 from "./vector.js";
 
+const runspeed  = 2;
+const jumpspeed = 1.375;
+const gravity   = 20;
+
 let display = new Display();
 let camera = new Camera(display);
 let world = new World(display);
@@ -17,7 +21,7 @@ let gl = display.gl;
 world.touchChunk( 0, 0, 0);
 
 body.pos.set([8.5,18,8.5]);
-body.acc[1] = -12;
+body.acc[1] = -gravity;
 
 let container = document.createElement("div");
 let crosshairs = document.createElement("img");
@@ -37,7 +41,6 @@ container.appendChild(crosshairs);
 document.body.appendChild(container);
 
 let input = new Input(container);
-let speed = 1;
 let blockHit = null;
 
 let axis = display.createStaticByteBuffer([
@@ -69,7 +72,7 @@ let axisShader = display.createShader(`
 	}
 `);
 
-let p = -1 / 16;
+let p = -1 / 1024;
 
 let selector = display.createStaticFloatBuffer([
 	0,0,p, 1,0,p, 0,1,p,
@@ -98,19 +101,19 @@ let selectorMat = matrix.identity();
 display.onRender = () =>
 {
 	if(input.keymap.w) {
-		let vec = camera.getForward(speed);
+		let vec = camera.getForward(runspeed);
 		body.move(vec, 1 / 60);
 	}
 	if(input.keymap.a) {
-		let vec = camera.getLeftward(speed);
+		let vec = camera.getLeftward(runspeed);
 		body.move(vec, 1 / 60);
 	}
 	if(input.keymap.s) {
-		let vec = camera.getForward(-speed);
+		let vec = camera.getForward(-runspeed);
 		body.move(vec, 1 / 60);
 	}
 	if(input.keymap.d) {
-		let vec = camera.getLeftward(-speed);
+		let vec = camera.getLeftward(-runspeed);
 		body.move(vec, 1 / 60);
 	}
 	
@@ -169,7 +172,7 @@ display.onRender = () =>
 input.onKeyDown = key =>
 {
 	if(key === "space") {
-		body.accelerate([0,5,0], 1);
+		body.accelerate([0,5,0], jumpspeed);
 	}
 };
 

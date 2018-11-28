@@ -7,35 +7,35 @@ let dir      = new Float32Array(3);
 let voxpos   = new Float32Array(3);
 let step     = new Float32Array(3);
 let waydelta = new Float32Array(3);
-let distnext = new Float32Array(3);
 let waynext  = new Float32Array(3);
 
 export function raycast(start, vec, getvox)
 {
-	let len  = sqrt(vec[0] ** 2 + vec[1] ** 2 + vec[2] ** 2);
-	let way  = 0;
-	let axis = 0;
+	let len      = sqrt(vec[0] ** 2 + vec[1] ** 2 + vec[2] ** 2);
+	let way      = 0;
+	let axis     = 0;
+	let distnext = 0;
 	
 	for(let k=0; k<3; k++) {
 		dir[k]      = vec[k] / len;
 		waydelta[k] = abs(1 / dir[k]);
 		
 		if(dir[k] > 0) {
-			step[k]     = 1;
-			voxpos[k]   = ceil(start[k]) - 1;
-			distnext[k] = ceil(start[k]) - start[k];
+			step[k]   = 1;
+			voxpos[k] = ceil(start[k]) - 1;
+			distnext  = ceil(start[k]) - start[k];
 		}
 		else {
-			step[k]     = -1;
-			voxpos[k]   = floor(start[k]);
-			distnext[k] = start[k] - floor(start[k]);
+			step[k]   = -1;
+			voxpos[k] = floor(start[k]);
+			distnext  = start[k] - floor(start[k]);
 		}
 		
 		if(waydelta[k] === Infinity) {
 			waynext[k] = Infinity;
 		}
 		else {
-			waynext[k] = waydelta[k] * distnext[k];
+			waynext[k] = waydelta[k] * distnext;
 		}
 	}
 	
