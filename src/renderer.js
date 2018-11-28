@@ -90,11 +90,13 @@ export class Renderer
 
 	drawChunk(chunk)
 	{
-		this.drawTriangles(
-			chunk.buf,  chunk.vertnum,
-			chunk.x * CHUNK_WIDTH, chunk.y * CHUNK_WIDTH, chunk.z * CHUNK_WIDTH,
-			0,  this.atlas
-		);
+		if(chunk.vertnum > 0) {
+			this.drawTriangles(
+				chunk.buf,  chunk.vertnum,
+				chunk.x * CHUNK_WIDTH, chunk.y * CHUNK_WIDTH, chunk.z * CHUNK_WIDTH,
+				0,  this.atlas
+			);
+		}
 	}
 
 	drawTriangles(buf, vertnum, x, y, z, a, tex)

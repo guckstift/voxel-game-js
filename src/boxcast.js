@@ -5,7 +5,6 @@ let abs   = Math.abs;
 
 let dir      = new Float32Array(3);
 let lead     = new Float32Array(3);
-let trail    = new Float32Array(3);
 let voxpos   = new Float32Array(3);
 let leadvox  = new Float32Array(3);
 let trailvox = new Float32Array(3);
@@ -19,6 +18,7 @@ export function boxcast(boxmin, boxmax, vec, getvox)
 	let way      = 0;
 	let axis     = 0;
 	let distnext = 0;
+	let trail    = 0;
 	
 	for(let k = 0; k < 3; k ++) {
 		dir[k]      = vec[k] / len;
@@ -27,17 +27,17 @@ export function boxcast(boxmin, boxmax, vec, getvox)
 		if(dir[k] > 0) {
 			step[k]     = 1;
 			lead[k]     = boxmax[k];
-			trail[k]    = boxmin[k];
+			trail       = boxmin[k];
 			leadvox[k]  = ceil(lead[k]) - 1;
-			trailvox[k] = floor(trail[k]);
+			trailvox[k] = floor(trail);
 			distnext    = ceil(lead[k]) - lead[k];
 		}
 		else {
 			step[k]     = -1;
 			lead[k]     = boxmin[k];
-			trail[k]    = boxmax[k];
+			trail       = boxmax[k];
 			leadvox[k]  = floor(lead[k]);
-			trailvox[k] = ceil(trail[k]) - 1;
+			trailvox[k] = ceil(trail) - 1;
 			distnext    = lead[k] - floor(lead[k]);
 		}
 		

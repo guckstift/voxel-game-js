@@ -13,6 +13,13 @@ export class World
 		this.chunks = {};
 	}
 	
+	touchChunkAt(x, y, z)
+	{
+		let chunkPos = this.getChunkPos(x, y, z);
+		
+		this.touchChunk(...chunkPos);
+	}
+	
 	touchChunk(x, y, z)
 	{
 		if(!this.chunks[z]) {

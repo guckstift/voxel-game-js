@@ -1,6 +1,7 @@
 import {Display} from "./display.js";
 import {Camera} from "./camera.js";
 import {World} from "./world.js";
+import {CHUNK_WIDTH} from "./chunk.js";
 import {Input} from "./input.js";
 import {Renderer} from "./renderer.js";
 import {Body} from "./body.js";
@@ -120,6 +121,14 @@ display.onRender = () =>
 	body.update(1 / 60);
 	camera.setPos(body.pos);
 	camera.pos[1] += 1.5;
+	
+	world.touchChunkAt(...body.pos);
+	world.touchChunkAt(body.pos[0] - CHUNK_WIDTH, body.pos[1], body.pos[2]);
+	world.touchChunkAt(body.pos[0], body.pos[1] - CHUNK_WIDTH, body.pos[2]);
+	world.touchChunkAt(body.pos[0], body.pos[1], body.pos[2] - CHUNK_WIDTH);
+	world.touchChunkAt(body.pos[0] + CHUNK_WIDTH, body.pos[1], body.pos[2]);
+	world.touchChunkAt(body.pos[0], body.pos[1] + CHUNK_WIDTH, body.pos[2]);
+	world.touchChunkAt(body.pos[0], body.pos[1], body.pos[2] + CHUNK_WIDTH);
 	
 	renderer.begin(camera);
 	renderer.drawWorld(world);

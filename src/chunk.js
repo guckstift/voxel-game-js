@@ -24,9 +24,14 @@ export class Chunk
 		this.data = new Uint8Array(CHUNK_WIDTH ** 3);
 		this.mesh = new Uint8Array(CHUNK_WIDTH ** 3 * BLOCK_SIZE);
 		this.buf = this.display.createStaticByteBuffer(this.mesh);
-
+		
 		for(let i=0; i < CHUNK_WIDTH ** 3; i++) {
-			this.data[i] = 1 + Math.random() * 3;
+			if(y < 0) {
+				this.data[i] = 1 + Math.random() * 3;
+			}
+			else {
+				this.data[i] = 0;
+			}
 		}
 		
 		this.updateMesh();
