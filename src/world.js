@@ -1,5 +1,6 @@
 import {Chunk, CHUNK_WIDTH} from "./chunk.js";
 import {raycast} from "./raycast.js";
+import {boxcast} from "./boxcast.js";
 import * as vector3 from "./vector3.js";
 
 export class World
@@ -137,5 +138,10 @@ export class World
 	raycast(start, vec)
 	{
 		return raycast(start, vec, this.solidVoxel);
+	}
+	
+	boxcast(boxmin, boxmax, vec)
+	{
+		return boxcast(boxmin, boxmax, vec, this.solidVoxel);
 	}
 }

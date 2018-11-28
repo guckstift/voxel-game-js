@@ -15,7 +15,7 @@ let display = new Display();
 let camera = new Camera(display);
 let world = new World(display);
 let renderer = new Renderer(display);
-let body = new Body(world);
+let body = new Body(world, [-0.25, 0, -0.25], [0.25, 1.75, 0.25]);
 let gl = display.gl;
 
 world.touchChunk( 0, 0, 0);
@@ -119,7 +119,7 @@ display.onRender = () =>
 	
 	body.update(1 / 60);
 	camera.setPos(body.pos);
-	camera.pos[1] += 0.5;
+	camera.pos[1] += 1.5;
 	
 	renderer.begin(camera);
 	renderer.drawWorld(world);
