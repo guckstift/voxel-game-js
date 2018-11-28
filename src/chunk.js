@@ -27,7 +27,7 @@ export class Chunk
 		
 		for(let i=0; i < CHUNK_WIDTH ** 3; i++) {
 			if(y < 0) {
-				this.data[i] = 1 + Math.random() * 3;
+				this.data[i] = Math.random() * 4;
 			}
 			else {
 				this.data[i] = 0;

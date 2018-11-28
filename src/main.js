@@ -8,8 +8,8 @@ import {Body} from "./body.js";
 import * as matrix from "./matrix.js";
 import * as vector3 from "./vector.js";
 
-const runspeed  = 2;
-const jumpspeed = 1.375;
+const runspeed  = 3;
+const jumpspeed = 6.5;//8.25;//11;//5.5;//1.375;
 const gravity   = 20;
 
 let display = new Display();
@@ -21,7 +21,7 @@ let gl = display.gl;
 
 world.touchChunk( 0, 0, 0);
 
-body.pos.set([8.5,18,8.5]);
+body.pos.set([8.5,4.5,8.5]);
 body.acc[1] = -gravity;
 
 let container = document.createElement("div");
@@ -101,6 +101,9 @@ let selectorMat = matrix.identity();
 
 display.onRender = () =>
 {
+	if(input.keymap.space && body.rest[1] === 1) {
+		body.accelerate([0, jumpspeed, 0], 1);
+	}
 	if(input.keymap.w) {
 		let vec = camera.getForward(runspeed);
 		body.move(vec, 1 / 60);
@@ -121,6 +124,8 @@ display.onRender = () =>
 	body.update(1 / 60);
 	camera.setPos(body.pos);
 	camera.pos[1] += 1.5;
+	
+	blockHit = world.hitBlock(camera.getDirVec(), camera.pos);
 	
 	world.touchChunkAt(...body.pos);
 	world.touchChunkAt(body.pos[0] - CHUNK_WIDTH, body.pos[1], body.pos[2]);
@@ -178,18 +183,10 @@ display.onRender = () =>
 	gl.enable(gl.DEPTH_TEST);
 };
 
-input.onKeyDown = key =>
-{
-	if(key === "space") {
-		body.accelerate([0,5,0], jumpspeed);
-	}
-};
-
 input.onMove = e =>
 {
 	camera.turnHori(e.movementX / 100);
 	camera.turnVert(-e.movementY / 100);
-	blockHit = world.hitBlock(camera.getDirVec(), camera.pos);
 	window.blockHit = blockHit;
 };
 

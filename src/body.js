@@ -11,9 +11,10 @@ export class Body
 		this.boxmin = boxmin;
 		this.boxmax = boxmax;
 		
-		this.pos = vector3.create();
-		this.vel = vector3.create();
-		this.acc = vector3.create();
+		this.pos  = vector3.create();
+		this.vel  = vector3.create();
+		this.acc  = vector3.create();
+		this.rest = new Uint8Array(3);
 		
 		this.deltavel  = vector3.create();
 		this.globoxmin = vector3.create();
@@ -29,11 +30,15 @@ export class Body
 	{
 		vector3.scale(vel, delta, this.deltavel);
 		this.updateBox();
+		this.rest[0] = 0;
+		this.rest[1] = 0;
+		this.rest[2] = 0;
 		
 		let hit = world.boxcast(this.globoxmin, this.globoxmax, this.deltavel);
 		
 		for(let i = 0; i < 3 && hit; i ++) {
-			this.pos[hit.axis] = hit.pos;
+			this.pos[hit.axis]  = hit.pos;
+			this.rest[hit.axis] = 1;
 			
 			if(hit.step > 0) {
 				this.pos[hit.axis] -= this.boxmax[hit.axis];
