@@ -13,6 +13,60 @@ export const RAW_FACE_SIZE = FACE_VERTS * RAW_VERT_SIZE;
 export const FACE_SIZE = FACE_VERTS * VERT_SIZE;
 export const BLOCK_SIZE = BLOCK_FACES * FACE_SIZE;
 
+export let vertSrc = `
+	uniform mat4 proj;
+	uniform mat4 view;
+	uniform mat4 model;
+	uniform vec3 sun;
+
+	attribute vec3 pos;
+	attribute vec2 texcoord;
+	attribute float faceid;
+
+	varying vec2 vTexcoord;
+	varying float vCoef;
+
+	void main()
+	{
+		gl_Position = proj * view * model * vec4(pos, 1.0);
+
+		vTexcoord = texcoord / 16.0;
+		
+		vec3 normal =
+			faceid == 0.0 ? vec3(0, 0, -1) :
+			faceid == 1.0 ? vec3(+1, 0, 0) :
+			faceid == 2.0 ? vec3(0, 0, +1) :
+			faceid == 3.0 ? vec3(-1, 0, 0) :
+			faceid == 4.0 ? vec3(0, +1, 0) :
+			faceid == 5.0 ? vec3(0, -1, 0) :
+			vec3(0,0,0);
+		
+		vCoef = 0.5 + max(0.0, dot(normal, -sun)) * 0.5;
+	}
+`;
+
+export let fragSrc = `
+	precision highp float;
+
+	uniform sampler2D tex;
+
+	varying vec2 vTexcoord;
+	varying float vCoef;
+
+	void main()
+	{
+		gl_FragColor = texture2D(tex, vTexcoord);
+		gl_FragColor.rgb *= vCoef;
+	}
+`;
+
+let model = matrix.identity();
+
+function getLinearBlockIndex(x, y, z)
+{
+	return x + y * CHUNK_WIDTH + z * CHUNK_WIDTH * CHUNK_WIDTH;
+}
+
 export class Chunk
 {
 	constructor(x, y, z, display)
@@ -26,6 +80,8 @@ export class Chunk
 		this.data = new Uint8Array(CHUNK_WIDTH ** 3);
 		this.mesh = new Uint8Array(CHUNK_WIDTH ** 3 * BLOCK_SIZE);
 		this.buf = this.display.createStaticByteBuffer(this.mesh);
+		this.shader = display.getShader("chunk", vertSrc, fragSrc);
+		this.atlas = display.getTexture("gfx/atlas.png");
 		
 		for(let bx = x * CHUNK_WIDTH, i=0; bx < (x + 1) * CHUNK_WIDTH; bx++) {
 			for(let by = y * CHUNK_WIDTH; by < (y + 1) * CHUNK_WIDTH; by++) {
@@ -43,18 +99,13 @@ export class Chunk
 		this.updateMesh();
 	}
 	
-	getLinearBlockIndex(x, y, z)
-	{
-		return x + y * CHUNK_WIDTH + z * CHUNK_WIDTH * CHUNK_WIDTH;
-	}
-	
 	getBlock(x, y, z)
 	{
 		if(x < 0 || y < 0 || z < 0 || x >= CHUNK_WIDTH || y >= CHUNK_WIDTH || z >= CHUNK_WIDTH) {
 			return null;
 		}
 		
-		let i = this.getLinearBlockIndex(x, y, z);
+		let i = getLinearBlockIndex(x, y, z);
 		let t = this.data[i];
 		let block = blocks[t];
 		
@@ -67,7 +118,7 @@ export class Chunk
 			return;
 		}
 		
-		let i = this.getLinearBlockIndex(x, y, z);
+		let i = getLinearBlockIndex(x, y, z);
 		
 		this.data[i] = t;
 		this.updateMesh();
@@ -120,6 +171,35 @@ export class Chunk
 			this.meshsize += FACE_SIZE;
 			this.vertnum += FACE_VERTS;
 		}
+	}
+
+	draw()
+	{
+		if(this.vertnum > 0) {
+			this.drawTriangles(
+				this.buf, this.vertnum,
+				this.x * CHUNK_WIDTH, this.y * CHUNK_WIDTH, this.z * CHUNK_WIDTH,
+				0, this.atlas
+			);
+		}
+	}
+
+	drawTriangles(buf, vertnum, x, y, z, a, tex)
+	{
+		let gl = this.display.gl;
+		
+		matrix.translation(x, y, z, model);
+		matrix.rotateX(model, a, model);
+		matrix.rotateY(model, a, model);
+		
+		this.shader.uniformMatrix4fv("model", model);
+		this.shader.uniformTex("tex", tex, 0);
+		
+		this.shader.vertexAttrib("pos",      buf, 3, true, VERT_SIZE, 0);
+		this.shader.vertexAttrib("texcoord", buf, 2, true, VERT_SIZE, 3);
+		this.shader.vertexAttrib("faceid",   buf, 1, true, VERT_SIZE, 5);
+		
+		gl.drawArrays(gl.TRIANGLES, 0, vertnum);
 	}
 }
 

@@ -3,7 +3,6 @@ import {Camera} from "./camera.js";
 import {World} from "./world.js";
 import {CHUNK_WIDTH} from "./chunk.js";
 import {Input} from "./input.js";
-import {Renderer} from "./renderer.js";
 import {Body} from "./body.js";
 import {radians} from "./math.js";
 import * as matrix from "./matrix.js";
@@ -15,8 +14,7 @@ const gravity   = 20;
 
 let display = new Display();
 let camera = new Camera(display);
-let world = new World(display);
-let renderer = new Renderer(display);
+let world = new World(display, camera);
 let body = new Body(world, [-0.25, 0, -0.25], [0.25, 1.75, 0.25]);
 let gl = display.gl;
 
@@ -136,8 +134,7 @@ display.onRender = () =>
 	world.touchChunkAt(body.pos[0], body.pos[1] + CHUNK_WIDTH, body.pos[2]);
 	world.touchChunkAt(body.pos[0], body.pos[1], body.pos[2] + CHUNK_WIDTH);
 	
-	renderer.begin(camera);
-	renderer.drawWorld(world);
+	world.draw();
 	
 	if(blockHit) {
 		let r = radians(90);

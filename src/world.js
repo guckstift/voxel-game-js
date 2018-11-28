@@ -1,15 +1,23 @@
-import {Chunk, CHUNK_WIDTH} from "./chunk.js";
+import {Chunk, CHUNK_WIDTH, vertSrc, fragSrc} from "./chunk.js";
 import {raycast} from "./raycast.js";
 import {boxcast} from "./boxcast.js";
+import {radians} from "./math.js";
 import * as vector3 from "./vector3.js";
+
+let sun = vector3.create(0, -1, 0);
+
+vector3.rotateX(sun, radians(-30), sun);
+vector3.rotateY(sun, radians(-30), sun);
 
 export class World
 {
-	constructor(display)
+	constructor(display, camera)
 	{
 		this.solidVoxel = this.solidVoxel.bind(this);
 		this.getBlock = this.getBlock.bind(this);
 		this.display = display;
+		this.camera = camera;
+		this.shader = display.getShader("chunk", vertSrc, fragSrc);
 		this.chunks = {};
 	}
 	
@@ -150,5 +158,27 @@ export class World
 	boxcast(boxmin, boxmax, vec)
 	{
 		return boxcast(boxmin, boxmax, vec, this.solidVoxel);
+	}
+	
+	draw()
+	{
+		this.shader.use();
+		this.shader.uniformMatrix4fv("proj", this.camera.getProjection());
+		this.shader.uniformMatrix4fv("view", this.camera.getView());
+		this.shader.uniform3fv("sun", sun.subarray(0, 3));
+		
+		for(let z in this.chunks) {
+			let slice = this.chunks[z];
+			
+			for(let y in slice) {
+				let column = slice[y];
+				
+				for(let x in column) {
+					let chunk = column[x];
+					
+					chunk.draw();
+				}
+			}
+		}
 	}
 }

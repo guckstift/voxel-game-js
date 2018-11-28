@@ -9,11 +9,13 @@ export class Display
 		let gl = canvas.getContext("webgl", {alpha: false, antialias: false});
 
 		gl.enable(gl.BLEND);
-		//gl.enable(gl.CULL_FACE);
+		gl.enable(gl.CULL_FACE);
 		gl.enable(gl.DEPTH_TEST);
 		
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		
+		this.texcache = {};
+		this.shadercache = {};
 		this.canvas = canvas;
 		this.gl = gl;
 		this.frame = this.frame.bind(this);
@@ -51,6 +53,24 @@ export class Display
 		this.canvas.height = h;
 		
 		gl.viewport(0, 0, w, h);
+	}
+	
+	getTexture(url)
+	{
+		if(!this.texcache[url]) {
+			this.texcache[url] = this.createTexture(url);
+		}
+		
+		return this.texcache[url];
+	}
+	
+	getShader(id, vertSrc, fragSrc)
+	{
+		if(!this.shadercache[id]) {
+			this.shadercache[id] = this.createShader(vertSrc, fragSrc);
+		}
+		
+		return this.shadercache[id];
 	}
 	
 	createShader(vertSrc, fragSrc)
