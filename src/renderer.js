@@ -1,6 +1,6 @@
 import {VERT_SIZE, CHUNK_WIDTH} from "./chunk.js";
 import * as matrix from "./matrix.js";
-import * as vector from "./vector.js";
+import * as vector3 from "./vector3.js";
 
 let vertSrc = `
 	uniform mat4 proj;
@@ -49,9 +49,9 @@ let fragSrc = `
 	}
 `;
 
-let sun = vector.create(0, -1, 0);
-vector.rotateX(sun, -Math.PI / 6, sun);
-vector.rotateY(sun, -Math.PI / 6, sun);
+let sun = vector3.create(0, -1, 0);
+vector3.rotateX(sun, -Math.PI / 6, sun);
+vector3.rotateY(sun, -Math.PI / 6, sun);
 
 export class Renderer
 {

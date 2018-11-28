@@ -1,5 +1,4 @@
 import * as matrix from "./matrix.js";
-import * as vector from "./vector.js";
 import * as vector3 from "./vector3.js";
 
 export class Camera
@@ -7,14 +6,14 @@ export class Camera
 	constructor(display)
 	{
 		this.display = display;
-		this.pos = vector.create();
+		this.pos = vector3.create();
 		this.hangle = 0;
 		this.vangle = 0;
 		this.proj = matrix.identity();
 		this.view = matrix.identity();
 		this.rota = matrix.identity();
-		this.forward = vector.create();
-		this.dirvec = vector.create();
+		this.forward = vector3.create();
+		this.dirvec = vector3.create();
 	}
 	
 	getProjection()
@@ -38,8 +37,8 @@ export class Camera
 	{
 		matrix.identity(this.rota);
 		matrix.rotateY(this.rota, -this.hangle, this.rota);
-		vector.create(0, 0, speed, 1, this.forward);
-		vector.transform(this.forward, this.rota, this.forward);
+		vector3.create(0, 0, speed, this.forward);
+		vector3.transform(this.forward, this.rota, this.forward);
 		
 		return this.forward;
 	}
@@ -54,9 +53,9 @@ export class Camera
 	
 	getDirVec()
 	{
-		vector.create(0, 0, 1, 1, this.dirvec);
-		vector.rotateX(this.dirvec, -this.vangle, this.dirvec);
-		vector.rotateY(this.dirvec, -this.hangle, this.dirvec);
+		vector3.create(0, 0, 1, this.dirvec);
+		vector3.rotateX(this.dirvec, -this.vangle, this.dirvec);
+		vector3.rotateY(this.dirvec, -this.hangle, this.dirvec);
 		
 		return this.dirvec;
 	}
@@ -68,22 +67,22 @@ export class Camera
 	
 	moveForward(speed)
 	{
-		vector.add(this.pos, this.getForward(speed), this.pos);
+		vector3.add(this.pos, this.getForward(speed), this.pos);
 	}
 	
 	moveBackward(speed)
 	{
-		vector.sub(this.pos, this.getForward(speed), this.pos);
+		vector3.add(this.pos, this.getForward(-speed), this.pos);
 	}
 	
 	moveLeft(speed)
 	{
-		vector.add(this.pos, this.getLeftward(speed), this.pos);
+		vector3.add(this.pos, this.getLeftward(speed), this.pos);
 	}
 	
 	moveRight(speed)
 	{
-		vector.add(this.pos, this.getLeftward(-speed), this.pos);
+		vector3.add(this.pos, this.getLeftward(-speed), this.pos);
 	}
 	
 	moveUp(speed)

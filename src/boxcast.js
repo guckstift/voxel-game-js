@@ -20,6 +20,10 @@ export function boxcast(boxmin, boxmax, vec, getvox)
 	let distnext = 0;
 	let trail    = 0;
 	
+	if(len === 0) {
+		return;
+	}
+	
 	for(let k = 0; k < 3; k ++) {
 		dir[k]      = vec[k] / len;
 		waydelta[k] = abs(1 / dir[k]);

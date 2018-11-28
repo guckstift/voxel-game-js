@@ -19,11 +19,12 @@ export function copy(src, out = new Float32Array(3))
 export function transform(v, m, out = new Float32Array(3))
 {
 	let x = v[0], y = v[1], z = v[2];
+	let rw = 1 / (x * m[3] + y * m[7] + z * m[11] + m[15]);
 	
 	out.set([
-		x * m[0] + y * m[4] + z * m[8]  + w * m[12],
-		x * m[1] + y * m[5] + z * m[9]  + w * m[13],
-		x * m[2] + y * m[6] + z * m[10] + w * m[14],
+		(x * m[0] + y * m[4] + z * m[8]  + m[12]) * rw,
+		(x * m[1] + y * m[5] + z * m[9]  + m[13]) * rw,
+		(x * m[2] + y * m[6] + z * m[10] + m[14]) * rw,
 	]);
 	
 	return out;
@@ -34,6 +35,15 @@ export function floor(v, out = new Float32Array(3))
 	out[0] = Math.floor(v[0]);
 	out[1] = Math.floor(v[1]);
 	out[2] = Math.floor(v[2]);
+	
+	return out;
+}
+
+export function round(v, out = new Float32Array(3))
+{
+	out[0] = Math.round(v[0]);
+	out[1] = Math.round(v[1]);
+	out[2] = Math.round(v[2]);
 	
 	return out;
 }

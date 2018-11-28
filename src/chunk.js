@@ -1,5 +1,6 @@
 import * as matrix from "./matrix.js";
-import * as vector from "./vector.js";
+import * as vector3 from "./vector3.js";
+import {noise3d} from "./noise.js";
 
 export const RAW_VERT_SIZE = 7;
 export const VERT_SIZE = 6;
@@ -25,12 +26,16 @@ export class Chunk
 		this.mesh = new Uint8Array(CHUNK_WIDTH ** 3 * BLOCK_SIZE);
 		this.buf = this.display.createStaticByteBuffer(this.mesh);
 		
-		for(let i=0; i < CHUNK_WIDTH ** 3; i++) {
-			if(y < 0) {
-				this.data[i] = Math.random() * 4;
-			}
-			else {
-				this.data[i] = 0;
+		for(let bx = x * CHUNK_WIDTH, i=0; bx < (x + 1) * CHUNK_WIDTH; bx++) {
+			for(let by = y * CHUNK_WIDTH; by < (y + 1) * CHUNK_WIDTH; by++) {
+				for(let bz = z * CHUNK_WIDTH; bz < (z + 1) * CHUNK_WIDTH; bz++, i++) {
+					if(y < 0) {
+						this.data[i] = noise3d(bx, by, bz, 0) * 4;
+					}
+					else {
+						this.data[i] = 0;
+					}
+				}
 			}
 		}
 		
@@ -192,8 +197,8 @@ function createQuad(x, y, z, ax, ay, az, slot, faceid, out = new Float32Array(RA
 		let t = v.subarray(4);
 		
 		v.set(front.subarray(o, o + RAW_VERT_SIZE));
-		vector.transform(v, m, v);
-		vector.round(v, v);
+		vector3.transform(v, m, v);
+		vector3.round(v, v);
 		t[0] = (sx + t[0]) / 16;
 		t[1] = (sy + t[1]) / 16;
 		t[2] = faceid;
