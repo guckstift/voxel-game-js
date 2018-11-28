@@ -9,7 +9,7 @@ import * as matrix from "./matrix.js";
 import * as vector3 from "./vector3.js";
 
 const runspeed  = 3;
-const jumpspeed = 6.5;//8.25;//11;//5.5;//1.375;
+const jumpspeed = 6.5;
 const gravity   = 20;
 
 let display = new Display();

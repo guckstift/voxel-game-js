@@ -83,10 +83,12 @@ export class Chunk
 		this.shader = display.getShader("chunk", vertSrc, fragSrc);
 		this.atlas = display.getTexture("gfx/atlas.png");
 		
-		for(let bx = x * CHUNK_WIDTH, i=0; bx < (x + 1) * CHUNK_WIDTH; bx++) {
-			for(let by = y * CHUNK_WIDTH; by < (y + 1) * CHUNK_WIDTH; by++) {
-				for(let bz = z * CHUNK_WIDTH; bz < (z + 1) * CHUNK_WIDTH; bz++, i++) {
-					if(y < 0) {
+		for(let bx = 0; bx < CHUNK_WIDTH; bx++) {
+			for(let by = 0; by < CHUNK_WIDTH; by++) {
+				for(let bz = 0; bz < CHUNK_WIDTH; bz++) {
+					let i = getLinearBlockIndex(bx, by, bz);
+					
+					if((bx + x * CHUNK_WIDTH + by + y * CHUNK_WIDTH) < 0) {
 						this.data[i] = noise3d(bx, by, bz, 0) * 4;
 					}
 					else {

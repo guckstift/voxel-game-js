@@ -9,6 +9,26 @@ let sun = vector3.create(0, -1, 0);
 vector3.rotateX(sun, radians(-30), sun);
 vector3.rotateY(sun, radians(-30), sun);
 
+function getChunkPos(x, y, z)
+{
+	return [
+		Math.floor(x / CHUNK_WIDTH),
+		Math.floor(y / CHUNK_WIDTH),
+		Math.floor(z / CHUNK_WIDTH),
+	];
+}
+
+function getLocalPos(x, y, z)
+{
+	let chunkPos = getChunkPos(x, y, z);
+	
+	return [
+		x - chunkPos[0] * CHUNK_WIDTH,
+		y - chunkPos[1] * CHUNK_WIDTH,
+		z - chunkPos[2] * CHUNK_WIDTH,
+	];
+}
+
 export class World
 {
 	constructor(display, camera)
@@ -23,7 +43,7 @@ export class World
 	
 	touchChunkAt(x, y, z)
 	{
-		let chunkPos = this.getChunkPos(x, y, z);
+		let chunkPos = getChunkPos(x, y, z);
 		
 		this.touchChunk(...chunkPos);
 	}
@@ -45,26 +65,6 @@ export class World
 		if(!column[x]) {
 			column[x] = new Chunk(x, y, z, this.display);
 		}
-	}
-	
-	getChunkPos(x, y, z)
-	{
-		return [
-			Math.floor(x / CHUNK_WIDTH),
-			Math.floor(y / CHUNK_WIDTH),
-			Math.floor(z / CHUNK_WIDTH),
-		];
-	}
-	
-	getLocalPos(x, y, z)
-	{
-		let chunkPos = this.getChunkPos(x, y, z);
-		
-		return [
-			x - chunkPos[0] * CHUNK_WIDTH,
-			y - chunkPos[1] * CHUNK_WIDTH,
-			z - chunkPos[2] * CHUNK_WIDTH,
-		];
 	}
 	
 	getChunk(x, y, z)
@@ -90,8 +90,8 @@ export class World
 	
 	getBlock(x, y, z)
 	{
-		let chunkPos = this.getChunkPos(x, y, z);
-		let localPos = this.getLocalPos(x, y, z);
+		let chunkPos = getChunkPos(x, y, z);
+		let localPos = getLocalPos(x, y, z);
 		let chunk = this.getChunk(...chunkPos);
 		
 		if(!chunk) {
@@ -108,8 +108,8 @@ export class World
 	
 	setBlock(x, y, z, t)
 	{
-		let chunkPos = this.getChunkPos(x, y, z);
-		let localPos = this.getLocalPos(x, y, z);
+		let chunkPos = getChunkPos(x, y, z);
+		let localPos = getLocalPos(x, y, z);
 		let chunk = this.getChunk(...chunkPos);
 		
 		if(!chunk) {
