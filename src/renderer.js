@@ -1,4 +1,5 @@
 import {VERT_SIZE, CHUNK_WIDTH} from "./chunk.js";
+import {radians} from "./math.js";
 import * as matrix from "./matrix.js";
 import * as vector3 from "./vector3.js";
 
@@ -50,8 +51,8 @@ let fragSrc = `
 `;
 
 let sun = vector3.create(0, -1, 0);
-vector3.rotateX(sun, -Math.PI / 6, sun);
-vector3.rotateY(sun, -Math.PI / 6, sun);
+vector3.rotateX(sun, radians(-30), sun);
+vector3.rotateY(sun, radians(-30), sun);
 
 export class Renderer
 {

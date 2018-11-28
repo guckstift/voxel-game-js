@@ -1,6 +1,7 @@
 import * as matrix from "./matrix.js";
 import * as vector3 from "./vector3.js";
 import {noise3d} from "./noise.js";
+import {radians} from "./math.js";
 
 export const RAW_VERT_SIZE = 7;
 export const VERT_SIZE = 6;
@@ -124,8 +125,8 @@ export class Chunk
 
 function createCube(slots, out = new Float32Array(BLOCK_SIZE))
 {
-	let r = Math.PI / 2;
-	let s = Math.PI;
+	let r = radians(90);
+	let s = radians(180);
 	
 	createQuad(0, 0, 0,  0, 0, 0,  slots[0], out.subarray(FACE_SIZE * 0)); // front
 	createQuad(1, 0, 0,  0, r, 0,  slots[1], out.subarray(FACE_SIZE * 1)); // right
@@ -139,8 +140,8 @@ function createCube(slots, out = new Float32Array(BLOCK_SIZE))
 
 function createByteCube(slots, out = new Uint8Array(BLOCK_SIZE))
 {
-	let r = Math.PI / 2;
-	let s = Math.PI;
+	let r = radians(90);
+	let s = radians(180);
 	
 	createByteQuad(0, 0, 0,  0, 0, 0,  slots[0], 0, out.subarray(FACE_SIZE * 0)); // front
 	createByteQuad(1, 0, 0,  0, r, 0,  slots[1], 1, out.subarray(FACE_SIZE * 1)); // right

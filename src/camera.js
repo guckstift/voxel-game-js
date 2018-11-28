@@ -1,5 +1,6 @@
 import * as matrix from "./matrix.js";
 import * as vector3 from "./vector3.js";
+import {radians} from "./math.js";
 
 export class Camera
 {
@@ -18,7 +19,7 @@ export class Camera
 	
 	getProjection()
 	{
-		matrix.perspective(90 * Math.PI / 180, this.display.aspect, 0.1, 100, this.proj);
+		matrix.perspective(radians(90), this.display.aspect, 0.1, 100, this.proj);
 		
 		return this.proj;
 	}
@@ -104,11 +105,11 @@ export class Camera
 	{
 		this.vangle += angle;
 		
-		if(this.vangle < -Math.PI / 2) {
-			this.vangle = -Math.PI / 2;
+		if(this.vangle < radians(-90)) {
+			this.vangle = radians(-90);
 		}
-		else if(this.vangle > Math.PI / 2) {
-			this.vangle = Math.PI / 2;
+		else if(this.vangle > radians(90)) {
+			this.vangle = radians(90);
 		}
 	}
 }

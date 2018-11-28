@@ -5,6 +5,7 @@ import {CHUNK_WIDTH} from "./chunk.js";
 import {Input} from "./input.js";
 import {Renderer} from "./renderer.js";
 import {Body} from "./body.js";
+import {radians} from "./math.js";
 import * as matrix from "./matrix.js";
 import * as vector3 from "./vector3.js";
 
@@ -139,8 +140,8 @@ display.onRender = () =>
 	renderer.drawWorld(world);
 	
 	if(blockHit) {
-		let r = Math.PI / 2;
-		let s = Math.PI;
+		let r = radians(90);
+		let s = radians(180);
 		let [x, y, z,  ax,ay,az] = [
 			[0, 0, 0,  0, 0, 0],
 			[1, 0, 0,  0, r, 0],
