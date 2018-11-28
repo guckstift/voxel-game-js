@@ -1,6 +1,6 @@
 export function noise1d(x, s)
 {
-	x *= 15485863;   // mult with 1000000. prime
+	x *= 15485863; // mult with 1000000. prime
 	x *= s || 1;
 	x ^= x >> 2;   // xor with r-shift with 1. prime
 	x ^= x << 5;   // xor with l-shift with 3. prime
@@ -14,8 +14,8 @@ export function noise1d(x, s)
 
 export function noise2d(x, y, s)
 {
-	x *= 15485863;   // mult with 1000000. prime
-	y *= 285058399;  // mult with 15485863. prime
+	x *= 15485863;  // mult with 1000000. prime
+	y *= 285058399; // mult with 15485863. prime
 	x += y;
 	x *= s || 1;
 	x ^= x >> 2;   // xor with r-shift with 1. prime

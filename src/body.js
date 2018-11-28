@@ -37,16 +37,14 @@ export class Body
 		let hit = world.boxcast(this.globoxmin, this.globoxmax, this.deltavel);
 		
 		for(let i = 0; i < 3 && hit; i ++) {
-			this.pos[hit.axis]  = hit.pos;
-			this.rest[hit.axis] = 1;
-			
 			if(hit.step > 0) {
-				this.pos[hit.axis] -= this.boxmax[hit.axis];
+				this.pos[hit.axis] = hit.pos - this.boxmax[hit.axis];
 			}
 			else {
-				this.pos[hit.axis] -= this.boxmin[hit.axis];
+				this.pos[hit.axis] = hit.pos - this.boxmin[hit.axis];
 			}
 			
+			this.rest[hit.axis]     = 1;
 			this.deltavel[hit.axis] = 0;
 			vel[hit.axis]           = 0;
 			

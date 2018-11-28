@@ -87,9 +87,12 @@ export class Chunk
 			for(let by = 0; by < CHUNK_WIDTH; by++) {
 				for(let bz = 0; bz < CHUNK_WIDTH; bz++) {
 					let i = getLinearBlockIndex(bx, by, bz);
+					let lx = bx + x * CHUNK_WIDTH;
+					let ly = by + y * CHUNK_WIDTH;
+					let lz = bz + z * CHUNK_WIDTH;
 					
-					if((bx + x * CHUNK_WIDTH + by + y * CHUNK_WIDTH) < 0) {
-						this.data[i] = noise3d(bx, by, bz, 0) * 4;
+					if(lx + ly < 0) {
+						this.data[i] = noise3d(lx, ly, lz, 0) * 4;
 					}
 					else {
 						this.data[i] = 0;
