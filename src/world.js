@@ -163,6 +163,7 @@ export class World
 	draw()
 	{
 		this.shader.use();
+		this.shader.uniformMatrix4fv("proj", this.camera.getProjection());
 		this.shader.uniform3fv("sun", sun.subarray(0, 3));
 		
 		for(let z in this.chunks) {

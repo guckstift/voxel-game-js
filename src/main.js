@@ -20,7 +20,7 @@ let gl = display.gl;
 
 world.touchChunk( 0, 0, 0);
 
-body.pos.set([8.5,4.5,8.5]);
+body.pos.set([8.5,-4.5,8.5]);
 body.acc[1] = -gravity;
 
 let container = document.createElement("div");
