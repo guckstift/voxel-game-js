@@ -1,5 +1,5 @@
 import * as matrix from "./matrix.js";
-import * as vector3 from "./vector3.js";
+import * as vector from "./vector.js";
 import {radians} from "./math.js";
 
 export class Camera
@@ -7,15 +7,15 @@ export class Camera
 	constructor(display)
 	{
 		this.display = display;
-		this.pos = vector3.create64();
+		this.pos = vector.create64();
 		this.hangle = 0;
 		this.vangle = 0;
 		this.proj = matrix.identity();
 		this.view = matrix.identity();
 		this.viewmodel = matrix.identity();
 		this.rota = matrix.identity();
-		this.forward = vector3.create();
-		this.dirvec = vector3.create();
+		this.forward = vector.create();
+		this.dirvec = vector.create();
 	}
 	
 	getProjection()
@@ -60,8 +60,8 @@ export class Camera
 	{
 		matrix.identity(this.rota);
 		matrix.rotateY(this.rota, -this.hangle, this.rota);
-		vector3.create(0, 0, speed, this.forward);
-		vector3.transform(this.forward, this.rota, this.forward);
+		vector.create(0, 0, speed, this.forward);
+		vector.transform(this.forward, this.rota, this.forward);
 		
 		return this.forward;
 	}
@@ -76,36 +76,36 @@ export class Camera
 	
 	getDirVec()
 	{
-		vector3.create(0, 0, 1, this.dirvec);
-		vector3.rotateX(this.dirvec, -this.vangle, this.dirvec);
-		vector3.rotateY(this.dirvec, -this.hangle, this.dirvec);
+		vector.create(0, 0, 1, this.dirvec);
+		vector.rotateX(this.dirvec, -this.vangle, this.dirvec);
+		vector.rotateY(this.dirvec, -this.hangle, this.dirvec);
 		
 		return this.dirvec;
 	}
 	
 	setPos(pos)
 	{
-		vector3.copy(pos, this.pos);
+		vector.copy(pos, this.pos);
 	}
 	
 	moveForward(speed)
 	{
-		vector3.add(this.pos, this.getForward(speed), this.pos);
+		vector.add(this.pos, this.getForward(speed), this.pos);
 	}
 	
 	moveBackward(speed)
 	{
-		vector3.add(this.pos, this.getForward(-speed), this.pos);
+		vector.add(this.pos, this.getForward(-speed), this.pos);
 	}
 	
 	moveLeft(speed)
 	{
-		vector3.add(this.pos, this.getLeftward(speed), this.pos);
+		vector.add(this.pos, this.getLeftward(speed), this.pos);
 	}
 	
 	moveRight(speed)
 	{
-		vector3.add(this.pos, this.getLeftward(-speed), this.pos);
+		vector.add(this.pos, this.getLeftward(-speed), this.pos);
 	}
 	
 	moveUp(speed)

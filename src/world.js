@@ -2,12 +2,12 @@ import {Chunk, CHUNK_WIDTH, vertSrc, fragSrc} from "./chunk.js";
 import {raycast} from "./raycast.js";
 import {boxcast} from "./boxcast.js";
 import {radians} from "./math.js";
-import * as vector3 from "./vector3.js";
+import * as vector from "./vector.js";
 
-let sun = vector3.create(0, -1, 0);
+let sun = vector.create(0, -1, 0);
 
-vector3.rotateX(sun, radians(-30), sun);
-vector3.rotateY(sun, radians(-30), sun);
+vector.rotateX(sun, radians(-30), sun);
+vector.rotateY(sun, radians(-30), sun);
 
 function getChunkPos(x, y, z)
 {
@@ -132,8 +132,8 @@ export class World
 		if(hit) {
 			let isec = hit.hitpos;
 			let blockpos = hit.voxpos;
-			let sqdist = vector3.squareDist(pos, isec);
-			let dist = vector3.dist(pos, isec);
+			let sqdist = vector.squareDist(pos, isec);
+			let dist = vector.dist(pos, isec);
 			let axis = hit.axis;
 			
 			let faceid = (

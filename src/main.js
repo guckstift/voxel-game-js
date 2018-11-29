@@ -6,7 +6,6 @@ import {Input} from "./input.js";
 import {Body} from "./body.js";
 import {radians} from "./math.js";
 import * as matrix from "./matrix.js";
-import * as vector3 from "./vector3.js";
 
 const runspeed  = 3;
 const jumpspeed = 6.5;

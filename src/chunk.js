@@ -1,5 +1,5 @@
 import * as matrix from "./matrix.js";
-import * as vector3 from "./vector3.js";
+import * as vector from "./vector.js";
 import {noise3d} from "./noise.js";
 import {radians} from "./math.js";
 
@@ -281,8 +281,8 @@ function createQuad(x, y, z, ax, ay, az, slot, faceid, out = new Float32Array(RA
 		let t = v.subarray(4);
 		
 		v.set(front.subarray(o, o + RAW_VERT_SIZE));
-		vector3.transform(v, m, v);
-		vector3.round(v, v);
+		vector.transform(v, m, v);
+		vector.round(v, v);
 		t[0] = (sx + t[0]) / 16;
 		t[1] = (sy + t[1]) / 16;
 		t[2] = faceid;

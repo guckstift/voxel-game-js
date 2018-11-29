@@ -1,15 +1,15 @@
-import * as vector3 from "./vector3.js";
+import * as vector from "./vector.js";
 
 let sqrt  = Math.sqrt;
 let floor = Math.floor;
 let ceil  = Math.ceil;
 let abs   = Math.abs;
 
-let dir      = vector3.create64();
-let voxpos   = vector3.create64();
-let step     = vector3.create64();
-let waydelta = vector3.create64();
-let waynext  = vector3.create64();
+let dir      = vector.create64();
+let voxpos   = vector.create64();
+let step     = vector.create64();
+let waydelta = vector.create64();
+let waynext  = vector.create64();
 
 export function raycast(start, vec, getvox)
 {

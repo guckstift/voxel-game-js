@@ -1,34 +1,34 @@
-import * as vector3 from "./vector3.js";
+import * as vector from "./vector.js";
 
 export class Body
 {
 	constructor(
 		world,
-		boxmin = vector3.create(-0.25, -0.25, -0.25),
-		boxmax = vector3.create( 0.25,  0.25,  0.25)
+		boxmin = vector.create(-0.25, -0.25, -0.25),
+		boxmax = vector.create( 0.25,  0.25,  0.25)
 	) {
 		this.world = world;
 		this.boxmin = boxmin;
 		this.boxmax = boxmax;
 		
-		this.pos  = vector3.create64();
-		this.vel  = vector3.create();
-		this.acc  = vector3.create();
+		this.pos  = vector.create64();
+		this.vel  = vector.create();
+		this.acc  = vector.create();
 		this.rest = new Uint8Array(3);
 		
-		this.deltavel  = vector3.create();
-		this.globoxmin = vector3.create64();
-		this.globoxmax = vector3.create64();
+		this.deltavel  = vector.create();
+		this.globoxmin = vector.create64();
+		this.globoxmax = vector.create64();
 	}
 	
 	accelerate(acc, delta)
 	{
-		vector3.addScaled(this.vel, acc, delta, this.vel);
+		vector.addScaled(this.vel, acc, delta, this.vel);
 	}
 	
 	move(vel, delta)
 	{
-		vector3.scale(vel, delta, this.deltavel);
+		vector.scale(vel, delta, this.deltavel);
 		this.updateBox();
 		this.rest[0] = 0;
 		this.rest[1] = 0;
@@ -53,7 +53,7 @@ export class Body
 			hit = world.boxcast(this.globoxmin, this.globoxmax, this.deltavel);
 		}
 		
-		vector3.add(this.pos, this.deltavel, this.pos);
+		vector.add(this.pos, this.deltavel, this.pos);
 	}
 	
 	update(delta)
@@ -64,7 +64,7 @@ export class Body
 	
 	updateBox()
 	{
-		vector3.add(this.pos, this.boxmin, this.globoxmin);
-		vector3.add(this.pos, this.boxmax, this.globoxmax);
+		vector.add(this.pos, this.boxmin, this.globoxmin);
+		vector.add(this.pos, this.boxmax, this.globoxmax);
 	}
 }
