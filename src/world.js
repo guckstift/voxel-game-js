@@ -2,6 +2,7 @@ import {Chunk, CHUNK_WIDTH, vertSrc, fragSrc} from "./chunk.js";
 import {raycast} from "./raycast.js";
 import {boxcast} from "./boxcast.js";
 import {radians} from "./math.js";
+import {NoiseField} from "./noisefield.js";
 import * as vector from "./vector.js";
 
 let sun = vector.create(0, -1, 0);
@@ -35,6 +36,7 @@ export class World
 	{
 		this.solidVoxel = this.solidVoxel.bind(this);
 		this.getBlock = this.getBlock.bind(this);
+		this.noise = new NoiseField();
 		this.display = display;
 		this.camera = camera;
 		this.shader = display.getShader("chunk", vertSrc, fragSrc);
@@ -63,7 +65,7 @@ export class World
 		let column = slice[y];
 		
 		if(!column[x]) {
-			column[x] = new Chunk(x, y, z, this.display, this.camera);
+			column[x] = new Chunk(x, y, z, this.display, this.camera, this.noise);
 		}
 	}
 	
@@ -135,6 +137,7 @@ export class World
 			let sqdist = vector.squareDist(pos, isec);
 			let dist = vector.dist(pos, isec);
 			let axis = hit.axis;
+			let normal = hit.normal;
 			
 			let faceid = (
 				hit.normal[0] > 0 ? 1 :
@@ -146,7 +149,7 @@ export class World
 				0
 			);
 			
-			return {isec, blockpos, sqdist, dist, faceid, axis};
+			return {isec, blockpos, sqdist, dist, faceid, axis, normal};
 		}
 	}
 	

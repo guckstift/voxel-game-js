@@ -42,7 +42,7 @@ export class Input
 
 		target.onmousedown = e => {
 			if(this.panning) {
-				this.onClick();
+				this.onClick(e);
 			}
 			else {
 				target.requestPointerLock();

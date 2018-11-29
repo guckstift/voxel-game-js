@@ -19,7 +19,7 @@ let gl = display.gl;
 
 world.touchChunk( 0, 0, 0);
 
-body.pos.set([8.5,-4.5,8.5]);
+body.pos.set([8, 8, 8]);
 body.acc[1] = -gravity;
 
 let container = document.createElement("div");
@@ -179,7 +179,17 @@ input.onMove = e =>
 input.onClick = e =>
 {
 	if(blockHit) {
-		world.setBlock(...blockHit.blockpos, 0);
+		if(e.button === 0) {
+			world.setBlock(...blockHit.blockpos, 0);
+		}
+		else if(e.button === 2) {
+			world.setBlock(
+				blockHit.blockpos[0] + blockHit.normal[0],
+				blockHit.blockpos[1] + blockHit.normal[1],
+				blockHit.blockpos[2] + blockHit.normal[2],
+				1
+			);
+		}
 	}
 };
 

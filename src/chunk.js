@@ -68,7 +68,7 @@ function getLinearBlockIndex(x, y, z)
 
 export class Chunk
 {
-	constructor(x, y, z, display, camera)
+	constructor(x, y, z, display, camera, noise)
 	{
 		this.x = x;
 		this.y = y;
@@ -90,9 +90,10 @@ export class Chunk
 					let lx = bx + x * CHUNK_WIDTH;
 					let ly = by + y * CHUNK_WIDTH;
 					let lz = bz + z * CHUNK_WIDTH;
+					let h = this.data[i] = noise.sample(lx / 4, 0, lz / 4) * 8;
 					
-					if(lx + ly < 0) {
-						this.data[i] = noise3d(lx, ly, lz, 0) * 4;
+					if(ly < h) {
+						this.data[i] = noise.sample(lx / 4, ly / 4, lz / 4) * 3 + 1;
 					}
 					else {
 						this.data[i] = 0;
