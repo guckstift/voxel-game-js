@@ -36,7 +36,7 @@ export class World
 	{
 		this.solidVoxel = this.solidVoxel.bind(this);
 		this.getBlock = this.getBlock.bind(this);
-		this.noise = new NoiseField();
+		this.noise = new NoiseField(0, 8, 8);
 		this.display = display;
 		this.camera = camera;
 		this.shader = display.getShader("chunk", vertSrc, fragSrc);

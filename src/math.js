@@ -22,7 +22,11 @@ export function smoothMix(a, b, x)
 
 export function smoothMix2d(aa, ba, ab, bb, x, y)
 {
-	return smoothMix(smoothMix(aa, ba, x), smoothMix(ab, bb, x), y);
+	return smoothMix(
+		smoothMix(aa, ba, x),
+		smoothMix(ab, bb, x),
+		y,
+	);
 }
 
 export function smoothMix3d(aaa, baa, aba, bba, aab, bab, abb, bbb, x, y, z)

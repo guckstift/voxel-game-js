@@ -40,7 +40,7 @@ export let vertSrc = `
 			faceid == 5.0 ? vec3(0, -1, 0) :
 			vec3(0,0,0);
 		
-		vCoef = 0.5 + max(0.0, dot(normal, -sun)) * 0.5;
+		vCoef = 0.25 + max(0.0, dot(normal, -sun)) * 0.75;
 	}
 `;
 
@@ -90,10 +90,10 @@ export class Chunk
 					let lx = bx + x * CHUNK_WIDTH;
 					let ly = by + y * CHUNK_WIDTH;
 					let lz = bz + z * CHUNK_WIDTH;
-					let h = this.data[i] = noise.sample(lx / 4, 0, lz / 4) * 8;
+					let h = this.data[i] = noise.sample(lx, 0, lz);
 					
 					if(ly < h) {
-						this.data[i] = noise.sample(lx / 4, ly / 4, lz / 4) * 3 + 1;
+						this.data[i] = noise.sample(lx, ly, lz) * 3 / 8 + 1;
 					}
 					else {
 						this.data[i] = 0;

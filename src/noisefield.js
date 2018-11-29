@@ -4,14 +4,20 @@ import {smoothMix3d} from "./math.js";
 
 export class NoiseField
 {
-	constructor(seed = 0)
+	constructor(seed = 0, amp = 1, scale = 1)
 	{
 		this.seed = seed;
-		this.samples = new Field((x, y, z) => noise3d(x, y, z, this.seed));
+		this.amp = amp;
+		this.invscale = 1 / scale;
+		this.samples = new Field((x, y, z) => this.amp * noise3d(x, y, z, this.seed));
 	}
 	
 	sample(x, y, z)
 	{
+		x *= this.invscale;
+		y *= this.invscale;
+		z *= this.invscale;
+		
 		let ix  = Math.floor(x);
 		let iy  = Math.floor(y);
 		let iz  = Math.floor(z);
