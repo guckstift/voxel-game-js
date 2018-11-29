@@ -7,11 +7,12 @@ export class Camera
 	constructor(display)
 	{
 		this.display = display;
-		this.pos = vector3.create();
+		this.pos = vector3.create64();
 		this.hangle = 0;
 		this.vangle = 0;
 		this.proj = matrix.identity();
 		this.view = matrix.identity();
+		this.viewmodel = matrix.identity();
 		this.rota = matrix.identity();
 		this.forward = vector3.create();
 		this.dirvec = vector3.create();
@@ -32,6 +33,27 @@ export class Camera
 		matrix.translate(this.rota, -this.pos[0], -this.pos[1], -this.pos[2], this.view);
 		
 		return this.view;
+	}
+	
+	getViewModel(modelx, modely, modelz, ax = 0, ay = 0, az = 0)
+	{
+		matrix.identity(this.rota);
+		matrix.rotateX(this.rota, this.vangle, this.rota);
+		matrix.rotateY(this.rota, this.hangle, this.rota);
+		
+		matrix.translate(
+			this.rota,
+			modelx - this.pos[0],
+			modely - this.pos[1],
+			modelz - this.pos[2],
+			this.viewmodel
+		);
+		
+		matrix.rotateX(this.viewmodel, ax, this.viewmodel);
+		matrix.rotateY(this.viewmodel, ay, this.viewmodel);
+		matrix.rotateZ(this.viewmodel, az, this.viewmodel);
+		
+		return this.viewmodel;
 	}
 	
 	getForward(speed)

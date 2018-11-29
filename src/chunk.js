@@ -15,8 +15,7 @@ export const BLOCK_SIZE = BLOCK_FACES * FACE_SIZE;
 
 export let vertSrc = `
 	uniform mat4 proj;
-	uniform mat4 view;
-	uniform mat4 model;
+	uniform mat4 viewmodel;
 	uniform vec3 sun;
 
 	attribute vec3 pos;
@@ -28,7 +27,7 @@ export let vertSrc = `
 
 	void main()
 	{
-		gl_Position = proj * view * model * vec4(pos, 1.0);
+		gl_Position = proj * viewmodel * vec4(pos, 1.0);
 
 		vTexcoord = texcoord / 16.0;
 		
@@ -69,12 +68,13 @@ function getLinearBlockIndex(x, y, z)
 
 export class Chunk
 {
-	constructor(x, y, z, display)
+	constructor(x, y, z, display, camera)
 	{
 		this.x = x;
 		this.y = y;
 		this.z = z;
 		this.display = display;
+		this.camera = camera;
 		this.meshsize = 0;
 		this.vertnum = 0;
 		this.data = new Uint8Array(CHUNK_WIDTH ** 3);
@@ -184,20 +184,18 @@ export class Chunk
 			this.drawTriangles(
 				this.buf, this.vertnum,
 				this.x * CHUNK_WIDTH, this.y * CHUNK_WIDTH, this.z * CHUNK_WIDTH,
-				0, this.atlas
+				this.atlas
 			);
 		}
 	}
 
-	drawTriangles(buf, vertnum, x, y, z, a, tex)
+	drawTriangles(buf, vertnum, x, y, z, tex)
 	{
 		let gl = this.display.gl;
 		
 		matrix.translation(x, y, z, model);
-		matrix.rotateX(model, a, model);
-		matrix.rotateY(model, a, model);
 		
-		this.shader.uniformMatrix4fv("model", model);
+		this.shader.uniformMatrix4fv("viewmodel", this.camera.getViewModel(x, y, z));
 		this.shader.uniformTex("tex", tex, 0);
 		
 		this.shader.vertexAttrib("pos",      buf, 3, true, VERT_SIZE, 0);

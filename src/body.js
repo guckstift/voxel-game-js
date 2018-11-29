@@ -11,14 +11,14 @@ export class Body
 		this.boxmin = boxmin;
 		this.boxmax = boxmax;
 		
-		this.pos  = vector3.create();
+		this.pos  = vector3.create64();
 		this.vel  = vector3.create();
 		this.acc  = vector3.create();
 		this.rest = new Uint8Array(3);
 		
 		this.deltavel  = vector3.create();
-		this.globoxmin = vector3.create();
-		this.globoxmax = vector3.create();
+		this.globoxmin = vector3.create64();
+		this.globoxmax = vector3.create64();
 	}
 	
 	accelerate(acc, delta)

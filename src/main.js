@@ -80,13 +80,12 @@ let selector = display.createStaticFloatBuffer([
 ]);
 
 let selectorShader = display.createShader(`
-	uniform mat4 model;
 	uniform mat4 proj;
-	uniform mat4 view;
+	uniform mat4 viewmodel;
 	attribute vec3 pos;
 	void main()
 	{
-		gl_Position = proj * view * model * vec4(pos, 1.0);
+		gl_Position = proj * viewmodel * vec4(pos, 1.0);
 	}
 `,`
 	precision highp float;
@@ -95,8 +94,6 @@ let selectorShader = display.createShader(`
 		gl_FragColor = vec4(1.0, 1.0, 1.0, 0.25);
 	}
 `);
-
-let selectorMat = matrix.identity();
 
 display.onRender = () =>
 {
@@ -147,25 +144,17 @@ display.onRender = () =>
 			[0, 1, 0,  r, 0, 0],
 			[0, 0, 1, -r, 0, 0],
 		][blockHit.faceid];
-	
-		matrix.identity(selectorMat);
 		
-		matrix.translate(
-			selectorMat,
+		selectorShader.use();
+		selectorShader.uniformMatrix4fv("proj", camera.getProjection());
+		
+		selectorShader.uniformMatrix4fv("viewmodel", camera.getViewModel(
 			x + blockHit.blockpos[0],
 			y + blockHit.blockpos[1],
 			z + blockHit.blockpos[2],
-			selectorMat
-		);
+			ax, ay, az,
+		));
 		
-		matrix.rotateX(selectorMat, ax, selectorMat);
-		matrix.rotateY(selectorMat, ay, selectorMat);
-		matrix.rotateZ(selectorMat, az, selectorMat);
-	
-		selectorShader.use();
-		selectorShader.uniformMatrix4fv("proj", camera.getProjection());
-		selectorShader.uniformMatrix4fv("view", camera.getView());
-		selectorShader.uniformMatrix4fv("model", selectorMat);
 		selectorShader.vertexAttrib("pos", selector, 3);
 		gl.drawArrays(gl.TRIANGLES, 0, 6);
 	}

@@ -63,7 +63,7 @@ export class World
 		let column = slice[y];
 		
 		if(!column[x]) {
-			column[x] = new Chunk(x, y, z, this.display);
+			column[x] = new Chunk(x, y, z, this.display, this.camera);
 		}
 	}
 	
@@ -163,8 +163,6 @@ export class World
 	draw()
 	{
 		this.shader.use();
-		this.shader.uniformMatrix4fv("proj", this.camera.getProjection());
-		this.shader.uniformMatrix4fv("view", this.camera.getView());
 		this.shader.uniform3fv("sun", sun.subarray(0, 3));
 		
 		for(let z in this.chunks) {

@@ -7,6 +7,15 @@ export function create(x = 0, y = 0, z = 0, out = new Float32Array(3))
 	return out;
 }
 
+export function create64(x = 0, y = 0, z = 0, out = new Float64Array(3))
+{
+	out[0] = x;
+	out[1] = y;
+	out[2] = z;
+	
+	return out;
+}
+
 export function copy(src, out = new Float32Array(3))
 {
 	out[0] = src[0];

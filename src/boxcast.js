@@ -1,16 +1,18 @@
+import * as vector3 from "./vector3.js";
+
 let sqrt  = Math.sqrt;
 let floor = Math.floor;
 let ceil  = Math.ceil;
 let abs   = Math.abs;
 
-let dir      = new Float32Array(3);
-let lead     = new Float32Array(3);
-let voxpos   = new Float32Array(3);
-let leadvox  = new Float32Array(3);
-let trailvox = new Float32Array(3);
-let step     = new Float32Array(3);
-let waydelta = new Float32Array(3);
-let waynext  = new Float32Array(3);
+let dir      = vector3.create64();
+let lead     = vector3.create64();
+let voxpos   = vector3.create64();
+let leadvox  = vector3.create64();
+let trailvox = vector3.create64();
+let step     = vector3.create64();
+let waydelta = vector3.create64();
+let waynext  = vector3.create64();
 
 export function boxcast(boxmin, boxmax, vec, getvox)
 {
