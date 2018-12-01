@@ -1,10 +1,12 @@
 import {Display} from "./display.js";
+import {Gui} from "./gui.js";
 import {Camera} from "./camera.js";
 import {World} from "./world.js";
 import {CHUNK_WIDTH} from "./chunk.js";
 import {Input} from "./input.js";
 import {Body} from "./body.js";
 import {radians} from "./math.js";
+import {blocks} from "./blocks.js";
 import * as matrix from "./matrix.js";
 
 const runspeed  = 3;
@@ -12,35 +14,14 @@ const jumpspeed = 6.5;
 const gravity   = 20;
 
 let display = new Display();
+let gui = new Gui(display);
 let camera = new Camera(display);
 let world = new World(display, camera);
 let body = new Body(world, [-0.25, 0, -0.25], [0.25, 1.75, 0.25]);
-let gl = display.gl;
-
-world.touchChunk( 0, 0, 0);
-
-body.pos.set([8, 8, 8]);
-body.acc[1] = -gravity;
-
-let container = document.createElement("div");
-let crosshairs = document.createElement("img");
-
-crosshairs.src = "gfx/crosshairs.png";
-crosshairs.style.position = "absolute";
-crosshairs.style.left = "50%";
-crosshairs.style.top = "50%";
-crosshairs.style.transform = "translateX(-50%) translateY(-50%)";
-display.canvas.style.display = "block";
-container.style.display = "inline-block";
-container.style.position = "absolute";
-container.style.left = "0";
-container.style.top = "0";
-container.appendChild(display.canvas);
-container.appendChild(crosshairs);
-document.body.appendChild(container);
-
-let input = new Input(container);
+let input = new Input(gui.container);
 let blockHit = null;
+let gl = display.gl;
+let selected = 1;
 
 let axis = display.createStaticByteBuffer([
 	0,0,0, 1,0,0,
@@ -93,6 +74,15 @@ let selectorShader = display.createShader(`
 		gl_FragColor = vec4(1.0, 1.0, 1.0, 0.25);
 	}
 `);
+
+document.body.appendChild(gui.container);
+
+world.touchChunk( 0, 0, 0);
+
+body.pos.set([8, 8, 8]);
+body.acc[1] = -gravity;
+
+gui.blockSelector.setFrame(blocks[selected].faces[0], 0);
 
 display.onRender = () =>
 {
@@ -187,10 +177,20 @@ input.onClick = e =>
 				blockHit.blockpos[0] + blockHit.normal[0],
 				blockHit.blockpos[1] + blockHit.normal[1],
 				blockHit.blockpos[2] + blockHit.normal[2],
-				1
+				selected,
 			);
 		}
 	}
+};
+
+input.onWheelUp = e => {
+	selected = (selected - 1 + blocks.length) % blocks.length || blocks.length - 1;
+	gui.blockSelector.setFrame(blocks[selected].faces[0], 0);
+};
+
+input.onWheelDown = e => {
+	selected = (selected + 1) % blocks.length || 1;
+	gui.blockSelector.setFrame(blocks[selected].faces[0], 0);
 };
 
 input.onResize = e =>

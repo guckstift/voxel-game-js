@@ -2,6 +2,7 @@ import * as matrix from "./matrix.js";
 import * as vector from "./vector.js";
 import {noise3d} from "./noise.js";
 import {radians} from "./math.js";
+import {blocks} from "./blocks.js";
 
 export const RAW_VERT_SIZE = 7;
 export const VERT_SIZE = 6;
@@ -108,12 +109,25 @@ export class Chunk
 	getBlock(x, y, z)
 	{
 		if(x < 0 || y < 0 || z < 0 || x >= CHUNK_WIDTH || y >= CHUNK_WIDTH || z >= CHUNK_WIDTH) {
-			return null;
+			return blocks[0];
 		}
 		
 		let i = getLinearBlockIndex(x, y, z);
 		let t = this.data[i];
 		let block = blocks[t];
+		
+		return block;
+	}
+	
+	getBlockVerts(x, y, z)
+	{
+		if(x < 0 || y < 0 || z < 0 || x >= CHUNK_WIDTH || y >= CHUNK_WIDTH || z >= CHUNK_WIDTH) {
+			return null;
+		}
+		
+		let i = getLinearBlockIndex(x, y, z);
+		let t = this.data[i];
+		let block = blockverts[t];
 		
 		return block;
 	}
@@ -140,7 +154,7 @@ export class Chunk
 		for(let z=0; z < CHUNK_WIDTH; z++) {
 			for(let y=0; y < CHUNK_WIDTH; y++) {
 				for(let x=0; x < CHUNK_WIDTH; x++) {
-					let block = this.getBlock(x, y, z);
+					let block = this.getBlockVerts(x, y, z);
 			
 					if(block) {
 						this.addFaceIfVisible(block, x,y,z,  0, 0,-1, 0); // front
@@ -160,7 +174,7 @@ export class Chunk
 	
 	addFaceIfVisible(block, x, y, z, ax, ay, az, faceid)
 	{
-		if(!this.getBlock(x + ax, y + ay, z + az)) {
+		if(this.getBlock(x + ax, y + ay, z + az).type === 0) {
 			let target = this.mesh.subarray(this.meshsize);
 			let face = block.subarray(FACE_SIZE * faceid, FACE_SIZE * (faceid + 1));
 
@@ -292,9 +306,11 @@ function createQuad(x, y, z, ax, ay, az, slot, faceid, out = new Float32Array(RA
 	return out;
 }
 
-let blocks = [
-	null, // air
-	createByteCube([2, 2, 2, 2, 0, 1]), // grass
-	createByteCube([3, 3, 3, 3, 3, 3]), // stone
-	createByteCube([1, 1, 1, 1, 1, 1]), // dirt
-];
+let blockverts = blocks.map(block => {
+	if(block.type > 0) {
+		return createByteCube(block.faces);
+	}
+	else {
+		return null;
+	}
+});

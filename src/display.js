@@ -7,7 +7,9 @@ export class Display
 	{
 		let canvas = document.createElement("canvas");
 		let gl = canvas.getContext("webgl", {alpha: false, antialias: false});
-
+		
+		canvas.style.display = "block";
+		
 		gl.enable(gl.BLEND);
 		gl.enable(gl.CULL_FACE);
 		gl.enable(gl.DEPTH_TEST);

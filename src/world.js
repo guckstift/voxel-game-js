@@ -3,6 +3,7 @@ import {raycast} from "./raycast.js";
 import {boxcast} from "./boxcast.js";
 import {radians} from "./math.js";
 import {NoiseField} from "./noisefield.js";
+import {blocks} from "./blocks.js";
 import * as vector from "./vector.js";
 
 let sun = vector.create(0, -1, 0);
@@ -97,7 +98,7 @@ export class World
 		let chunk = this.getChunk(...chunkPos);
 		
 		if(!chunk) {
-			return null;
+			return blocks[0];
 		}
 		
 		return chunk.getBlock(...localPos);
@@ -105,7 +106,7 @@ export class World
 	
 	solidVoxel(p)
 	{
-		return !!this.getBlock(...p);
+		return this.getBlock(...p).type > 0;
 	}
 	
 	setBlock(x, y, z, t)
