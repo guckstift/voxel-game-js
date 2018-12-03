@@ -3,6 +3,7 @@ import {raycast} from "./raycast.js";
 import {boxcast} from "./boxcast.js";
 import {radians} from "./math.js";
 import {NoiseField} from "./noisefield.js";
+import {Store} from "./store.js";
 import {blocks} from "./blocks.js";
 import * as vector from "./vector.js";
 
@@ -38,6 +39,7 @@ export class World
 		this.solidVoxel = this.solidVoxel.bind(this);
 		this.getBlock = this.getBlock.bind(this);
 		this.noise = new NoiseField(0, 8, 8);
+		this.store = new Store();
 		this.display = display;
 		this.camera = camera;
 		this.shader = display.getShader("chunk", vertSrc, fragSrc);
@@ -66,7 +68,7 @@ export class World
 		let column = slice[y];
 		
 		if(!column[x]) {
-			column[x] = new Chunk(x, y, z, this.display, this.camera, this.noise);
+			column[x] = new Chunk(x, y, z, this.display, this.camera, this.noise, this.store);
 		}
 	}
 	

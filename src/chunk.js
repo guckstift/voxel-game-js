@@ -69,13 +69,14 @@ function getLinearBlockIndex(x, y, z)
 
 export class Chunk
 {
-	constructor(x, y, z, display, camera, noise)
+	constructor(x, y, z, display, camera, noise, store)
 	{
 		this.x = x;
 		this.y = y;
 		this.z = z;
 		this.display = display;
 		this.camera = camera;
+		this.store = store;
 		this.meshsize = 0;
 		this.vertnum = 0;
 		this.data = new Uint8Array(CHUNK_WIDTH ** 3);
@@ -84,26 +85,36 @@ export class Chunk
 		this.shader = display.getShader("chunk", vertSrc, fragSrc);
 		this.atlas = display.getTexture("gfx/atlas.png");
 		
-		for(let bx = 0; bx < CHUNK_WIDTH; bx++) {
-			for(let by = 0; by < CHUNK_WIDTH; by++) {
-				for(let bz = 0; bz < CHUNK_WIDTH; bz++) {
-					let i = getLinearBlockIndex(bx, by, bz);
-					let lx = bx + x * CHUNK_WIDTH;
-					let ly = by + y * CHUNK_WIDTH;
-					let lz = bz + z * CHUNK_WIDTH;
-					let h = this.data[i] = noise.sample(lx, 0, lz);
+		store.loadChunk(
+			x, y, z,
+			chunk => {
+				this.data = chunk.data;
+				this.updateMesh();
+			},
+			() => {
+		
+				for(let bx = 0; bx < CHUNK_WIDTH; bx++) {
+					for(let by = 0; by < CHUNK_WIDTH; by++) {
+						for(let bz = 0; bz < CHUNK_WIDTH; bz++) {
+							let i = getLinearBlockIndex(bx, by, bz);
+							let lx = bx + x * CHUNK_WIDTH;
+							let ly = by + y * CHUNK_WIDTH;
+							let lz = bz + z * CHUNK_WIDTH;
+							let h = this.data[i] = noise.sample(lx, 0, lz);
 					
-					if(ly < h) {
-						this.data[i] = noise.sample(lx, ly, lz) * 3 / 8 + 1;
-					}
-					else {
-						this.data[i] = 0;
+							if(ly < h) {
+								this.data[i] = noise.sample(lx, ly, lz) * 3 / 8 + 1;
+							}
+							else {
+								this.data[i] = 0;
+							}
+						}
 					}
 				}
-			}
-		}
-		
-		this.updateMesh();
+				
+				this.updateMesh();
+			},
+		);
 	}
 	
 	getBlock(x, y, z)
@@ -142,6 +153,7 @@ export class Chunk
 		
 		this.data[i] = t;
 		this.updateMesh();
+		this.store.storeChunk(this);
 	}
 	
 	updateMesh()
