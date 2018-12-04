@@ -1,4 +1,4 @@
-# blockweb
+# BlockWeb
 
 Nothing to see here! This ist just another Minecraft clone made with JavaScript und WebGL. No
 third-party libraries are needed, all ist written completely from scratch.
