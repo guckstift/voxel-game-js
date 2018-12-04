@@ -86,6 +86,11 @@ export class Shader
 		this.gl.uniform3fv(this.getUniform(name), value);
 	}
 	
+	uniformMatrix3fv(name, value)
+	{
+		this.gl.uniformMatrix3fv(this.getUniform(name), false, value);
+	}
+	
 	uniformMatrix4fv(name, value)
 	{
 		this.gl.uniformMatrix4fv(this.getUniform(name), false, value);

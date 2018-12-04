@@ -5,9 +5,9 @@ import {World} from "./world.js";
 import {CHUNK_WIDTH} from "./chunk.js";
 import {Input} from "./input.js";
 import {Body} from "./body.js";
-import {radians} from "./math.js";
 import {blocks} from "./blocks.js";
 import * as matrix from "./matrix.js";
+import {radians} from "./math.js";
 
 const runspeed  = 4;
 const jumpspeed = 6.5;
@@ -93,6 +93,7 @@ let cuboid = display.createStaticFloatBuffer([
 		12/64,20/64, 4/64, 12/64,
 		56/64, 8/64, 4/64,  4/64,
 		56/64,12/64, 4/64,  4/64,
+		3,
 	), // left leg
 	
 	...createCuboid(
@@ -103,6 +104,7 @@ let cuboid = display.createStaticFloatBuffer([
 		28/64,20/64, 4/64, 12/64,
 		60/64, 8/64, 4/64,  4/64,
 		60/64,12/64, 4/64,  4/64,
+		4,
 	), // right leg
 	
 	...createCuboid(
@@ -113,6 +115,7 @@ let cuboid = display.createStaticFloatBuffer([
 		20/64, 8/64, 4/64, 12/64,
 		48/64, 0/64, 8/64,  4/64,
 		48/64, 4/64, 8/64,  4/64,
+		0,
 	), // upper body
 	
 	...createCuboid(
@@ -123,6 +126,7 @@ let cuboid = display.createStaticFloatBuffer([
 		24/64, 0/64, 8/64, 8/64,
 		32/64, 0/64, 8/64, 8/64,
 		40/64, 0/64, 8/64, 8/64,
+		0,
 	), // head
 	
 	...createCuboid(
@@ -133,6 +137,7 @@ let cuboid = display.createStaticFloatBuffer([
 		36/64, 8/64, 4/64, 12/64,
 		56/64, 0/64, 4/64,  4/64,
 		56/64, 4/64, 4/64,  4/64,
+		1,
 	), // left arm
 	
 	...createCuboid(
@@ -143,6 +148,7 @@ let cuboid = display.createStaticFloatBuffer([
 		52/64, 8/64, 4/64, 12/64,
 		60/64, 0/64, 4/64,  4/64,
 		60/64, 4/64, 4/64,  4/64,
+		2,
 	), // right arm
 ]);
 
@@ -154,38 +160,52 @@ function createCuboid(
 	u3, v3, w3, h3,
 	u4, v4, w4, h4,
 	u5, v5, w5, h5,
+	bone,
 ) {
 	return [
-		x0,y0,z0, u0   ,v0+h0,  x1,y0,z0, u0+w0,v0+h0,  x0,y1,z0, u0   ,v0,
-		x0,y1,z0, u0   ,v0,     x1,y0,z0, u0+w0,v0+h0,  x1,y1,z0, u0+w0,v0,
+		x0,y0,z0, u0   ,v0+h0, bone,  x1,y0,z0, u0+w0,v0+h0, bone,  x0,y1,z0, u0   ,v0, bone,
+		x0,y1,z0, u0   ,v0,    bone,  x1,y0,z0, u0+w0,v0+h0, bone,  x1,y1,z0, u0+w0,v0, bone,
 	
-		x1,y0,z0, u1   ,v1+h1,  x1,y0,z1, u1+w1,v1+h1,  x1,y1,z0, u1   ,v1,
-		x1,y1,z0, u1   ,v1,     x1,y0,z1, u1+w1,v1+h1,  x1,y1,z1, u1+w1,v1,
+		x1,y0,z0, u1   ,v1+h1, bone,  x1,y0,z1, u1+w1,v1+h1, bone,  x1,y1,z0, u1   ,v1, bone,
+		x1,y1,z0, u1   ,v1,    bone,  x1,y0,z1, u1+w1,v1+h1, bone,  x1,y1,z1, u1+w1,v1, bone,
 	
-		x1,y0,z1, u2   ,v2+h2,  x0,y0,z1, u2+w2,v2+h2,  x1,y1,z1, u2   ,v2,
-		x1,y1,z1, u2   ,v2,     x0,y0,z1, u2+w2,v2+h2,  x0,y1,z1, u2+w2,v2,
+		x1,y0,z1, u2   ,v2+h2, bone,  x0,y0,z1, u2+w2,v2+h2, bone,  x1,y1,z1, u2   ,v2, bone,
+		x1,y1,z1, u2   ,v2,    bone,  x0,y0,z1, u2+w2,v2+h2, bone,  x0,y1,z1, u2+w2,v2, bone,
 	
-		x0,y0,z1, u3   ,v3+h3,  x0,y0,z0, u3+w3,v3+h3,  x0,y1,z1, u3   ,v3,
-		x0,y1,z1, u3   ,v3,     x0,y0,z0, u3+w3,v3+h3,  x0,y1,z0, u3+w3,v3,
+		x0,y0,z1, u3   ,v3+h3, bone,  x0,y0,z0, u3+w3,v3+h3, bone,  x0,y1,z1, u3   ,v3, bone,
+		x0,y1,z1, u3   ,v3,    bone,  x0,y0,z0, u3+w3,v3+h3, bone,  x0,y1,z0, u3+w3,v3, bone,
 	
-		x0,y1,z0, u4   ,v4+h4,  x1,y1,z0, u4+w4,v4+h4,  x0,y1,z1, u4   ,v4,
-		x0,y1,z1, u4   ,v4,     x1,y1,z0, u4+w4,v4+h4,  x1,y1,z1, u4+w4,v4,
+		x0,y1,z0, u4   ,v4+h4, bone,  x1,y1,z0, u4+w4,v4+h4, bone,  x0,y1,z1, u4   ,v4, bone,
+		x0,y1,z1, u4   ,v4,    bone,  x1,y1,z0, u4+w4,v4+h4, bone,  x1,y1,z1, u4+w4,v4, bone,
 	
-		x0,y0,z1, u5   ,v5+h5,  x1,y0,z1, u5+w5,v5+h5,  x0,y0,z0, u5   ,v5,
-		x0,y0,z0, u5   ,v5,     x1,y0,z1, u5+w5,v5+h5,  x1,y0,z0, u5+w5,v5,
+		x0,y0,z1, u5   ,v5+h5, bone,  x1,y0,z1, u5+w5,v5+h5, bone,  x0,y0,z0, u5   ,v5, bone,
+		x0,y0,z0, u5   ,v5,    bone,  x1,y0,z1, u5+w5,v5+h5, bone,  x1,y0,z0, u5+w5,v5, bone,
 	];
 }
 
 let cubeShader = display.createShader(`
 	uniform mat4 proj;
 	uniform mat4 viewmodel;
+	uniform mat4 bones[4];
+	uniform vec3 roots[4];
 	attribute vec3 pos;
 	attribute vec2 texpos;
+	attribute float bone;
 	varying vec3 vCol;
 	varying vec2 vTexpos;
 	void main()
 	{
-		gl_Position = proj * viewmodel * vec4(pos, 1.0);
+		gl_Position = vec4(pos, 1.0);
+		
+		for(float i=0.0; i<4.0; i++) {
+			if(i == bone - 1.0) {
+				gl_Position.xyz -= roots[int(i)];
+				gl_Position = bones[int(i)] * gl_Position;
+				gl_Position.xyz += roots[int(i)];
+			}
+		}
+		
+		gl_Position = proj * viewmodel * gl_Position;
 		vCol = pos;
 		vTexpos = texpos;
 	}
@@ -202,11 +222,13 @@ let cubeShader = display.createShader(`
 
 let playertex = display.getTexture("gfx/player.png");
 
+let fr = 0;
+
 document.body.appendChild(gui.container);
 
 world.touchChunk( 0, 0, 0);
 
-body.pos.set([8, 8, 8]);
+body.pos.set([-0.5, 0, -2.5]);
 body.acc[1] = -gravity;
 
 gui.blockSelector.setFrame(blocks[selected].faces[0], 0);
@@ -282,8 +304,25 @@ display.onRender = () =>
 	cubeShader.use();
 	cubeShader.uniformTex("tex", playertex, 0);
 	cubeShader.uniformMatrix4fv("proj", camera.getProjection());
-	cubeShader.vertexAttrib("pos", cuboid, 3, false, 5, 0);
-	cubeShader.vertexAttrib("texpos", cuboid, 2, false, 5, 3);
+	
+	cubeShader.uniformMatrix4fv("bones", [
+		...matrix.rotationX(radians(fr*1.1 + 30)),
+		...matrix.rotationX(radians(fr*0.9 - 30)),
+		...matrix.rotationX(radians(fr*1.1 + 40)),
+		...matrix.rotationX(radians(fr*0.9 - 40)),
+	]);
+	cubeShader.uniform3fv("roots", [
+		-0.375,1.375,0,
+		+0.375,1.375,0,
+		-0.125,0.75,0,
+		+0.125,0.75,0,
+	]);
+	
+	fr += 1;
+	
+	cubeShader.vertexAttrib("pos", cuboid, 3, false, 6, 0);
+	cubeShader.vertexAttrib("texpos", cuboid, 2, false, 6, 3);
+	cubeShader.vertexAttrib("bone", cuboid, 1, false, 6, 5);
 	cubeShader.uniformMatrix4fv("viewmodel", camera.getViewModel(0,0,0, 0,0,0));
 	gl.drawArrays(gl.TRIANGLES, 0, 36 * 6);
 	
@@ -292,8 +331,8 @@ display.onRender = () =>
 	axisShader.use();
 	axisShader.uniformMatrix4fv("proj", camera.getProjection());
 	axisShader.uniformMatrix4fv("view", camera.getView());
-	axisShader.vertexAttrib("pos", axis, 3, true, 6, 0);
-	axisShader.vertexAttrib("col", axis, 3, true, 6, 3);
+	axisShader.vertexAttrib("pos",  axis, 3, true, 6, 0);
+	axisShader.vertexAttrib("col",  axis, 3, true, 6, 3);
 	gl.drawArrays(gl.LINES, 0, 6);
 	gl.enable(gl.DEPTH_TEST);
 };

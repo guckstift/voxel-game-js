@@ -9,7 +9,12 @@ export class Img
 		this.elm.style.position = "absolute";
 		this.elm.style.left = x;
 		this.elm.style.top = y;
-		this.elm.style.transform = `scale(${scale}) translateX(-${anchorx * 100}%) translateY(-${anchory * 100}%)`;
+		
+		this.elm.style.transform = `
+			scale(${scale})
+			translateX(-${anchorx * 100}%)
+			translateY(-${anchory * 100}%)
+		`;
 		
 		if(framew > 0) {
 			this.elm.style.width = framew + "px";
