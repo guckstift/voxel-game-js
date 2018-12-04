@@ -5,4 +5,4 @@ third-party libraries are needed, all ist written completely from scratch.
 
 [Play it!](https://guckstift.github.io/blockweb)
 
-![Latest screenshot](./screenshots/2018-11-30.jpg)
+![Latest screenshot](./screenshots/2018-12-05.jpg)
