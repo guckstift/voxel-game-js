@@ -14,7 +14,7 @@ export class Body
 		this.pos  = vector.create64();
 		this.vel  = vector.create();
 		this.acc  = vector.create();
-		this.rest = new Uint8Array(3);
+		this.rest = new Int8Array(3);
 		
 		this.deltavel  = vector.create();
 		this.globoxmin = vector.create64();
@@ -44,7 +44,7 @@ export class Body
 				this.pos[hit.axis] = hit.pos - this.boxmin[hit.axis];
 			}
 			
-			this.rest[hit.axis]     = 1;
+			this.rest[hit.axis]     = hit.step;
 			this.deltavel[hit.axis] = 0;
 			vel[hit.axis]           = 0;
 			
