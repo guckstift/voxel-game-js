@@ -74,11 +74,12 @@ export class Camera
 		return this.forward;
 	}
 	
-	getDirVec()
+	getDirVec(scale = 1)
 	{
 		vector.create(0, 0, 1, this.dirvec);
 		vector.rotateX(this.dirvec, -this.vangle, this.dirvec);
 		vector.rotateY(this.dirvec, -this.hangle, this.dirvec);
+		vector.scale(this.dirvec, scale, this.dirvec);
 		
 		return this.dirvec;
 	}

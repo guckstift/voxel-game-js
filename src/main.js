@@ -6,8 +6,9 @@ import {CHUNK_WIDTH} from "./chunk.js";
 import {Input} from "./input.js";
 import {Body} from "./body.js";
 import {blocks} from "./blocks.js";
-import * as matrix from "./matrix.js";
 import {radians} from "./math.js";
+import * as matrix from "./matrix.js";
+import * as vector from "./vector.js";
 
 const runspeed  = 4;
 const jumpspeed = 6.5;
@@ -81,6 +82,9 @@ let selectorShader = display.createShader(`
 		if(vPos.x < gap || vPos.x > 1.0 - gap || vPos.y < gap || vPos.y > 1.0 - gap) {
 			gl_FragColor.a = 0.5;
 		}
+		else {
+			discard;
+		}
 	}
 `);
 
@@ -126,7 +130,7 @@ let cuboid = display.createStaticFloatBuffer([
 		24/64, 0/64, 8/64, 8/64,
 		32/64, 0/64, 8/64, 8/64,
 		40/64, 0/64, 8/64, 8/64,
-		0,
+		5,
 	), // head
 	
 	...createCuboid(
@@ -186,8 +190,8 @@ function createCuboid(
 let cubeShader = display.createShader(`
 	uniform mat4 proj;
 	uniform mat4 viewmodel;
-	uniform mat4 bones[4];
-	uniform vec3 roots[4];
+	uniform mat4 bones[8];
+	uniform vec3 roots[8];
 	attribute vec3 pos;
 	attribute vec2 texpos;
 	attribute float bone;
@@ -197,7 +201,7 @@ let cubeShader = display.createShader(`
 	{
 		gl_Position = vec4(pos, 1.0);
 		
-		for(float i=0.0; i<4.0; i++) {
+		for(float i=0.0; i<8.0; i++) {
 			if(i == bone - 1.0) {
 				gl_Position.xyz -= roots[int(i)];
 				gl_Position = bones[int(i)] * gl_Position;
@@ -258,6 +262,7 @@ display.onRender = () =>
 	body.update(1 / 60);
 	camera.setPos(body.pos);
 	camera.pos[1] += 1.5;
+	vector.add(camera.pos, camera.getDirVec(-2), camera.pos);
 	
 	blockHit = world.hitBlock(camera.getDirVec(), camera.pos);
 	
@@ -306,16 +311,18 @@ display.onRender = () =>
 	cubeShader.uniformMatrix4fv("proj", camera.getProjection());
 	
 	cubeShader.uniformMatrix4fv("bones", [
-		...matrix.rotationX(radians(fr*1.1 + 30)),
-		...matrix.rotationX(radians(fr*0.9 - 30)),
-		...matrix.rotationX(radians(fr*1.1 + 40)),
-		...matrix.rotationX(radians(fr*0.9 - 40)),
+		...matrix.rotationX(radians(+ 30)),
+		...matrix.rotationX(radians(- 30)),
+		...matrix.rotationX(radians(+ 40)),
+		...matrix.rotationX(radians(- 40)),
+		...matrix.rotationX(radians(20)),
 	]);
 	cubeShader.uniform3fv("roots", [
 		-0.375,1.375,0,
 		+0.375,1.375,0,
 		-0.125,0.75,0,
 		+0.125,0.75,0,
+		+0.0, 1.5,+0.0,
 	]);
 	
 	fr += 1;
@@ -323,7 +330,7 @@ display.onRender = () =>
 	cubeShader.vertexAttrib("pos", cuboid, 3, false, 6, 0);
 	cubeShader.vertexAttrib("texpos", cuboid, 2, false, 6, 3);
 	cubeShader.vertexAttrib("bone", cuboid, 1, false, 6, 5);
-	cubeShader.uniformMatrix4fv("viewmodel", camera.getViewModel(0,0,0, 0,0,0));
+	cubeShader.uniformMatrix4fv("viewmodel", camera.getViewModel(...body.pos, 0, Math.PI-camera.hangle,0));
 	gl.drawArrays(gl.TRIANGLES, 0, 36 * 6);
 	
 	gl.disable(gl.DEPTH_TEST);
