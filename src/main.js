@@ -262,7 +262,7 @@ display.onRender = () =>
 	body.update(1 / 60);
 	camera.setPos(body.pos);
 	camera.pos[1] += 1.5;
-	vector.add(camera.pos, camera.getDirVec(-2), camera.pos);
+	//vector.add(camera.pos, camera.getDirVec(-2), camera.pos);
 	
 	blockHit = world.hitBlock(camera.getDirVec(), camera.pos);
 	
@@ -331,7 +331,7 @@ display.onRender = () =>
 	cubeShader.vertexAttrib("texpos", cuboid, 2, false, 6, 3);
 	cubeShader.vertexAttrib("bone", cuboid, 1, false, 6, 5);
 	cubeShader.uniformMatrix4fv("viewmodel", camera.getViewModel(...body.pos, 0, Math.PI-camera.hangle,0));
-	gl.drawArrays(gl.TRIANGLES, 0, 36 * 6);
+	//gl.drawArrays(gl.TRIANGLES, 0, 36 * 6);
 	
 	gl.disable(gl.DEPTH_TEST);
 	gl.lineWidth(2);

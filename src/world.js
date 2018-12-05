@@ -5,6 +5,7 @@ import {radians} from "./math.js";
 import {NoiseField} from "./noisefield.js";
 import {Store} from "./store.js";
 import {blocks} from "./blocks.js";
+import {Generator} from "./generator.js";
 import * as vector from "./vector.js";
 
 let sun = vector.create(0, -1, 0);
@@ -40,6 +41,7 @@ export class World
 		this.getBlock = this.getBlock.bind(this);
 		this.noise = new NoiseField(0, 8, 8);
 		this.store = new Store();
+		this.generator = new Generator();
 		this.display = display;
 		this.camera = camera;
 		this.shader = display.getShader("chunk", vertSrc, fragSrc);
@@ -68,7 +70,7 @@ export class World
 		let column = slice[y];
 		
 		if(!column[x]) {
-			column[x] = new Chunk(x, y, z, this.display, this.camera, this.noise, this.store);
+			column[x] = new Chunk(x, y, z, this.display, this.camera, this.generator, this.noise, this.store);
 		}
 	}
 	

@@ -62,14 +62,14 @@ export let fragSrc = `
 
 let model = matrix.identity();
 
-function getLinearBlockIndex(x, y, z)
+export function getLinearBlockIndex(x, y, z)
 {
 	return x + y * CHUNK_WIDTH + z * CHUNK_WIDTH * CHUNK_WIDTH;
 }
 
 export class Chunk
 {
-	constructor(x, y, z, display, camera, noise, store)
+	constructor(x, y, z, display, camera, generator, noise, store)
 	{
 		this.x = x;
 		this.y = y;
@@ -92,27 +92,10 @@ export class Chunk
 				this.updateMesh();
 			},
 			() => {
-		
-				for(let bx = 0; bx < CHUNK_WIDTH; bx++) {
-					for(let by = 0; by < CHUNK_WIDTH; by++) {
-						for(let bz = 0; bz < CHUNK_WIDTH; bz++) {
-							let i = getLinearBlockIndex(bx, by, bz);
-							let lx = bx + x * CHUNK_WIDTH;
-							let ly = by + y * CHUNK_WIDTH;
-							let lz = bz + z * CHUNK_WIDTH;
-							let h = this.data[i] = noise.sample(lx, 0, lz);
-					
-							if(ly < h) {
-								this.data[i] = noise.sample(lx, ly, lz) * 3 / 8 + 1;
-							}
-							else {
-								this.data[i] = 0;
-							}
-						}
-					}
-				}
-				
-				this.updateMesh();
+				generator.requestChunk(x, y, z, this.data.buffer, (data) => {
+					this.data = new Uint8Array(data);
+					this.updateMesh();
+				});
 			},
 		);
 	}

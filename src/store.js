@@ -6,16 +6,16 @@ export class Store
 			let request = window.indexedDB.open("blockweb");
 		
 			request.onerror = e => {
-				console.log("request error", e);
+				//console.log("request error", e);
 			};
 
 			request.onupgradeneeded = e => {
-				console.log("request upgrade", e);
+				//console.log("request upgrade", e);
 				e.target.result.createObjectStore("chunks", {keyPath: "pos"});
 			};
 
 			request.onsuccess = e => {
-				console.log("request success", e);
+				//console.log("request success", e);
 				this.db = e.target.result;
 				res();
 			};
@@ -30,12 +30,12 @@ export class Store
 			let request     = objectStore.get([x, y, z]);
 			
 			request.onerror = e => {
-				console.log("request chunk error", e);
+				//console.log("request chunk error", e);
 				errcb();
 			};
 			
 			request.onsuccess = e => {
-				console.log("request chunk success", e);
+				//console.log("request chunk success", e);
 				if(request.result) {
 					cb(request.result);
 				}
@@ -55,11 +55,11 @@ export class Store
 			let transaction = this.db.transaction(["chunks"], "readwrite");
 		
 			transaction.onerror = e => {
-				console.log("transaction error", e);
+				//console.log("transaction error", e);
 			};
 		
 			transaction.oncomplete = e => {
-				console.log("transaction complete", e);
+				//console.log("transaction complete", e);
 			};
 		
 			let chunkStore = transaction.objectStore("chunks");
