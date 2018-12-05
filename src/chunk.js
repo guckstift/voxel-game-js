@@ -84,16 +84,19 @@ export class Chunk
 		this.buf = this.display.createStaticByteBuffer(this.mesh);
 		this.shader = display.getShader("chunk", vertSrc, fragSrc);
 		this.atlas = display.getTexture("gfx/atlas.png");
+		this.loading = true;
 		
 		store.loadChunk(
 			x, y, z,
 			chunk => {
 				this.data = chunk.data;
+				this.loading = false;
 				this.updateMesh();
 			},
 			() => {
 				generator.requestChunk(x, y, z, this.data.buffer, (data) => {
 					this.data = new Uint8Array(data);
+					this.loading = false;
 					this.updateMesh();
 				});
 			},
@@ -102,9 +105,15 @@ export class Chunk
 	
 	getBlock(x, y, z)
 	{
+		if(this.loading) {
+			return blocks[1];
+		}
+		
 		if(x < 0 || y < 0 || z < 0 || x >= CHUNK_WIDTH || y >= CHUNK_WIDTH || z >= CHUNK_WIDTH) {
 			return blocks[0];
 		}
+		
+		//console.log(this.data);
 		
 		let i = getLinearBlockIndex(x, y, z);
 		let t = this.data[i];

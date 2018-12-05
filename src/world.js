@@ -97,9 +97,17 @@ export class World
 	
 	getBlock(x, y, z)
 	{
+		if(x === -1 && y === 1 && z === -2) {
+			//console.log(2);
+		}
+		
 		let chunkPos = getChunkPos(x, y, z);
 		let localPos = getLocalPos(x, y, z);
 		let chunk = this.getChunk(...chunkPos);
+		
+		if(x === -1 && y === 1 && z === -2) {
+			//console.log(chunk);
+		}
 		
 		if(!chunk) {
 			return blocks[0];
