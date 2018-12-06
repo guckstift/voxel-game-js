@@ -3,6 +3,6 @@
 Nothing to see here! This ist just another Minecraft clone made with JavaScript und WebGL. No
 third-party libraries are needed, all ist written completely from scratch.
 
-[Play it!](https://guckstift.github.io/blockweb)
+[Play it!](https://guckstift.github.io/BlockWeb)
 
 ![Latest screenshot](./screenshots/2018-12-05.jpg)

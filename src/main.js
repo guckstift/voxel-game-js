@@ -10,8 +10,24 @@ import {radians} from "./math.js";
 import * as matrix from "./matrix.js";
 import * as vector from "./vector.js";
 
+function testWebSocket()
+{
+	let socket = new WebSocket("ws://localhost:1234", "blockweb");
+
+	socket.binaryType = "arraybuffer";
+
+	socket.onopen = e => {
+		console.log("open");
+		socket.send(new Uint8Array([2,3]));
+	};
+
+	socket.onmessage = e => {
+		console.log(e);
+	};
+}
+
 const runspeed  = 4;
-const jumpspeed = 6.5;
+const jumpspeed = 7.5;
 const gravity   = 20;
 
 let display = new Display();
@@ -76,9 +92,9 @@ let selectorShader = display.createShader(`
 	void main()
 	{
 		gl_FragColor = vec4(1.0, 1.0, 1.0, 0.0);
-		
+
 		float gap = 1.0/32.0;
-		
+
 		if(vPos.x < gap || vPos.x > 1.0 - gap || vPos.y < gap || vPos.y > 1.0 - gap) {
 			gl_FragColor.a = 0.5;
 		}
@@ -99,7 +115,7 @@ let cuboid = display.createStaticFloatBuffer([
 		56/64,12/64, 4/64,  4/64,
 		3,
 	), // left leg
-	
+
 	...createCuboid(
 		+0/16,+0/16,-2/16,  +4/16,+12/16,+2/16,
 		16/64,20/64, 4/64, 12/64,
@@ -110,7 +126,7 @@ let cuboid = display.createStaticFloatBuffer([
 		60/64,12/64, 4/64,  4/64,
 		4,
 	), // right leg
-	
+
 	...createCuboid(
 		-4/16,+12/16,-2/16, +4/16,+24/16,+2/16,
 		 0/64, 8/64, 8/64, 12/64,
@@ -121,7 +137,7 @@ let cuboid = display.createStaticFloatBuffer([
 		48/64, 4/64, 8/64,  4/64,
 		0,
 	), // upper body
-	
+
 	...createCuboid(
 		-4/16,+24/16,-4/16, +4/16,+32/16,+4/16,
 		0/64, 0/64, 8/64, 8/64,
@@ -132,7 +148,7 @@ let cuboid = display.createStaticFloatBuffer([
 		40/64, 0/64, 8/64, 8/64,
 		5,
 	), // head
-	
+
 	...createCuboid(
 		-8/16,+12/16,-2/16, -4/16,+24/16,+2/16,
 		24/64, 8/64, 4/64, 12/64,
@@ -143,7 +159,7 @@ let cuboid = display.createStaticFloatBuffer([
 		56/64, 4/64, 4/64,  4/64,
 		1,
 	), // left arm
-	
+
 	...createCuboid(
 		+4/16,+12/16,-2/16, +8/16,+24/16,+2/16,
 		40/64, 8/64, 4/64, 12/64,
@@ -169,19 +185,19 @@ function createCuboid(
 	return [
 		x0,y0,z0, u0   ,v0+h0, bone,  x1,y0,z0, u0+w0,v0+h0, bone,  x0,y1,z0, u0   ,v0, bone,
 		x0,y1,z0, u0   ,v0,    bone,  x1,y0,z0, u0+w0,v0+h0, bone,  x1,y1,z0, u0+w0,v0, bone,
-	
+
 		x1,y0,z0, u1   ,v1+h1, bone,  x1,y0,z1, u1+w1,v1+h1, bone,  x1,y1,z0, u1   ,v1, bone,
 		x1,y1,z0, u1   ,v1,    bone,  x1,y0,z1, u1+w1,v1+h1, bone,  x1,y1,z1, u1+w1,v1, bone,
-	
+
 		x1,y0,z1, u2   ,v2+h2, bone,  x0,y0,z1, u2+w2,v2+h2, bone,  x1,y1,z1, u2   ,v2, bone,
 		x1,y1,z1, u2   ,v2,    bone,  x0,y0,z1, u2+w2,v2+h2, bone,  x0,y1,z1, u2+w2,v2, bone,
-	
+
 		x0,y0,z1, u3   ,v3+h3, bone,  x0,y0,z0, u3+w3,v3+h3, bone,  x0,y1,z1, u3   ,v3, bone,
 		x0,y1,z1, u3   ,v3,    bone,  x0,y0,z0, u3+w3,v3+h3, bone,  x0,y1,z0, u3+w3,v3, bone,
-	
+
 		x0,y1,z0, u4   ,v4+h4, bone,  x1,y1,z0, u4+w4,v4+h4, bone,  x0,y1,z1, u4   ,v4, bone,
 		x0,y1,z1, u4   ,v4,    bone,  x1,y1,z0, u4+w4,v4+h4, bone,  x1,y1,z1, u4+w4,v4, bone,
-	
+
 		x0,y0,z1, u5   ,v5+h5, bone,  x1,y0,z1, u5+w5,v5+h5, bone,  x0,y0,z0, u5   ,v5, bone,
 		x0,y0,z0, u5   ,v5,    bone,  x1,y0,z1, u5+w5,v5+h5, bone,  x1,y0,z0, u5+w5,v5, bone,
 	];
@@ -200,7 +216,7 @@ let cubeShader = display.createShader(`
 	void main()
 	{
 		gl_Position = vec4(pos, 1.0);
-		
+
 		for(float i=0.0; i<8.0; i++) {
 			if(i == bone - 1.0) {
 				gl_Position.xyz -= roots[int(i)];
@@ -208,7 +224,7 @@ let cubeShader = display.createShader(`
 				gl_Position.xyz += roots[int(i)];
 			}
 		}
-		
+
 		gl_Position = proj * viewmodel * gl_Position;
 		vCol = pos;
 		vTexpos = texpos;
@@ -258,14 +274,14 @@ display.onRender = () =>
 		let vec = camera.getLeftward(-runspeed);
 		body.move(vec, 1 / 60);
 	}
-	
+
 	body.update(1 / 60);
 	camera.setPos(body.pos);
 	camera.pos[1] += 1.5;
 	//vector.add(camera.pos, camera.getDirVec(-2), camera.pos);
-	
+
 	blockHit = world.hitBlock(camera.getDirVec(), camera.pos);
-	
+
 	for(let x=-1; x<=+1; x++) {
 		for(let y=-1; y<=+1; y++) {
 			for(let z=-1; z<=+1; z++) {
@@ -277,9 +293,9 @@ display.onRender = () =>
 			}
 		}
 	}
-	
+
 	world.draw();
-	
+
 	if(blockHit) {
 		let r = radians(90);
 		let s = radians(180);
@@ -291,25 +307,25 @@ display.onRender = () =>
 			[0, 1, 0,  r, 0, 0],
 			[0, 0, 1, -r, 0, 0],
 		][blockHit.faceid];
-		
+
 		selectorShader.use();
 		selectorShader.uniformMatrix4fv("proj", camera.getProjection());
-		
+
 		selectorShader.uniformMatrix4fv("viewmodel", camera.getViewModel(
 			x + blockHit.blockpos[0],
 			y + blockHit.blockpos[1],
 			z + blockHit.blockpos[2],
 			ax, ay, az,
 		));
-		
+
 		selectorShader.vertexAttrib("pos", selector, 3);
 		gl.drawArrays(gl.TRIANGLES, 0, 6);
 	}
-	
+
 	cubeShader.use();
 	cubeShader.uniformTex("tex", playertex, 0);
 	cubeShader.uniformMatrix4fv("proj", camera.getProjection());
-	
+
 	cubeShader.uniformMatrix4fv("bones", [
 		...matrix.rotationX(radians(+ 30)),
 		...matrix.rotationX(radians(- 30)),
@@ -324,15 +340,15 @@ display.onRender = () =>
 		+0.125,0.75,0,
 		+0.0, 1.5,+0.0,
 	]);
-	
+
 	fr += 1;
-	
+
 	cubeShader.vertexAttrib("pos", cuboid, 3, false, 6, 0);
 	cubeShader.vertexAttrib("texpos", cuboid, 2, false, 6, 3);
 	cubeShader.vertexAttrib("bone", cuboid, 1, false, 6, 5);
 	cubeShader.uniformMatrix4fv("viewmodel", camera.getViewModel(...body.pos, 0, Math.PI-camera.hangle,0));
 	//gl.drawArrays(gl.TRIANGLES, 0, 36 * 6);
-	
+
 	gl.disable(gl.DEPTH_TEST);
 	gl.lineWidth(2);
 	axisShader.use();
