@@ -1,0 +1,17 @@
+{
+  "name": "blockweb",
+  "version": "0.0.0",
+  "description": "This ist just another Minecraft clone made with JavaScript und WebGL",
+  "main": "src/server.bundle.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guckstift/BlockWeb.git"
+  },
+  "author": "guckstift",
+  "bugs": {
+    "url": "https://github.com/guckstift/BlockWeb/issues"
+  },
+  "homepage": "https://github.com/guckstift/BlockWeb"
+}
