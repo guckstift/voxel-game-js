@@ -7,7 +7,8 @@ export class ClientStore
 		this.requests = {};
 
 		this.ready = new Promise(res => {
-			this.socket = new WebSocket("ws://localhost:12345", "blockweb");
+			this.host = window.location.host;
+			this.socket = new WebSocket("ws://" + this.host, "blockweb");
 			this.socket.binaryType = "arraybuffer";
 
 			this.socket.onopen = e => {
