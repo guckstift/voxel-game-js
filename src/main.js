@@ -18,7 +18,7 @@ function testWebSocket()
 
 	socket.onopen = e => {
 		console.log("open");
-		socket.send(new Uint8Array([2,3]));
+		socket.send(new Int32Array([1, 0,-1,0]));
 	};
 
 	socket.onmessage = e => {
@@ -346,7 +346,12 @@ display.onRender = () =>
 	cubeShader.vertexAttrib("pos", cuboid, 3, false, 6, 0);
 	cubeShader.vertexAttrib("texpos", cuboid, 2, false, 6, 3);
 	cubeShader.vertexAttrib("bone", cuboid, 1, false, 6, 5);
-	cubeShader.uniformMatrix4fv("viewmodel", camera.getViewModel(...body.pos, 0, Math.PI-camera.hangle,0));
+
+	cubeShader.uniformMatrix4fv(
+		"viewmodel",
+		camera.getViewModel(...body.pos, 0, Math.PI-camera.hangle,0)
+	);
+
 	//gl.drawArrays(gl.TRIANGLES, 0, 36 * 6);
 
 	gl.disable(gl.DEPTH_TEST);

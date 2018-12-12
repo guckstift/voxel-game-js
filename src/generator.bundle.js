@@ -330,14 +330,14 @@ var generator = (function (exports) {
 	{
 		let r = radians(90);
 		let s = radians(180);
-		
+
 		createByteQuad(0, 0, 0,  0, 0, 0,  slots[0], 0, out.subarray(FACE_SIZE * 0)); // front
 		createByteQuad(1, 0, 0,  0, r, 0,  slots[1], 1, out.subarray(FACE_SIZE * 1)); // right
 		createByteQuad(1, 0, 1,  0, s, 0,  slots[2], 2, out.subarray(FACE_SIZE * 2)); // back
 		createByteQuad(0, 0, 1,  0,-r, 0,  slots[3], 3, out.subarray(FACE_SIZE * 3)); // left
 		createByteQuad(0, 1, 0,  r, 0, 0,  slots[4], 4, out.subarray(FACE_SIZE * 4)); // top
 		createByteQuad(0, 0, 1, -r, 0, 0,  slots[5], 5, out.subarray(FACE_SIZE * 5)); // bottom
-		
+
 		return out;
 	}
 
@@ -353,19 +353,19 @@ var generator = (function (exports) {
 	function createByteQuad(x, y, z, ax, ay, az, slot, faceid, out = new Uint8Array(FACE_SIZE))
 	{
 		let floatquad = createQuad(x, y, z, ax, ay, az, slot, faceid);
-		
+
 		for(let i=0; i < FACE_VERTS; i++) {
 			let o  = i * VERT_SIZE;
 			let o2 = i * RAW_VERT_SIZE;
 			let v = out.subarray(o);
 			let f = floatquad.subarray(o2);
-			
+
 			v.set(f.subarray(0, 3));
 			v[3] = f[4] * 16;
 			v[4] = f[5] * 16;
 			v[5] = f[6];
 		}
-		
+
 		return out;
 	}
 
@@ -374,17 +374,17 @@ var generator = (function (exports) {
 		let m = identity();
 		let sx = slot % 16;
 		let sy = Math.floor(slot / 16);
-		
+
 		translate(m, x, y, z, m);
 		rotateX(m, ax, m);
 		rotateY(m, ay, m);
 		rotateZ(m, az, m);
-		
+
 		for(let i=0; i < FACE_VERTS; i++) {
 			let o = i * RAW_VERT_SIZE;
 			let v = out.subarray(o);
 			let t = v.subarray(4);
-			
+
 			v.set(front.subarray(o, o + RAW_VERT_SIZE));
 			transform(v, m, v);
 			round(v, v);
@@ -392,7 +392,7 @@ var generator = (function (exports) {
 			t[1] = (sy + t[1]) / 16;
 			t[2] = faceid;
 		}
-		
+
 		return out;
 	}
 
@@ -405,80 +405,91 @@ var generator = (function (exports) {
 		}
 	});
 
+	let env = "";
+
+	try {
+		if(window) {
+			env = "web";
+		}
+	}
+	catch(e) {
+		try {
+			if(module) {
+				env = "node";
+			}
+		}
+		catch(e) {
+			env = "worker";
+		}
+	}
+
 	class Generator
 	{
-		constructor(inworker = false)
+		constructor()
 		{
-			this.inworker = inworker;
 			this.counter = 0;
 			this.callbacks = {};
-			
-			if(inworker) {
-				this.noise = new NoiseField(0, 8, 8);
-				
+			this.noise = new NoiseField(0, 8, 8);
+
+			if(env === "worker") {
 				onmessage = e => {
 					//console.log("jup", e);
-					
+
 					this.generateChunk(e.data.x, e.data.y, e.data.z, e.data.buf);
-					
+
 					postMessage({buf: e.data.buf, id: e.data.id}, [e.data.buf]);
 				};
-				
+
 				//console.log("worker running");
 			}
-			else {
+			else if(env === "web") {
 				this.worker = new Worker("./src/generator.bundle.js");
-				
+
 				this.worker.onmessage = e => {
 					this.callbacks[e.data.id](e.data.buf);
 				};
-				
+
 				//console.log("client running");
 			}
 		}
-		
+
 		generateChunk(x, y, z, buf)
 		{
 			let data = new Uint8Array(buf);
-			
-			if(this.inworker) {
-				for(let bx = 0; bx < CHUNK_WIDTH; bx++) {
-					for(let by = 0; by < CHUNK_WIDTH; by++) {
-						for(let bz = 0; bz < CHUNK_WIDTH; bz++) {
-							let i = getLinearBlockIndex(bx, by, bz);
-							let lx = bx + x * CHUNK_WIDTH;
-							let ly = by + y * CHUNK_WIDTH;
-							let lz = bz + z * CHUNK_WIDTH;
-							let h = data[i] = this.noise.sample(lx, 0, lz);
-				
-							if(ly < h) {
-								data[i] = this.noise.sample(lx, ly, lz) * 3 / 8 + 1;
-							}
-							else {
-								data[i] = 0;
-							}
+
+			for(let bx = 0; bx < CHUNK_WIDTH; bx++) {
+				for(let by = 0; by < CHUNK_WIDTH; by++) {
+					for(let bz = 0; bz < CHUNK_WIDTH; bz++) {
+						let i = getLinearBlockIndex(bx, by, bz);
+						let lx = bx + x * CHUNK_WIDTH;
+						let ly = by + y * CHUNK_WIDTH;
+						let lz = bz + z * CHUNK_WIDTH;
+						let h = data[i] = this.noise.sample(lx, 0, lz);
+
+						if(ly < h) {
+							data[i] = this.noise.sample(lx, ly, lz) * 3 / 8 + 1;
+						}
+						else {
+							data[i] = 0;
 						}
 					}
 				}
 			}
 		}
-		
+
 		requestChunk(x, y, z, buf, cb)
 		{
 			//console.log("request chunk");
-			
+
 			let id = this.counter++;
-			
+
 			this.callbacks[id] = cb;
 			this.worker.postMessage({x, y, z, buf, id}, [buf]);
 		}
 	}
 
-	try {
-		window = window;
-	}
-	catch(e) {
-		let generator = new Generator(true);
+	if(env === "worker") {
+		let generator = new Generator();
 	}
 
 	exports.Generator = Generator;

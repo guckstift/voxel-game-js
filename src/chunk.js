@@ -31,7 +31,7 @@ export let vertSrc = `
 		gl_Position = proj * viewmodel * vec4(pos, 1.0);
 
 		vTexcoord = texcoord / 16.0;
-		
+
 		vec3 normal =
 			faceid == 0.0 ? vec3(0, 0, -1) :
 			faceid == 1.0 ? vec3(+1, 0, 0) :
@@ -40,7 +40,7 @@ export let vertSrc = `
 			faceid == 4.0 ? vec3(0, +1, 0) :
 			faceid == 5.0 ? vec3(0, -1, 0) :
 			vec3(0,0,0);
-		
+
 		vCoef = 0.25 + max(0.0, dot(normal, -sun)) * 0.75;
 	}
 `;
@@ -69,7 +69,7 @@ export function getLinearBlockIndex(x, y, z)
 
 export class Chunk
 {
-	constructor(x, y, z, display, camera, generator, noise, store)
+	constructor(x, y, z, display, camera, generator, store, inserver = false)
 	{
 		this.x = x;
 		this.y = y;
@@ -77,81 +77,105 @@ export class Chunk
 		this.display = display;
 		this.camera = camera;
 		this.store = store;
+		this.inserver = inserver;
 		this.meshsize = 0;
 		this.vertnum = 0;
 		this.data = new Uint8Array(CHUNK_WIDTH ** 3);
-		this.mesh = new Uint8Array(CHUNK_WIDTH ** 3 * BLOCK_SIZE);
-		this.buf = this.display.createStaticByteBuffer(this.mesh);
-		this.shader = display.getShader("chunk", vertSrc, fragSrc);
-		this.atlas = display.getTexture("gfx/atlas.png");
 		this.loading = true;
-		
+		this.onLoaded = () => {};
+
+		if(!this.inserver) {
+			this.mesh = new Uint8Array(CHUNK_WIDTH ** 3 * BLOCK_SIZE);
+			this.buf = this.display.createStaticByteBuffer(this.mesh);
+			this.shader = display.getShader("chunk", vertSrc, fragSrc);
+			this.atlas = display.getTexture("gfx/atlas.png");
+		}
+
 		store.loadChunk(
 			x, y, z,
-			chunk => {
-				this.data = chunk.data;
+			data => {
+				this.data = data;
 				this.loading = false;
+				this.onLoaded();
 				this.updateMesh();
 			},
 			() => {
-				generator.requestChunk(x, y, z, this.data.buffer, (data) => {
-					this.data = new Uint8Array(data);
+				if(this.inserver) {
+					generator.generateChunk(x, y, z, this.data.buffer);
 					this.loading = false;
+					this.onLoaded();
 					this.updateMesh();
-				});
+				}
+				else {
+					generator.requestChunk(x, y, z, this.data.buffer, (data) => {
+						this.data = new Uint8Array(data);
+						this.loading = false;
+						this.onLoaded();
+						this.updateMesh();
+					});
+				}
 			},
 		);
 	}
-	
+
 	getBlock(x, y, z)
 	{
 		if(this.loading) {
 			return blocks[1];
 		}
-		
+
 		if(x < 0 || y < 0 || z < 0 || x >= CHUNK_WIDTH || y >= CHUNK_WIDTH || z >= CHUNK_WIDTH) {
 			return blocks[0];
 		}
-		
-		//console.log(this.data);
-		
+
 		let i = getLinearBlockIndex(x, y, z);
 		let t = this.data[i];
 		let block = blocks[t];
-		
+
 		return block;
 	}
-	
+
 	getBlockVerts(x, y, z)
 	{
 		if(x < 0 || y < 0 || z < 0 || x >= CHUNK_WIDTH || y >= CHUNK_WIDTH || z >= CHUNK_WIDTH) {
 			return null;
 		}
-		
+
 		let i = getLinearBlockIndex(x, y, z);
 		let t = this.data[i];
 		let block = blockverts[t];
-		
+
 		return block;
 	}
-	
+
 	setBlock(x, y, z, t)
 	{
 		if(x < 0 || y < 0 || z < 0 || x >= CHUNK_WIDTH || y >= CHUNK_WIDTH || z >= CHUNK_WIDTH) {
 			return;
 		}
-		
+
 		let i = getLinearBlockIndex(x, y, z);
-		
+
 		this.data[i] = t;
 		this.updateMesh();
 		this.store.storeChunk(this);
 	}
-	
+
+	setChunkData(data)
+	{
+		this.data.set(data);
+		this.updateMesh();
+		this.store.storeChunk(this);
+	}
+
 	updateMesh()
 	{
+		if(this.inserver) {
+			return;
+		}
+
 		let gl = this.display.gl;
-		
+
 		this.meshsize = 0;
 		this.vertnum = 0;
 
@@ -159,7 +183,7 @@ export class Chunk
 			for(let y=0; y < CHUNK_WIDTH; y++) {
 				for(let x=0; x < CHUNK_WIDTH; x++) {
 					let block = this.getBlockVerts(x, y, z);
-			
+
 					if(block) {
 						this.addFaceIfVisible(block, x,y,z,  0, 0,-1, 0); // front
 						this.addFaceIfVisible(block, x,y,z, +1, 0, 0, 1); // right
@@ -171,11 +195,11 @@ export class Chunk
 				}
 			}
 		}
-		
+
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.buf);
 		gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.mesh.subarray(0, this.meshsize));
 	}
-	
+
 	addFaceIfVisible(block, x, y, z, ax, ay, az, faceid)
 	{
 		if(this.getBlock(x + ax, y + ay, z + az).type === 0) {
@@ -191,7 +215,7 @@ export class Chunk
 				vertex[1] += y;
 				vertex[2] += z;
 			}
-		
+
 			this.meshsize += FACE_SIZE;
 			this.vertnum += FACE_VERTS;
 		}
@@ -211,16 +235,16 @@ export class Chunk
 	drawTriangles(buf, vertnum, x, y, z, tex)
 	{
 		let gl = this.display.gl;
-		
+
 		matrix.translation(x, y, z, model);
-		
+
 		this.shader.uniformMatrix4fv("viewmodel", this.camera.getViewModel(x, y, z));
 		this.shader.uniformTex("tex", tex, 0);
-		
+
 		this.shader.vertexAttrib("pos",      buf, 3, true, VERT_SIZE, 0);
 		this.shader.vertexAttrib("texcoord", buf, 2, true, VERT_SIZE, 3);
 		this.shader.vertexAttrib("faceid",   buf, 1, true, VERT_SIZE, 5);
-		
+
 		gl.drawArrays(gl.TRIANGLES, 0, vertnum);
 	}
 }
@@ -229,14 +253,14 @@ function createCube(slots, out = new Float32Array(BLOCK_SIZE))
 {
 	let r = radians(90);
 	let s = radians(180);
-	
+
 	createQuad(0, 0, 0,  0, 0, 0,  slots[0], out.subarray(FACE_SIZE * 0)); // front
 	createQuad(1, 0, 0,  0, r, 0,  slots[1], out.subarray(FACE_SIZE * 1)); // right
 	createQuad(1, 0, 1,  0, s, 0,  slots[2], out.subarray(FACE_SIZE * 2)); // back
 	createQuad(0, 0, 1,  0,-r, 0,  slots[3], out.subarray(FACE_SIZE * 3)); // left
 	createQuad(0, 1, 0,  r, 0, 0,  slots[4], out.subarray(FACE_SIZE * 4)); // top
 	createQuad(0, 0, 1, -r, 0, 0,  slots[5], out.subarray(FACE_SIZE * 5)); // bottom
-	
+
 	return out;
 }
 
@@ -244,14 +268,14 @@ function createByteCube(slots, out = new Uint8Array(BLOCK_SIZE))
 {
 	let r = radians(90);
 	let s = radians(180);
-	
+
 	createByteQuad(0, 0, 0,  0, 0, 0,  slots[0], 0, out.subarray(FACE_SIZE * 0)); // front
 	createByteQuad(1, 0, 0,  0, r, 0,  slots[1], 1, out.subarray(FACE_SIZE * 1)); // right
 	createByteQuad(1, 0, 1,  0, s, 0,  slots[2], 2, out.subarray(FACE_SIZE * 2)); // back
 	createByteQuad(0, 0, 1,  0,-r, 0,  slots[3], 3, out.subarray(FACE_SIZE * 3)); // left
 	createByteQuad(0, 1, 0,  r, 0, 0,  slots[4], 4, out.subarray(FACE_SIZE * 4)); // top
 	createByteQuad(0, 0, 1, -r, 0, 0,  slots[5], 5, out.subarray(FACE_SIZE * 5)); // bottom
-	
+
 	return out;
 }
 
@@ -267,19 +291,19 @@ let front = new Float32Array([
 function createByteQuad(x, y, z, ax, ay, az, slot, faceid, out = new Uint8Array(FACE_SIZE))
 {
 	let floatquad = createQuad(x, y, z, ax, ay, az, slot, faceid);
-	
+
 	for(let i=0; i < FACE_VERTS; i++) {
 		let o  = i * VERT_SIZE;
 		let o2 = i * RAW_VERT_SIZE;
 		let v = out.subarray(o);
 		let f = floatquad.subarray(o2);
-		
+
 		v.set(f.subarray(0, 3));
 		v[3] = f[4] * 16;
 		v[4] = f[5] * 16;
 		v[5] = f[6];
 	}
-	
+
 	return out;
 }
 
@@ -288,17 +312,17 @@ function createQuad(x, y, z, ax, ay, az, slot, faceid, out = new Float32Array(RA
 	let m = matrix.identity();
 	let sx = slot % 16;
 	let sy = Math.floor(slot / 16);
-	
+
 	matrix.translate(m, x, y, z, m);
 	matrix.rotateX(m, ax, m);
 	matrix.rotateY(m, ay, m);
 	matrix.rotateZ(m, az, m);
-	
+
 	for(let i=0; i < FACE_VERTS; i++) {
 		let o = i * RAW_VERT_SIZE;
 		let v = out.subarray(o);
 		let t = v.subarray(4);
-		
+
 		v.set(front.subarray(o, o + RAW_VERT_SIZE));
 		vector.transform(v, m, v);
 		vector.round(v, v);
@@ -306,7 +330,7 @@ function createQuad(x, y, z, ax, ay, az, slot, faceid, out = new Float32Array(RA
 		t[1] = (sy + t[1]) / 16;
 		t[2] = faceid;
 	}
-	
+
 	return out;
 }
 
