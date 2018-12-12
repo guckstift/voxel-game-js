@@ -1524,7 +1524,18 @@
 		}
 	}
 
-	let server = new SocketServer();
+	let port = 12345;
+
+	if(process.argv[2] !== undefined) {
+		port = parseInt(process.argv[2]);
+	}
+	else if(process.env.PORT) {
+		port = parseInt(process.env.PORT);
+	}
+
+	console.log("Using port", port);
+
+	let server = new SocketServer(port);
 	let world = new World();
 
 	server.onNewClient = client => {
@@ -1570,7 +1581,7 @@
 					"wants to store chunk", x, y, z,
 					"reqid", requestid
 				);
-				
+
 				world.touchChunk(x, y, z).setChunkData(data.subarray(5 * 4));
 			}
 		};
