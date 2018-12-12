@@ -634,8 +634,6 @@
 				return blocks[0];
 			}
 
-			//console.log(this.data);
-
 			let i = getLinearBlockIndex(x, y, z);
 			let t = this.data[i];
 			let block = blocks[t];
