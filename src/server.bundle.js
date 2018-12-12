@@ -1030,7 +1030,13 @@
 
 			this.ready = new Promise(res => {
 				this.host = window.location.host;
-				this.socket = new WebSocket("ws://" + this.host, "blockweb");
+				this.protocol = "ws";
+
+				if(window.location.protocol === "https:") {
+					this.protocol = "wss";
+				}
+
+				this.socket = new WebSocket(this.protocol + "://" + this.host, "blockweb");
 				this.socket.binaryType = "arraybuffer";
 
 				this.socket.onopen = e => {
