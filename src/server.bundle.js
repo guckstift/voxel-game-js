@@ -1363,8 +1363,14 @@ var generator = (function (exports) {
 				mime = "application/javascript";
 			}
 			
-			response.setHeader("Content-Type", mime);
-			response.end(fs.readFileSync("./" + url));
+			if(fs.existsSync("." + url)) {
+				response.setHeader("Content-Type", mime);
+				response.end(fs.readFileSync("." + url));
+			}
+			else {
+				response.writeHead(404);
+				response.end();
+			}
 		}
 		
 		onConnection(socket, request)
