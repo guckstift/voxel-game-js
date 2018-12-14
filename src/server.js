@@ -3,6 +3,7 @@ import {World} from "./world.js";
 let http = require("http");
 let ws = require("ws");
 let fs = require("fs");
+let colors = require("colors");
 
 let intsize = Int32Array.BYTES_PER_ELEMENT;
 
@@ -15,6 +16,9 @@ export class Server
 		this.server.listen(port);
 		this.wss = new ws.Server({server: this.server});
 		this.wss.on("connection", this.onConnection.bind(this));
+		
+		console.log("\n  BlockWeb Server  \n".rainbow);
+		this.log("Listening on port", port);
 	}
 	
 	onRequest(request, response)
@@ -48,6 +52,13 @@ export class Server
 	onConnection(socket, request)
 	{
 		let client = new Client(this, socket);
+		
+		this.log("New connection", request.socket.remoteAddress);
+	}
+	
+	log(...messages)
+	{
+		console.log("[%s]".yellow, new Date().toLocaleString(), ...messages);
 	}
 }
 
