@@ -7,31 +7,50 @@ export class ClientStore
 		this.requests = {};
 
 		this.ready = new Promise(res => {
-			this.host = window.location.host;
-			this.protocol = "ws";
+			this.connect(res);
+		});
+	}
 
-			if(window.location.protocol === "https:") {
-				this.protocol = "wss";
-			}
+	connect(cb)
+	{
+		this.host = window.location.host;
+		this.protocol = "ws";
 
-			this.socket = new WebSocket(this.protocol + "://" + this.host, "blockweb");
-			this.socket.binaryType = "arraybuffer";
+		if(window.location.protocol === "https:") {
+			this.protocol = "wss";
+		}
 
-			this.socket.onopen = e => {
-				res();
-				this.isready = true;
-			};
+		this.socket = new WebSocket(this.protocol + "://" + this.host, "blockweb");
+		this.socket.binaryType = "arraybuffer";
 
-			this.socket.onerror = e => {
-				console.log("WebSocket error", e);
-			};
+		this.socket.onopen = e => {
+			console.log("Websocket open", e);
+			cb && cb();
+			this.isready = true;
+		};
 
-			this.socket.onmessage = e => {
-				let requestid = new Int32Array(e.data)[0];
-				let payload = new Uint8Array(e.data, 4);
+		this.socket.onclose = e => {
+			console.log("Connection closed", e);
+			this.isready = false;
+			//this.connect();
+		};
 
-				this.requests[requestid](payload);
-			};
+		this.socket.onerror = e => {
+			console.log("WebSocket error", e);
+		};
+
+		this.socket.onmessage = e => {
+			console.log("Websocket message", e);
+			
+			let requestid = new Int32Array(e.data)[0];
+			let payload = new Uint8Array(e.data, 4);
+
+			this.requests[requestid](payload);
+		};
+		
+		window.addEventListener("beforeunload", e => {
+			console.log("Close web socket");
+			this.socket.close();
 		});
 	}
 

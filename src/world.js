@@ -40,11 +40,11 @@ export class World
 		this.inserver = !display;
 		this.solidVoxel = this.solidVoxel.bind(this);
 		this.getBlock = this.getBlock.bind(this);
-		this.generator = new Generator();
 		this.chunks = {};
 
 		if(this.inserver) {
 			this.store = new ServerStore();
+			this.generator = new Generator();
 		}
 		else {
 			this.store = new ClientStore();

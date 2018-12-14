@@ -1,65 +1,107 @@
-import {SocketServer} from "./socketserver.js";
 import {World} from "./world.js";
+
+let http = require("http");
+let ws = require("ws");
+let fs = require("fs");
+
+let intsize = Int32Array.BYTES_PER_ELEMENT;
+
+export class Server
+{
+	constructor(port = 12345)
+	{
+		this.world = new World();
+		this.server = http.createServer(this.onRequest.bind(this));
+		this.server.listen(port);
+		this.wss = new ws.Server({server: this.server});
+		this.wss.on("connection", this.onConnection.bind(this));
+	}
+	
+	onRequest(request, response)
+	{
+		let url = request.url;
+		
+		if(url === "/") {
+			url = "/index.html";
+		}
+		
+		let ext = url.split(".").pop();
+		let mime = "text/html";
+		
+		if(ext === "png") {
+			mime = "image/png";
+		}
+		else if(ext === "js") {
+			mime = "application/javascript";
+		}
+		
+		response.setHeader("Content-Type", mime);
+		response.end(fs.readFileSync("./" + url));
+	}
+	
+	onConnection(socket, request)
+	{
+		let client = new Client(this, socket);
+	}
+}
+
+class Client
+{
+	constructor(server, socket)
+	{
+		this.server = server;
+		this.socket = socket;
+		this.socket.on("message", this.onMessage.bind(this));
+	}
+	
+	onMessage(data)
+	{
+		let values = new Int32Array(new Uint8Array(data).buffer);
+		let cmd = values[0];
+		let reqid = values[1];
+		
+		if(cmd === 1) {
+			this.onGetChunk(reqid, values[2], values[3], values[4]);
+		}
+		else if(cmd === 2) {
+			let chunkData = new Uint8Array(data).subarray(intsize * 5);
+			
+			this.onStoreChunk(reqid, values[2], values[3], values[4], chunkData);
+		}
+	}
+	
+	onGetChunk(reqid, x, y, z)
+	{
+		let chunk = this.server.world.touchChunk(x, y, z);
+
+		if(chunk.loading) {
+			chunk.onLoaded = () => this.sendChunk(reqid, chunk.data);
+		}
+		else {
+			this.sendChunk(reqid, chunk.data);
+		}
+	}
+	
+	sendChunk(reqid, data)
+	{
+		let bytes = new Uint8Array(intsize + data.byteLength);
+		let values = new Int32Array(bytes.buffer);
+		
+		values[0] = reqid;
+		bytes.set(data, intsize);
+		this.socket.send(bytes);
+	}
+	
+	onStoreChunk(reqid, x, y, z, data)
+	{
+		this.server.world.touchChunk(x, y, z).setChunkData(data);
+	}
+}
 
 let port = 12345;
 
 if(process.argv[2] !== undefined) {
 	port = parseInt(process.argv[2]);
 }
-else if(process.env.PORT) {
-	port = parseInt(process.env.PORT);
-}
 
-console.log("Using port", port);
-
-let server = new SocketServer(port);
-let world = new World();
-
-server.onNewClient = client => {
-	client.onMessage = data => {
-		// console.log(data);
-		let data32 = new Int32Array(data.buffer, 0, 2);
-		let cmd = data32[0];
-		let requestid = data32[1];
-
-		// console.log("Message reqid", requestid);
-
-		if(cmd === 1) {
-			data32 = new Int32Array(data.buffer, 0, 5);
-			let x = data32[2];
-			let y = data32[3];
-			let z = data32[4];
-
-			console.log(
-				"Client", client.id,
-				"wants chunk", x, y, z,
-				"reqid", requestid
-			);
-
-			let chunk = world.touchChunk(x, y, z);
-
-			if(chunk.loading) {
-				chunk.onLoaded = () => {
-					client.sendData(new Int32Array([requestid]), chunk.data);
-				};
-			}
-			else {
-				client.sendData(new Int32Array([requestid]), chunk.data);
-			}
-		}
-		else if(cmd === 2) {
-			data32 = new Int32Array(data.buffer, 0, 5);
-			let x = data32[2];
-			let y = data32[3];
-			let z = data32[4];
-
-			console.log(
-				"Client", client.id,
-				"wants to store chunk", x, y, z,
-				"reqid", requestid
-			);
-
-			world.touchChunk(x, y, z).setChunkData(data.subarray(5 * 4));
-		}
-	};
-};
+let server = new Server(port);

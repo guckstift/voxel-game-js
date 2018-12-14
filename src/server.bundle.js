@@ -1,227 +1,5 @@
-(function () {
+var generator = (function (exports) {
 	'use strict';
-
-	let noop = () => {};
-	let zeroKey = new Uint8Array(4);
-	let idctr = 0;
-
-	class SocketServer
-	{
-		constructor(port = 12345)
-		{
-			this.http = require("http");
-			this.crypto = require("crypto");
-			this.fs = require("fs");
-			this.onNewClient = noop;
-
-			this.server = this.http.createServer((req, res) => {
-				if(
-					req.headers.upgrade === "websocket" &&
-					req.headers.connection === "Upgrade" &&
-					req.headers["sec-websocket-version"] === "13"
-				) {
-					let clientKey = req.headers["sec-websocket-key"];
-					let serverKey = this.createServerKey(clientKey);
-
-					res.statusCode = 101;
-					res.setHeader("Upgrade", "websocket");
-					res.setHeader("Connection", "upgrade");
-					res.setHeader("Sec-WebSocket-Accept", serverKey);
-					res.setHeader("Sec-WebSocket-Protocol", "blockweb");
-					res.end();
-
-					let client = new Client(req.socket);
-
-					this.onNewClient(client);
-				}
-				else if(req.method === "GET") {
-					let url = req.url;
-					let ext = url.split(".").pop();
-
-					console.log(url);
-
-					if(url === "/") {
-						url = "/index.html";
-					}
-
-					this.fs.readFile(
-						"." + url,
-						(err, data) => {
-							if(err) {
-								res.statusCode = 404;
-								res.end();
-							}
-							else {
-								if(ext === "js") {
-									res.setHeader("Content-Type", "application/javascript");
-								}
-								else if(ext === "html") {
-									res.setHeader("Content-Type", "text/html");
-								}
-								else if(ext === "png") {
-									res.setHeader("Content-Type", "image/png");
-								}
-
-								res.end(data);
-							}
-						}
-					);
-				}
-			});
-
-			this.server.listen(port);
-		}
-
-		createServerKey(clientKey)
-		{
-			return this.crypto
-				.createHash("sha1")
-				.update(clientKey + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")
-				.digest("base64");
-		}
-	}
-
-	class Client
-	{
-		constructor(socket)
-		{
-			this.id = idctr++;
-			this.socket = socket;
-			this.socket.on("data", e => this.onData(e));
-			this.type = 0;
-			this.msgparts = [];
-			this.message = "";
-			this.onMessage = () => {};
-		}
-
-		sendData(...bufs)
-		{
-			let length = bufs.reduce((len, buf) => len + buf.byteLength, 0);
-			let frame = new Uint8Array(length + 10);
-			let i = 0;
-
-			// fin / rsv / opc = 1 / 0 / 2
-			frame[i++] = 0b10000010;
-
-			if(length > 2**16 - 1) {
-				frame[i++] = 127;
-				frame[i++] = length >> 56 & 0xff;
-				frame[i++] = length >> 48 & 0xff;
-				frame[i++] = length >> 40 & 0xff;
-				frame[i++] = length >> 32 & 0xff;
-				frame[i++] = length >> 24 & 0xff;
-				frame[i++] = length >> 16 & 0xff;
-				frame[i++] = length >>  8 & 0xff;
-				frame[i++] = length >>  0 & 0xff;
-			}
-			else if(length > 125) {
-				frame[i++] = 126;
-				frame[i++] = length >> 8 & 0xff;
-				frame[i++] = length >> 0 & 0xff;
-			}
-			else {
-				frame[i++] = length;
-			}
-
-			bufs.forEach(buf => {
-				frame.set(new Uint8Array(buf.buffer), i);
-				i += buf.byteLength;
-			});
-
-			this.socket.write(frame);
-		}
-
-		onData(data)
-		{
-			let frames = this.parseData(data);
-
-			frames.forEach(frame => {
-				if(frame.opc === 1) {
-					throw "Error: client texts me. I don't want that!";
-				}
-				else if(frame.opc === 2) {
-					this.type = frame.opc;
-					this.msgparts = [frame.dec];
-				}
-				else if(frame.opc === 0) {
-					this.msgparts.push(frame.dec);
-				}
-
-				if(this.type === 2 && (frame.opc === 0 || frame.opc === 2)) {
-					if(frame.fin) {
-						this.message = this.msgparts.reduce((left, right) => left.concat(right));
-						this.msgparts = [];
-						this.onMessage(this.message);
-					}
-				}
-			});
-		}
-
-		parseData(buf)
-		{
-			let frames = [];
-
-			while(buf.length > 0) {
-				let frame = this.parseFrame(buf);
-
-				frames.push(frame);
-				buf = buf.subarray(frame.consumed);
-			}
-
-			return frames;
-		}
-
-		parseFrame(buf)
-		{
-			let consumed = 0;
-			let key = zeroKey;
-			let fin = (buf[0] & 0b10000000) >> 7;
-			let rsv = (buf[0] &  0b1110000) >> 4;
-			let opc = (buf[0] &     0b1111) >> 0;
-			let msk = (buf[1] & 0b10000000) >> 7;
-			let len = (buf[1] &  0b1111111) >> 0;
-
-			if(len === 126) {
-				len =  buf[2] << 8;
-				len += buf[3];
-				buf = buf.subarray(4);
-				consumed += 4;
-			}
-			else if(len === 127) {
-				len =  buf[2] << 56;
-				len += buf[3] << 48;
-				len += buf[4] << 40;
-				len += buf[5] << 32;
-				len += buf[6] << 24;
-				len += buf[7] << 16;
-				len += buf[8] << 8;
-				len += buf[9];
-				buf = buf.subarray(10);
-				consumed += 10;
-			}
-			else {
-				buf = buf.subarray(2);
-				consumed += 2;
-			}
-
-			let dec = new Uint8Array(len);
-
-			if(msk > 0) {
-				key = buf.subarray(0, 4);
-				buf = buf.subarray(4);
-				consumed += 4;
-			}
-
-			for(let i=0; i < len; i++) {
-				dec[i] = buf[i] ^ key[i % 4];
-				consumed += 1;
-			}
-
-			// console.log("frame", fin, rsv, opc, msk, len, key, dec);
-
-			return {fin, rsv, opc, msk, len, key, dec, consumed};
-		}
-	}
 
 	function identity(out = new Float32Array(16))
 	{
@@ -1029,31 +807,50 @@
 			this.requests = {};
 
 			this.ready = new Promise(res => {
-				this.host = window.location.host;
-				this.protocol = "ws";
+				this.connect(res);
+			});
+		}
 
-				if(window.location.protocol === "https:") {
-					this.protocol = "wss";
-				}
+		connect(cb)
+		{
+			this.host = window.location.host;
+			this.protocol = "ws";
 
-				this.socket = new WebSocket(this.protocol + "://" + this.host, "blockweb");
-				this.socket.binaryType = "arraybuffer";
+			if(window.location.protocol === "https:") {
+				this.protocol = "wss";
+			}
 
-				this.socket.onopen = e => {
-					res();
-					this.isready = true;
-				};
+			this.socket = new WebSocket(this.protocol + "://" + this.host, "blockweb");
+			this.socket.binaryType = "arraybuffer";
 
-				this.socket.onerror = e => {
-					console.log("WebSocket error", e);
-				};
+			this.socket.onopen = e => {
+				console.log("Websocket open", e);
+				cb && cb();
+				this.isready = true;
+			};
 
-				this.socket.onmessage = e => {
-					let requestid = new Int32Array(e.data)[0];
-					let payload = new Uint8Array(e.data, 4);
+			this.socket.onclose = e => {
+				console.log("Connection closed", e);
+				this.isready = false;
+				//this.connect();
+			};
 
-					this.requests[requestid](payload);
-				};
+			this.socket.onerror = e => {
+				console.log("WebSocket error", e);
+			};
+
+			this.socket.onmessage = e => {
+				console.log("Websocket message", e);
+				
+				let requestid = new Int32Array(e.data)[0];
+				let payload = new Uint8Array(e.data, 4);
+
+				this.requests[requestid](payload);
+			};
+			
+			window.addEventListener("beforeunload", e => {
+				console.log("Close web socket");
+				this.socket.close();
 			});
 		}
 
@@ -1366,11 +1163,11 @@
 			this.inserver = !display;
 			this.solidVoxel = this.solidVoxel.bind(this);
 			this.getBlock = this.getBlock.bind(this);
-			this.generator = new Generator();
 			this.chunks = {};
 
 			if(this.inserver) {
 				this.store = new ServerStore();
+				this.generator = new Generator();
 			}
 			else {
 				this.store = new ClientStore();
@@ -1531,67 +1328,114 @@
 		}
 	}
 
+	let http = require("http");
+	let ws = require("ws");
+	let fs = require("fs");
+
+	let intsize = Int32Array.BYTES_PER_ELEMENT;
+
+	class Server
+	{
+		constructor(port = 12345)
+		{
+			this.world = new World();
+			this.server = http.createServer(this.onRequest.bind(this));
+			this.server.listen(port);
+			this.wss = new ws.Server({server: this.server});
+			this.wss.on("connection", this.onConnection.bind(this));
+		}
+		
+		onRequest(request, response)
+		{
+			let url = request.url;
+			
+			if(url === "/") {
+				url = "/index.html";
+			}
+			
+			let ext = url.split(".").pop();
+			let mime = "text/html";
+			
+			if(ext === "png") {
+				mime = "image/png";
+			}
+			else if(ext === "js") {
+				mime = "application/javascript";
+			}
+			
+			response.setHeader("Content-Type", mime);
+			response.end(fs.readFileSync("./" + url));
+		}
+		
+		onConnection(socket, request)
+		{
+			let client = new Client(this, socket);
+		}
+	}
+
+	class Client
+	{
+		constructor(server, socket)
+		{
+			this.server = server;
+			this.socket = socket;
+			this.socket.on("message", this.onMessage.bind(this));
+		}
+		
+		onMessage(data)
+		{
+			let values = new Int32Array(new Uint8Array(data).buffer);
+			let cmd = values[0];
+			let reqid = values[1];
+			
+			if(cmd === 1) {
+				this.onGetChunk(reqid, values[2], values[3], values[4]);
+			}
+			else if(cmd === 2) {
+				let chunkData = new Uint8Array(data).subarray(intsize * 5);
+				
+				this.onStoreChunk(reqid, values[2], values[3], values[4], chunkData);
+			}
+		}
+		
+		onGetChunk(reqid, x, y, z)
+		{
+			let chunk = this.server.world.touchChunk(x, y, z);
+
+			if(chunk.loading) {
+				chunk.onLoaded = () => this.sendChunk(reqid, chunk.data);
+			}
+			else {
+				this.sendChunk(reqid, chunk.data);
+			}
+		}
+		
+		sendChunk(reqid, data)
+		{
+			let bytes = new Uint8Array(intsize + data.byteLength);
+			let values = new Int32Array(bytes.buffer);
+			
+			values[0] = reqid;
+			bytes.set(data, intsize);
+			this.socket.send(bytes);
+		}
+		
+		onStoreChunk(reqid, x, y, z, data)
+		{
+			this.server.world.touchChunk(x, y, z).setChunkData(data);
+		}
+	}
+
 	let port = 12345;
 
 	if(process.argv[2] !== undefined) {
 		port = parseInt(process.argv[2]);
 	}
-	else if(process.env.PORT) {
-		port = parseInt(process.env.PORT);
-	}
 
-	console.log("Using port", port);
+	let server = new Server(port);
 
-	let server = new SocketServer(port);
-	let world = new World();
+	exports.Server = Server;
 
-	server.onNewClient = client => {
-		client.onMessage = data => {
-			// console.log(data);
-			let data32 = new Int32Array(data.buffer, 0, 2);
-			let cmd = data32[0];
-			let requestid = data32[1];
+	return exports;
 
-			// console.log("Message reqid", requestid);
-
-			if(cmd === 1) {
-				data32 = new Int32Array(data.buffer, 0, 5);
-				let x = data32[2];
-				let y = data32[3];
-				let z = data32[4];
-
-				console.log(
-					"Client", client.id,
-					"wants chunk", x, y, z,
-					"reqid", requestid
-				);
-
-				let chunk = world.touchChunk(x, y, z);
-
-				if(chunk.loading) {
-					chunk.onLoaded = () => {
-						client.sendData(new Int32Array([requestid]), chunk.data);
-					};
-				}
-				else {
-					client.sendData(new Int32Array([requestid]), chunk.data);
-				}
-			}
-			else if(cmd === 2) {
-				data32 = new Int32Array(data.buffer, 0, 5);
-				let x = data32[2];
-				let y = data32[3];
-				let z = data32[4];
-
-				console.log(
-					"Client", client.id,
-					"wants to store chunk", x, y, z,
-					"reqid", requestid
-				);
-
-				world.touchChunk(x, y, z).setChunkData(data.subarray(5 * 4));
-			}
-		};
-	};
-
-}());
+}({}));
