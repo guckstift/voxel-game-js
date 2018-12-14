@@ -2,8 +2,7 @@ import {Chunk, CHUNK_WIDTH, vertSrc, fragSrc} from "./chunk.js";
 import {raycast} from "./raycast.js";
 import {boxcast} from "./boxcast.js";
 import {radians} from "./math.js";
-import {ClientStore} from "./clientstore.js";
-import {ServerStore} from "./serverstore.js";
+import {Store} from "./store.js";
 import {blocks} from "./blocks.js";
 import {Generator} from "./generator.js";
 import * as vector from "./vector.js";
@@ -41,13 +40,14 @@ export class World
 		this.solidVoxel = this.solidVoxel.bind(this);
 		this.getBlock = this.getBlock.bind(this);
 		this.chunks = {};
+		this.store = new Store();
 
 		if(this.inserver) {
-			this.store = new ServerStore();
+			// this.store = new ServerStore();
 			this.generator = new Generator();
 		}
 		else {
-			this.store = new ClientStore();
+			// this.store = new ClientStore();
 			this.display = display;
 			this.camera = camera;
 			this.shader = display.getShader("chunk", vertSrc, fragSrc);

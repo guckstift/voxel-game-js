@@ -29,6 +29,10 @@ export class Server
 			url = "/index.html";
 		}
 		
+		if(!fs.existsSync("." + url)) {
+			url = "/index.html";
+		}
+		
 		let ext = url.split(".").pop();
 		let mime = "text/html";
 		
@@ -39,14 +43,8 @@ export class Server
 			mime = "application/javascript";
 		}
 		
-		if(fs.existsSync("." + url)) {
-			response.setHeader("Content-Type", mime);
-			response.end(fs.readFileSync("." + url));
-		}
-		else {
-			response.writeHead(404);
-			response.end();
-		}
+		response.setHeader("Content-Type", mime);
+		response.end(fs.readFileSync("." + url));
 	}
 	
 	onConnection(socket, request)
