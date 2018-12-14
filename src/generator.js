@@ -22,7 +22,7 @@ export class Generator
 			//console.log("worker running");
 		}
 		else if(env === "web") {
-			this.worker = new Worker("./src/generator.bundle.js");
+			this.worker = new Worker("../bundles/generator.js");
 
 			this.worker.onmessage = e => {
 				this.callbacks[e.data.id](e.data.buf);

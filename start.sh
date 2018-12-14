@@ -1,3 +1,3 @@
 #!/bin/bash
 
-node src/server.bundle.js
+node bundles/server.js
