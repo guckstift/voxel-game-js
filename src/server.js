@@ -49,7 +49,7 @@ export class Server
 	
 	onConnection(socket, request)
 	{
-		let client = new Client(this, socket);
+		let client = new Client(this, socket, request.socket.remoteAddress);
 		
 		this.log("New connection", request.socket.remoteAddress);
 	}
@@ -62,10 +62,11 @@ export class Server
 
 class Client
 {
-	constructor(server, socket)
+	constructor(server, socket, addr)
 	{
 		this.server = server;
 		this.socket = socket;
+		this.addr = addr;
 		this.socket.on("message", this.onMessage.bind(this));
 	}
 	
@@ -109,6 +110,7 @@ class Client
 	
 	onStoreChunk(reqid, x, y, z, data)
 	{
+		this.server.log("Client", this.addr, "stores chunk", x, y, z);
 		this.server.world.touchChunk(x, y, z).setChunkData(data);
 	}
 }
