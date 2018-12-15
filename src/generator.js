@@ -1,4 +1,4 @@
-import {NoiseField} from "./noisefield.js";
+import {NoiseField} from "./noise.js";
 import {CHUNK_WIDTH, getLinearBlockIndex} from "./chunk.js";
 import {env} from "./env.js";
 
