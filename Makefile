@@ -10,4 +10,7 @@ install:
 	npm i ws
 	npm i colors
 
-.PHONY: start install build
+backup:
+	cp -a ./chunks ./backups/`date +'%Y-%m-%d-%H-%M-%S'`
+
+.PHONY: start install build backup

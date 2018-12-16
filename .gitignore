@@ -1,4 +1,5 @@
-chunks/*
+backups/*
 bundles/*.js
+chunks/*
 node_modules
 package-lock.json
