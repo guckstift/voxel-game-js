@@ -5,6 +5,7 @@ import {radians} from "./math.js";
 import {Store} from "./store.js";
 import {blocks} from "./blocks.js";
 import {Generator} from "./generator.js";
+import {Field} from "./field.js";
 import * as vector from "./vector.js";
 
 let sun = vector.create(0, -1, 0);
@@ -39,19 +40,29 @@ export class World
 		this.inserver = !display;
 		this.solidVoxel = this.solidVoxel.bind(this);
 		this.getBlock = this.getBlock.bind(this);
-		this.chunks = {};
+		this.chunks = new Field(this.chunkFactory.bind(this));
 		this.store = new Store();
 
 		if(this.inserver) {
-			// this.store = new ServerStore();
 			this.generator = new Generator();
 		}
 		else {
-			// this.store = new ClientStore();
 			this.display = display;
 			this.camera = camera;
 			this.shader = display.getShader("chunk", vertSrc, fragSrc);
 		}
+	}
+
+	chunkFactory(x, y, z)
+	{
+		return new Chunk(
+			x, y, z,
+			this.display,
+			this.camera,
+			this.generator,
+			this.store,
+			this.inserver,
+		);
 	}
 
 	touchChunkAt(x, y, z)
@@ -63,51 +74,12 @@ export class World
 
 	touchChunk(x, y, z)
 	{
-		if(!this.chunks[z]) {
-			this.chunks[z] = {};
-		}
-
-		let slice = this.chunks[z];
-
-		if(!slice[y]) {
-			slice[y] = {};
-		}
-
-		let column = slice[y];
-
-		if(!column[x]) {
-			column[x] = new Chunk(
-				x, y, z,
-				this.display,
-				this.camera,
-				this.generator,
-				this.store,
-				this.inserver,
-			);
-		}
-
-		return column[x];
+		return this.chunks.get(x, y, z);
 	}
 
 	getChunk(x, y, z)
 	{
-		if(!this.chunks[z]) {
-			return null;
-		}
-
-		let slice = this.chunks[z];
-
-		if(!slice[y]) {
-			return null;
-		}
-
-		let column = slice[y];
-
-		if(!column[x]) {
-			return null;
-		}
-
-		return column[x];
+		return this.chunks.softGet(x, y, z);
 	}
 
 	getBlock(x, y, z)
@@ -188,19 +160,6 @@ export class World
 		this.shader.use();
 		this.shader.uniformMatrix4fv("proj", this.camera.getProjection());
 		this.shader.uniform3fv("sun", sun.subarray(0, 3));
-
-		for(let z in this.chunks) {
-			let slice = this.chunks[z];
-
-			for(let y in slice) {
-				let column = slice[y];
-
-				for(let x in column) {
-					let chunk = column[x];
-
-					chunk.draw();
-				}
-			}
-		}
+		this.chunks.each(chunk => chunk.draw());
 	}
 }

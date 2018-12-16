@@ -47,7 +47,7 @@ export class Store
 		};
 
 		this.socket.onmessage = e => {
-			console.log("Websocket message", e);
+			// console.log("Websocket message", e);
 
 			let requestid = new Int32Array(e.data)[0];
 			let payload = new Uint8Array(e.data, 4);
