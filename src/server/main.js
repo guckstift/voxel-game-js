@@ -1,10 +1,11 @@
-import {World} from "./world.js";
+import {World} from "../world.js";
 
 let http = require("http");
 let ws = require("ws");
 let fs = require("fs");
 let colors = require("colors");
 
+let idctr = 0;
 let intsize = Int32Array.BYTES_PER_ELEMENT;
 
 export class Server
@@ -47,9 +48,9 @@ export class Server
 		response.end(fs.readFileSync("." + url));
 	}
 	
-	onConnection(socket, request)
+	onConnection(ws, request)
 	{
-		let client = new Client(this, socket, request.socket.remoteAddress);
+		let client = new Client(this, ws, request.socket);
 		
 		this.log("New connection", request.socket.remoteAddress);
 	}
@@ -62,12 +63,15 @@ export class Server
 
 class Client
 {
-	constructor(server, socket, addr)
+	constructor(server, ws, socket)
 	{
+		this.id = idctr++;
 		this.server = server;
+		this.ws = ws;
 		this.socket = socket;
-		this.addr = addr;
-		this.socket.on("message", this.onMessage.bind(this));
+		this.addr = socket.remoteAddress;
+		this.ws.on("message", this.onMessage.bind(this));
+		this.ws.on("close", this.onClose.bind(this));
 	}
 	
 	onMessage(data)
@@ -84,6 +88,11 @@ class Client
 			
 			this.onStoreChunk(reqid, values[2], values[3], values[4], chunkData);
 		}
+	}
+	
+	onClose()
+	{
+		this.server.log("Client disconnected", this.addr);
 	}
 	
 	onGetChunk(reqid, x, y, z)
@@ -105,7 +114,7 @@ class Client
 		
 		values[0] = reqid;
 		bytes.set(data, intsize);
-		this.socket.send(bytes);
+		this.ws.send(bytes);
 	}
 	
 	onStoreChunk(reqid, x, y, z, data)
