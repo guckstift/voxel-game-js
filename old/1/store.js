@@ -38,8 +38,6 @@ export class Store
 
 		this.socket.onclose = e => {
 			console.log("Connection closed", e);
-			//this.isready = false;
-			//this.connect();
 		};
 
 		this.socket.onerror = e => {
@@ -47,8 +45,6 @@ export class Store
 		};
 
 		this.socket.onmessage = e => {
-			// console.log("Websocket message", e);
-
 			let requestid = new Int32Array(e.data)[0];
 			let payload = new Uint8Array(e.data, 4);
 
@@ -57,7 +53,7 @@ export class Store
 
 		window.addEventListener("beforeunload", e => {
 			console.log("Close web socket");
-			this.socket.close();
+			//this.socket.close();
 		});
 	}
 

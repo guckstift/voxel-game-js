@@ -2,6 +2,7 @@ import {Display} from "./display.js";
 import {Gui} from "./gui.js";
 import {Camera} from "./camera.js";
 import {World} from "./world.js";
+import {Server} from "./server.js";
 import {CHUNK_WIDTH} from "./chunk.js";
 import {Input} from "./input.js";
 import {Body} from "./body.js";
@@ -10,35 +11,27 @@ import {radians} from "./math.js";
 import * as matrix from "./matrix.js";
 import * as vector from "./vector.js";
 
-function testWebSocket()
-{
-	let socket = new WebSocket("ws://localhost:1234", "blockweb");
-
-	socket.binaryType = "arraybuffer";
-
-	socket.onopen = e => {
-		console.log("open");
-		socket.send(new Int32Array([1, 0,-1,0]));
-	};
-
-	socket.onmessage = e => {
-		console.log(e);
-	};
-}
-
 const runspeed  = 4;
 const jumpspeed = 7.5;
 const gravity   = 20;
 
 let display = new Display();
-let gui = new Gui(display);
 let camera = new Camera(display);
-let world = new World(display, camera);
+let server = new Server();
+let world = new World(display, camera, server);
+let gui = new Gui(display);
 let body = new Body(world, [-0.25, 0, -0.25], [0.25, 1.75, 0.25]);
 let input = new Input(gui.container);
 let blockHit = null;
 let gl = display.gl;
 let selected = 1;
+
+server.onSetChunk = (x, y, z, data) => {
+	let chunk = world.getChunk(x, y, z);
+	
+	chunk.data.set(data);
+	chunk.updateMesh();
+};
 
 let axis = display.createStaticByteBuffer([
 	0,0,0, 1,0,0,
@@ -246,7 +239,7 @@ let fr = 0;
 
 document.body.appendChild(gui.container);
 
-world.touchChunk( 0, 0, 0);
+//world.getChunk( 0, 0, 0);
 
 body.pos.set([-0.5, 8, -2.5]);
 body.acc[1] = -gravity;
@@ -285,7 +278,7 @@ display.onRender = () =>
 	for(let x=-1; x<=+1; x++) {
 		for(let y=-1; y<=+1; y++) {
 			for(let z=-1; z<=+1; z++) {
-				world.touchChunkAt(
+				world.getChunkAt(
 					body.pos[0] + CHUNK_WIDTH * x,
 					body.pos[1] + CHUNK_WIDTH * y,
 					body.pos[2] + CHUNK_WIDTH * z,

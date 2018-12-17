@@ -1,179 +1,81 @@
 import * as matrix from "./matrix.js";
 import * as vector from "./vector.js";
-import {noise3d} from "./noise.js";
 import {radians} from "./math.js";
 import {blocks} from "./blocks.js";
+import {chunkSrc} from "./glsl.js";
 
 export const RAW_VERT_SIZE = 7;
 export const VERT_SIZE = 6;
 export const FACE_VERTS = 6;
 export const BLOCK_FACES = 6;
 export const CHUNK_WIDTH = 16;
+export const CHUNK_SIZE = CHUNK_WIDTH ** 3;
 
 export const RAW_FACE_SIZE = FACE_VERTS * RAW_VERT_SIZE;
 export const FACE_SIZE = FACE_VERTS * VERT_SIZE;
 export const BLOCK_SIZE = BLOCK_FACES * FACE_SIZE;
 
-export let vertSrc = `
-	uniform mat4 proj;
-	uniform mat4 viewmodel;
-	uniform vec3 sun;
-
-	attribute vec3 pos;
-	attribute vec2 texcoord;
-	attribute float faceid;
-
-	varying vec2 vTexcoord;
-	varying float vCoef;
-
-	void main()
-	{
-		gl_Position = proj * viewmodel * vec4(pos, 1.0);
-
-		vTexcoord = texcoord / 16.0;
-
-		vec3 normal =
-			faceid == 0.0 ? vec3(0, 0, -1) :
-			faceid == 1.0 ? vec3(+1, 0, 0) :
-			faceid == 2.0 ? vec3(0, 0, +1) :
-			faceid == 3.0 ? vec3(-1, 0, 0) :
-			faceid == 4.0 ? vec3(0, +1, 0) :
-			faceid == 5.0 ? vec3(0, -1, 0) :
-			vec3(0,0,0);
-
-		vCoef = 0.25 + max(0.0, dot(normal, -sun)) * 0.75;
-	}
-`;
-
-export let fragSrc = `
-	precision highp float;
-
-	uniform sampler2D tex;
-
-	varying vec2 vTexcoord;
-	varying float vCoef;
-
-	void main()
-	{
-		gl_FragColor = texture2D(tex, vTexcoord);
-		gl_FragColor.rgb *= vCoef;
-	}
-`;
-
 let model = matrix.identity();
-
-export function getLinearBlockIndex(x, y, z)
-{
-	return x + y * CHUNK_WIDTH + z * CHUNK_WIDTH * CHUNK_WIDTH;
-}
 
 export class Chunk
 {
-	constructor(x, y, z, display, camera, generator, store, inserver = false)
+	constructor(x, y, z, world)
 	{
 		this.x = x;
 		this.y = y;
 		this.z = z;
-		this.display = display;
-		this.camera = camera;
-		this.store = store;
-		this.inserver = inserver;
+		this.world = world;
+		this.display = world.display;
+		this.camera = world.camera;
+		this.server = world.server;
 		this.meshsize = 0;
 		this.vertnum = 0;
-		this.data = new Uint8Array(CHUNK_WIDTH ** 3);
-		this.loading = true;
-		this.onLoaded = () => {};
+		this.data = new Uint8Array(CHUNK_SIZE);
+		this.mesh = new Uint8Array(CHUNK_SIZE * BLOCK_SIZE);
+		this.buf = this.display.createStaticByteBuffer(this.mesh);
+		this.shader = this.display.getShader("chunk", chunkSrc.vert, chunkSrc.frag);
+		this.atlas = this.display.getTexture("gfx/atlas.png");
 
-		if(!this.inserver) {
-			this.mesh = new Uint8Array(CHUNK_WIDTH ** 3 * BLOCK_SIZE);
-			this.buf = this.display.createStaticByteBuffer(this.mesh);
-			this.shader = display.getShader("chunk", vertSrc, fragSrc);
-			this.atlas = display.getTexture("gfx/atlas.png");
+		console.log("chunkctor", x, y, z);
+		this.server.getChunk(x, y, z);
+	}
+	
+	getBlockType(x, y, z)
+	{
+		if(!posInChunk(x, y, z)) {
+			return 0;
 		}
-
-		store.loadChunk(
-			x, y, z,
-			data => {
-				this.data = data;
-				this.loading = false;
-				this.onLoaded();
-				this.updateMesh();
-			},
-			() => {
-				if(this.inserver) {
-					generator.generateChunk(x, y, z, this.data.buffer);
-					this.loading = false;
-					this.onLoaded();
-					this.updateMesh();
-				}
-				else {
-					generator.requestChunk(x, y, z, this.data.buffer, (data) => {
-						this.data = new Uint8Array(data);
-						this.loading = false;
-						this.onLoaded();
-						this.updateMesh();
-					});
-				}
-			},
-		);
+		
+		return this.data[getLinearBlockIndex(x, y, z)];
 	}
 
 	getBlock(x, y, z)
 	{
-		if(this.loading) {
-			return blocks[1];
-		}
-
-		if(x < 0 || y < 0 || z < 0 || x >= CHUNK_WIDTH || y >= CHUNK_WIDTH || z >= CHUNK_WIDTH) {
-			return blocks[0];
-		}
-
-		let i = getLinearBlockIndex(x, y, z);
-		let t = this.data[i];
-		let block = blocks[t];
-
-		return block;
+		return blocks[this.getBlockType(x, y, z)];
 	}
 
 	getBlockVerts(x, y, z)
 	{
-		if(x < 0 || y < 0 || z < 0 || x >= CHUNK_WIDTH || y >= CHUNK_WIDTH || z >= CHUNK_WIDTH) {
+		if(!posInChunk(x, y, z)) {
 			return null;
 		}
-
-		let i = getLinearBlockIndex(x, y, z);
-		let t = this.data[i];
-		let block = blockverts[t];
-
-		return block;
+		
+		return blockverts[this.getBlockType(x, y, z)];
 	}
 
 	setBlock(x, y, z, t)
 	{
-		if(x < 0 || y < 0 || z < 0 || x >= CHUNK_WIDTH || y >= CHUNK_WIDTH || z >= CHUNK_WIDTH) {
+		if(!posInChunk(x, y, z)) {
 			return;
 		}
-
-		let i = getLinearBlockIndex(x, y, z);
-
-		this.data[i] = t;
+		
+		this.data[getLinearBlockIndex(x, y, z)] = t;
+		this.server.setChunk(this.x, this.y, this.z, this.data);
 		this.updateMesh();
-		this.store.storeChunk(this);
-	}
-
-	setChunkData(data)
-	{
-		this.data.set(data);
-		this.updateMesh();
-		this.store.storeChunk(this);
 	}
 
 	updateMesh()
 	{
-		if(this.inserver) {
-			return;
-		}
-
 		let gl = this.display.gl;
 
 		this.meshsize = 0;
@@ -277,6 +179,16 @@ function createByteCube(slots, out = new Uint8Array(BLOCK_SIZE))
 	createByteQuad(0, 0, 1, -r, 0, 0,  slots[5], 5, out.subarray(FACE_SIZE * 5)); // bottom
 
 	return out;
+}
+
+export function getLinearBlockIndex(x, y, z)
+{
+	return x + y * CHUNK_WIDTH + z * CHUNK_WIDTH * CHUNK_WIDTH;
+}
+
+export function posInChunk(x, y, z)
+{
+	return x >= 0 && y >= 0 && z >= 0 && x < CHUNK_WIDTH && y < CHUNK_WIDTH && z < CHUNK_WIDTH;
 }
 
 let front = new Float32Array([

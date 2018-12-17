@@ -1,19 +1,13 @@
-import {Chunk, CHUNK_WIDTH, vertSrc, fragSrc} from "./chunk.js";
+import {Chunk, CHUNK_WIDTH} from "./chunk.js";
 import {raycast} from "./raycast.js";
 import {boxcast} from "./boxcast.js";
 import {radians} from "./math.js";
-import {Store} from "./store.js";
 import {blocks} from "./blocks.js";
-import {Generator} from "./generator.js";
 import {Field} from "./field.js";
 import * as vector from "./vector.js";
+import {chunkSrc} from "./glsl.js";
 
-let sun = vector.create(0, -1, 0);
-
-vector.rotateX(sun, radians(-30), sun);
-vector.rotateY(sun, radians(-30), sun);
-
-function getChunkPos(x, y, z)
+export function getChunkPos(x, y, z)
 {
 	return [
 		Math.floor(x / CHUNK_WIDTH),
@@ -22,7 +16,7 @@ function getChunkPos(x, y, z)
 	];
 }
 
-function getLocalPos(x, y, z)
+export function getLocalPos(x, y, z)
 {
 	let chunkPos = getChunkPos(x, y, z);
 
@@ -35,67 +29,44 @@ function getLocalPos(x, y, z)
 
 export class World
 {
-	constructor(display, camera)
+	constructor(display, camera, server)
 	{
-		this.inserver = !display;
-		this.solidVoxel = this.solidVoxel.bind(this);
-		this.getBlock = this.getBlock.bind(this);
+		this.solidBlock = this.solidBlock.bind(this);
 		this.chunks = new Field(this.chunkFactory.bind(this));
-		this.store = new Store();
-
-		if(this.inserver) {
-			this.generator = new Generator();
-		}
-		else {
-			this.display = display;
-			this.camera = camera;
-			this.shader = display.getShader("chunk", vertSrc, fragSrc);
-		}
+		this.display = display;
+		this.camera = camera;
+		this.server = server;
+		this.shader = display.getShader("chunk", chunkSrc.vert, chunkSrc.frag);
+		this.sun = vector.create(0, -1, 0);
+		
+		vector.rotateX(this.sun, radians(-30), this.sun);
+		vector.rotateY(this.sun, radians(-30), this.sun);
 	}
 
 	chunkFactory(x, y, z)
 	{
-		return new Chunk(
-			x, y, z,
-			this.display,
-			this.camera,
-			this.generator,
-			this.store,
-			this.inserver,
-		);
-	}
-
-	touchChunkAt(x, y, z)
-	{
-		let chunkPos = getChunkPos(x, y, z);
-
-		this.touchChunk(...chunkPos);
-	}
-
-	touchChunk(x, y, z)
-	{
-		return this.chunks.get(x, y, z);
+		return new Chunk(x, y, z, this);
 	}
 
 	getChunk(x, y, z)
 	{
-		return this.chunks.softGet(x, y, z);
+		return this.chunks.get(x, y, z);
+	}
+
+	getChunkAt(x, y, z)
+	{
+		return this.getChunk(...getChunkPos(x, y, z));
 	}
 
 	getBlock(x, y, z)
 	{
 		let chunkPos = getChunkPos(x, y, z);
 		let localPos = getLocalPos(x, y, z);
-		let chunk = this.getChunk(...chunkPos);
 
-		if(!chunk) {
-			return blocks[0];
-		}
-
-		return chunk.getBlock(...localPos);
+		return this.getChunk(...chunkPos).getBlock(...localPos);
 	}
 
-	solidVoxel(p)
+	solidBlock(p)
 	{
 		return this.getBlock(...p).type > 0;
 	}
@@ -104,23 +75,18 @@ export class World
 	{
 		let chunkPos = getChunkPos(x, y, z);
 		let localPos = getLocalPos(x, y, z);
-		let chunk = this.getChunk(...chunkPos);
-
-		if(!chunk) {
-			return;
-		}
-
-		chunk.setBlock(...localPos, t);
+		
+		return this.getChunk(...chunkPos).setBlock(...localPos, t);
 	}
 
 	hitBlock(dirvec, pos, raylength = 8)
 	{
-		let hit = raycast(
-			[pos[0], pos[1], pos[2]],
+		let hit = this.raycast(
+			pos,
 			[dirvec[0] * raylength,
 			dirvec[1] * raylength,
 			dirvec[2] * raylength],
-			this.solidVoxel,
+			this.solidBlock,
 		);
 
 		if(hit) {
@@ -147,19 +113,19 @@ export class World
 
 	raycast(start, vec)
 	{
-		return raycast(start, vec, this.solidVoxel);
+		return raycast(start, vec, this.solidBlock);
 	}
 
 	boxcast(boxmin, boxmax, vec)
 	{
-		return boxcast(boxmin, boxmax, vec, this.solidVoxel);
+		return boxcast(boxmin, boxmax, vec, this.solidBlock);
 	}
 
 	draw()
 	{
 		this.shader.use();
 		this.shader.uniformMatrix4fv("proj", this.camera.getProjection());
-		this.shader.uniform3fv("sun", sun.subarray(0, 3));
+		this.shader.uniform3fv("sun", this.sun);
 		this.chunks.each(chunk => chunk.draw());
 	}
 }

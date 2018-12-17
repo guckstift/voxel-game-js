@@ -9,6 +9,7 @@ export class Generator
 		this.counter = 0;
 		this.callbacks = {};
 		this.noise = new NoiseField(0, 8, 8);
+		this.buf = new Uint8Array(CHUNK_WIDTH ** 3);
 
 		if(env === "worker") {
 			onmessage = e => {
@@ -32,9 +33,9 @@ export class Generator
 		}
 	}
 
-	generateChunk(x, y, z, buf)
+	generateChunk(x, y, z)
 	{
-		let data = new Uint8Array(buf);
+		let data = this.buf;
 
 		for(let bx = 0; bx < CHUNK_WIDTH; bx++) {
 			for(let by = 0; by < CHUNK_WIDTH; by++) {
@@ -54,6 +55,8 @@ export class Generator
 				}
 			}
 		}
+		
+		return data;
 	}
 
 	requestChunk(x, y, z, buf, cb)

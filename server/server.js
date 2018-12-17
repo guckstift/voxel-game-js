@@ -1,5 +1,6 @@
-import {World} from "../world.js";
 import {Client} from "./client.js";
+import {World} from "./world.js";
+import {Store} from "./store.js";
 
 let http = require("http");
 let ws = require("ws");
@@ -8,30 +9,42 @@ let colors = require("colors");
 
 export class Server
 {
-	constructor(port = 12345)
+	constructor(port)
 	{
-		this.world = new World();
+		this.nextClientId = 0;
 		this.server = http.createServer(this.onRequest.bind(this));
 		this.server.listen(port);
 		this.wss = new ws.Server({server: this.server});
 		this.wss.on("connection", this.onConnection.bind(this));
+		this.store = new Store();
+		this.world = new World(this.store);
 
-		console.log("\n  BlockWeb Server  \n".rainbow);
-		this.log("Listening on port", port);
+		this.nlog("\n  BlockWeb Server  \n".rainbow);
+		this.tlog("Listening on port", port);
 	}
 
 	onRequest(request, response)
 	{
 		let url = request.url;
 
-		if(url === "/") {
+		if(url === "/" || !fs.existsSync("." + url)) {
 			url = "/index.html";
 		}
 
-		if(!fs.existsSync("." + url)) {
-			url = "/index.html";
-		}
+		response.setHeader("Content-Type", this.getMime(url));
+		response.end(fs.readFileSync("." + url));
+	}
 
+	onConnection(ws, req)
+	{
+		this.tlog("New connection", req.socket.remoteAddress);
+		
+		let sock = req.socket;
+		let client = new Client(this, ws, sock, this.nextClientId++);
+	}
+	
+	getMime(url)
+	{
 		let ext = url.split(".").pop();
 		let mime = "text/html";
 
@@ -41,19 +54,16 @@ export class Server
 		else if(ext === "js") {
 			mime = "application/javascript";
 		}
-
-		response.setHeader("Content-Type", mime);
-		response.end(fs.readFileSync("." + url));
+		
+		return mime;
 	}
-
-	onConnection(ws, request)
+	
+	nlog(...messages)
 	{
-		let client = new Client(this, ws, request.socket);
-
-		this.log("New connection", request.socket.remoteAddress);
+		console.log(...messages);
 	}
 
-	log(...messages)
+	tlog(...messages)
 	{
 		console.log("[%s]".yellow, new Date().toLocaleString(), ...messages);
 	}

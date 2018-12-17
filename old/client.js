@@ -28,6 +28,28 @@ export class Client
 			
 			this.onStoreChunk(reqid, values[2], values[3], values[4], chunkData);
 		}
+		/*
+		let u8 = new Uint8Array(data);
+		let i32 = new Int32Array(u8.buffer);
+		let cmd = i32[0];
+		
+		if(cmd === 2) {
+			let x = i32[1];
+			let y = i32[2];
+			let z = i32[3];
+			let data = u8.subarray(16);
+			
+			this.onSetChunk(x, y, z, data);
+		}
+		else if(cmd === 3) {
+			let x = i32[1];
+			let y = i32[2];
+			let z = i32[3];
+			let block = u8[16];
+			
+			this.onSetBlock(x, y, z, data);
+		}
+		*/
 	}
 	
 	onClose()
