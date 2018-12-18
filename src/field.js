@@ -25,15 +25,19 @@ export class Field
 	{
 		for(let z = this.zrange[0]; z <= this.zrange[1]; z++) {
 			let slice = this.array[z];
+			
+			if(slice) {
+				for(let y = this.yrange[0]; y <= this.yrange[1]; y++) {
+					let column = slice[y];
+					
+					if(column) {
+						for(let x = this.xrange[0]; x <= this.xrange[1]; x++) {
+							let cell = column[x];
 
-			for(let y = this.yrange[0]; y <= this.yrange[1]; y++) {
-				let column = slice[y];
-
-				for(let x = this.xrange[0]; x <= this.xrange[1]; x++) {
-					let cell = column[x];
-
-					if(cell) {
-						fn(column[x]);
+							if(cell) {
+								fn(cell);
+							}
+						}
 					}
 				}
 			}
