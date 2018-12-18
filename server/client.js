@@ -52,7 +52,6 @@ export class Client
 		let chunk = this.world.getChunk(x, y, z);
 		
 		if(chunk.loaded) {
-			this.server.tlog(this.name, "wants chunk", x, y, z);
 			this.setChunk(x, y, z, chunk.data);
 		}
 		else {
