@@ -241,7 +241,7 @@ document.body.appendChild(gui.container);
 
 //world.getChunk( 0, 0, 0);
 
-body.pos.set([-0.5, 8, -2.5]);
+body.pos.set([-0.5, 16, -2.5]);
 body.acc[1] = -gravity;
 
 gui.blockSelector.setFrame(blocks[selected].faces[0], 0);
