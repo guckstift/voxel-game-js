@@ -58,6 +58,14 @@ export class World
 		return this.getChunk(...getChunkPos(x, y, z));
 	}
 
+	getBlockId(x, y, z)
+	{
+		let chunkPos = getChunkPos(x, y, z);
+		let localPos = getLocalPos(x, y, z);
+
+		return this.getChunk(...chunkPos).getBlockId(...localPos);
+	}
+	
 	getBlock(x, y, z)
 	{
 		let chunkPos = getChunkPos(x, y, z);
@@ -65,18 +73,28 @@ export class World
 
 		return this.getChunk(...chunkPos).getBlock(...localPos);
 	}
+	
+	getBlockType(x, y, z)
+	{
+		let chunkPos = getChunkPos(x, y, z);
+		let localPos = getLocalPos(x, y, z);
+
+		return this.getChunk(...chunkPos).getBlockType(...localPos);
+	}
 
 	solidBlock(p)
 	{
-		return this.getBlock(...p).type > 0;
+		return this.getBlockType(...p) === 1;
 	}
-
-	setBlock(x, y, z, t)
+	
+	setBlockId(x, y, z, id)
 	{
 		let chunkPos = getChunkPos(x, y, z);
 		let localPos = getLocalPos(x, y, z);
 		
-		return this.getChunk(...chunkPos).setBlock(...localPos, t);
+		this.server.setBlock(x, y, z, id);
+
+		return this.getChunk(...chunkPos).setBlockId(...localPos, id);
 	}
 
 	hitBlock(dirvec, pos, raylength = 8)

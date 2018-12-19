@@ -5,6 +5,7 @@ export class Server
 	constructor()
 	{
 		this.onSetChunk = noop;
+		this.onSetBlockId = noop;
 		this.connected = false;
 		this.queue = [];
 		
@@ -48,6 +49,14 @@ export class Server
 			
 			this.onSetChunk(x, y, z, data);
 		}
+		else if(cmd === 3) {
+			let x = dv.getInt32(4);
+			let y = dv.getInt32(8);
+			let z = dv.getInt32(12);
+			let id = dv.getUint8(16);
+			
+			this.onSetBlockId(x, y, z, id);
+		}
 	}
 	
 	enqueue(cb)
@@ -65,7 +74,7 @@ export class Server
 	getChunk(x, y, z)
 	{
 		if(this.connected) {
-			console.log("server getchunk", x, y, z);
+			console.log("WebSocket getChunk", x, y, z);
 			
 			let buf = new ArrayBuffer(16);
 			let dv = new DataView(buf);
@@ -100,6 +109,25 @@ export class Server
 		else {
 			data = data.slice();
 			this.enqueue(() => this.setChunk(x, y, z, data));
+		}
+	}
+	
+	setBlock(x, y, z, id)
+	{
+		if(this.connected) {
+			let buf = new ArrayBuffer(17);
+			let dv = new DataView(buf);
+			
+			dv.setInt32(0,  3);
+			dv.setInt32(4,  x);
+			dv.setInt32(8,  y);
+			dv.setInt32(12, z);
+			dv.setUint8(16, id);
+		
+			this.ws.send(buf);
+		}
+		else {
+			this.enqueue(() => this.setBlock(x, y, z, id));
 		}
 	}
 }

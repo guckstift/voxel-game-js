@@ -1,9 +1,12 @@
-import {CHUNK_SIZE} from "../src/chunk.js";
+import {CHUNK_SIZE, getLinearBlockIndex, posInChunk} from "../src/chunk.js";
+import {Queue} from "../src/queue.js";
 
-export class Chunk
+export class Chunk extends Queue
 {
 	constructor(x, y, z, world)
 	{
+		super();
+		
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -22,16 +25,16 @@ export class Chunk
 			this.processQueue();
 		});
 	}
-	
-	enqueue(cb)
+
+	setBlockId(x, y, z, id)
 	{
-		this.queue.push(cb);
-	}
-	
-	processQueue()
-	{
-		while(this.queue.length > 0) {
-			this.queue.shift()();
+		if(posInChunk(x, y, z)) {
+			if(this.loaded) {
+				this.data[getLinearBlockIndex(x, y, z)] = id;
+			}
+			else {
+				this.enqueue(() => this.setBlockId(x, y, z, id));
+			}
 		}
 	}
 }

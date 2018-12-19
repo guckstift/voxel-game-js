@@ -3,6 +3,7 @@ import * as vector from "./vector.js";
 import {radians} from "./math.js";
 import {blocks} from "./blocks.js";
 import {chunkSrc} from "./glsl.js";
+import {Queue} from "./queue.js";
 
 export const RAW_VERT_SIZE = 7;
 export const VERT_SIZE = 6;
@@ -17,10 +18,12 @@ export const BLOCK_SIZE = BLOCK_FACES * FACE_SIZE;
 
 let model = matrix.identity();
 
-export class Chunk
+export class Chunk extends Queue
 {
 	constructor(x, y, z, world)
 	{
+		super();
+		
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -30,48 +33,53 @@ export class Chunk
 		this.server = world.server;
 		this.meshsize = 0;
 		this.vertnum = 0;
+		this.loaded = false;
 		this.data = new Uint8Array(CHUNK_SIZE);
 		this.mesh = new Uint8Array(CHUNK_SIZE * BLOCK_SIZE);
 		this.buf = this.display.createStaticByteBuffer(this.mesh);
 		this.shader = this.display.getShader("chunk", chunkSrc.vert, chunkSrc.frag);
 		this.atlas = this.display.getTexture("gfx/atlas.png");
-
-		console.log("chunkctor", x, y, z);
+		
 		this.server.getChunk(x, y, z);
 	}
 	
-	getBlockType(x, y, z)
+	getBlockId(x, y, z)
 	{
-		if(!posInChunk(x, y, z)) {
+		if(this.loaded && posInChunk(x, y, z)) {
+			return this.data[getLinearBlockIndex(x, y, z)];
+		}
+		else {
 			return 0;
 		}
-		
-		return this.data[getLinearBlockIndex(x, y, z)];
 	}
 
 	getBlock(x, y, z)
 	{
-		return blocks[this.getBlockType(x, y, z)];
+		return blocks[this.getBlockId(x, y, z)];
+	}
+	
+	getBlockType(x, y, z)
+	{
+		if(this.loaded && posInChunk(x, y, z)) {
+			return this.getBlock(x, y, z).type;
+		}
+		else {
+			return 1;
+		}
 	}
 
 	getBlockVerts(x, y, z)
 	{
-		if(!posInChunk(x, y, z)) {
-			return null;
-		}
-		
-		return blockverts[this.getBlockType(x, y, z)];
+		return blockverts[this.getBlockId(x, y, z)];
 	}
 
-	setBlock(x, y, z, t)
+	setBlockId(x, y, z, id)
 	{
-		if(!posInChunk(x, y, z)) {
-			return;
+		if(this.loaded && posInChunk(x, y, z)) {
+			this.data[getLinearBlockIndex(x, y, z)] = id;
+			//this.server.setChunk(this.x, this.y, this.z, this.data);
+			this.updateMesh();
 		}
-		
-		this.data[getLinearBlockIndex(x, y, z)] = t;
-		this.server.setChunk(this.x, this.y, this.z, this.data);
-		this.updateMesh();
 	}
 
 	updateMesh()

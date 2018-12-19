@@ -1,5 +1,6 @@
 import {getLocalPos} from "../src/world.js";
 import {getLinearBlockIndex} from "../src/chunk.js";
+import {getChunkPos} from "../src/world.js";
 
 let fs = require("fs");
 let noop = () => {};
@@ -35,16 +36,17 @@ export class Store
 		});
 	}
 	
-	storeBlock(x, y, z, t, cb = noop, ecb = noop)
+	storeBlockId(x, y, z, id, cb = noop, ecb = noop)
 	{
 		let i = getLinearBlockIndex(getLocalPos(x, y, z));
+		let cp = getChunkPos(x, y, z);
 		
 		fs.open(this.getChunkPath(...cp), "r+", (err, fd) => {
 			if(err) {
 				ecb();
 			}
 			else {
-				fs.write(fd, new Uint8Array([t]), 0, 1, i, (err, bw, buf) => {
+				fs.write(fd, new Uint8Array([id]), 0, 1, i, (err, bw, buf) => {
 					if(err) {
 						ecb();
 					}

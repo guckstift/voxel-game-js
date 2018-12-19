@@ -1,3 +1,5 @@
+import {getLocalPos} from "../src/world.js";
+
 export class Client
 {
 	constructor(server, ws, socket, id)
@@ -40,11 +42,20 @@ export class Client
 			
 			this.onSetChunk(x, y, z, data);
 		}
+		else if(cmd === 3) {
+			let x = dv.getInt32(4);
+			let y = dv.getInt32(8);
+			let z = dv.getInt32(12);
+			let id = dv.getUint8(16);
+			
+			this.onSetBlockId(x, y, z, id);
+		}
 	}
 	
 	onClose()
 	{
 		this.server.tlog(this.name, "disconnected");
+		this.server.removeClient(this);
 	}
 	
 	onGetChunk(x, y, z)
@@ -61,16 +72,42 @@ export class Client
 	
 	onSetChunk(x, y, z, data)
 	{
-		let chunk = this.world.getChunk(x, y, z);
+		let chunk = this.world.getChunkAt(x, y, z);
 		
 		if(chunk.loaded) {
 			this.server.tlog(this.name, "stores chunk", x, y, z);
 			chunk.data.set(data);
 			this.store.storeChunk(x, y, z, data);
+			
+			this.server.clients.forEach(client => {
+				if(client !== this) {
+					client.setChunk(x, y, z, data);
+				}
+			});
 		}
 		else {
 			data = data.slice();
 			chunk.enqueue(() => this.onSetChunk(x, y, z, data));
+		}
+	}
+	
+	onSetBlockId(x, y, z, id)
+	{
+		let chunk = this.world.getChunk(x, y, z);
+		
+		if(chunk.loaded) {
+			this.server.tlog(this.name, "stores block", x, y, z, id);
+			this.world.setBlockId(x, y, z, id);
+			this.store.storeBlockId(x, y, z, id);
+			
+			this.server.clients.forEach(client => {
+				if(client !== this) {
+					client.setBlockId(x, y, z, id);
+				}
+			});
+		}
+		else {
+			chunk.enqueue(() => this.onSetBlockId(x, y, z, id));
 		}
 	}
 	
@@ -85,6 +122,20 @@ export class Client
 		dv.setInt32(8,  y);
 		dv.setInt32(12, z);
 		u8.set(data, 16);
+		
+		this.ws.send(buf);
+	}
+	
+	setBlockId(x, y, z, id)
+	{
+		let buf = new ArrayBuffer(17);
+		let dv = new DataView(buf);
+		
+		dv.setInt32(0,  3);
+		dv.setInt32(4,  x);
+		dv.setInt32(8,  y);
+		dv.setInt32(12, z);
+		dv.setUint8(16, id);
 		
 		this.ws.send(buf);
 	}

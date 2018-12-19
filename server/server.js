@@ -18,6 +18,7 @@ export class Server
 		this.wss.on("connection", this.onConnection.bind(this));
 		this.store = new Store();
 		this.world = new World(this.store);
+		this.clients = [];
 
 		this.nlog("\n  BlockWeb Server  \n".rainbow);
 		this.tlog("Listening on port", port);
@@ -41,6 +42,17 @@ export class Server
 		
 		let sock = req.socket;
 		let client = new Client(this, ws, sock, this.nextClientId++);
+		
+		this.clients.push(client);
+	}
+	
+	removeClient(client)
+	{
+		let index = this.clients.indexOf(client);
+		
+		if(index > -1) {
+			this.clients.splice(index, 1);
+		}
 	}
 	
 	getMime(url)

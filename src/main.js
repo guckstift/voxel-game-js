@@ -1,9 +1,9 @@
 import {Display} from "./display.js";
 import {Gui} from "./gui.js";
 import {Camera} from "./camera.js";
-import {World} from "./world.js";
+import {World, getLocalPos} from "./world.js";
 import {Server} from "./server.js";
-import {CHUNK_WIDTH} from "./chunk.js";
+import {CHUNK_WIDTH, getLinearBlockIndex} from "./chunk.js";
 import {Input} from "./input.js";
 import {Body} from "./body.js";
 import {blocks} from "./blocks.js";
@@ -30,6 +30,14 @@ server.onSetChunk = (x, y, z, data) => {
 	let chunk = world.getChunk(x, y, z);
 	
 	chunk.data.set(data);
+	chunk.loaded = true;
+	chunk.updateMesh();
+};
+
+server.onSetBlockId = (x, y, z, id) => {
+	let chunk = world.getChunkAt(x, y, z);
+	console.log("upadte blok", x,y,z,id);
+	chunk.data[getLinearBlockIndex(...getLocalPos(x, y, z))] = id;
 	chunk.updateMesh();
 };
 
@@ -369,10 +377,10 @@ input.onClick = e =>
 {
 	if(blockHit) {
 		if(e.button === 0) {
-			world.setBlock(...blockHit.blockpos, 0);
+			world.setBlockId(...blockHit.blockpos, 0);
 		}
 		else if(e.button === 2) {
-			world.setBlock(
+			world.setBlockId(
 				blockHit.blockpos[0] + blockHit.normal[0],
 				blockHit.blockpos[1] + blockHit.normal[1],
 				blockHit.blockpos[2] + blockHit.normal[2],

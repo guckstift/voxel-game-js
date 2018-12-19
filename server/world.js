@@ -1,5 +1,5 @@
 import {Field} from "../src/field.js";
-import {getChunkPos} from "../src/world.js";
+import {getChunkPos, getLocalPos} from "../src/world.js";
 import {Chunk} from "./chunk.js";
 import {Generator} from "./generator.js";
 
@@ -25,5 +25,12 @@ export class World
 	getChunkAt(x, y, z)
 	{
 		return this.getChunk(...getChunkPos(x, y, z));
+	}
+	
+	setBlockId(x, y, z, id)
+	{
+		let localPos = getLocalPos(x, y, z);
+
+		return this.getChunkAt(x, y, z).setBlockId(...localPos, id);
 	}
 }
