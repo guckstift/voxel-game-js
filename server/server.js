@@ -38,8 +38,6 @@ export class Server
 
 	onConnection(ws, req)
 	{
-		this.tlog("New connection", req.socket.remoteAddress);
-		
 		let sock = req.socket;
 		let client = new Client(this, ws, sock, this.nextClientId++);
 		
@@ -53,6 +51,8 @@ export class Server
 		if(index > -1) {
 			this.clients.splice(index, 1);
 		}
+		
+		this.tlog("Clients left:", this.clients.length);
 	}
 	
 	getMime(url)

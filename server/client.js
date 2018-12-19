@@ -15,6 +15,8 @@ export class Client
 		this.ws.binaryType = "arraybuffer";
 		this.ws.on("message", this.onMessage.bind(this));
 		this.ws.on("close", this.onClose.bind(this));
+		
+		this.server.tlog(this.name, "connected");
 	}
 	
 	get name()

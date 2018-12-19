@@ -77,7 +77,6 @@ export class Chunk extends Queue
 	{
 		if(this.loaded && posInChunk(x, y, z)) {
 			this.data[getLinearBlockIndex(x, y, z)] = id;
-			//this.server.setChunk(this.x, this.y, this.z, this.data);
 			this.updateMesh();
 		}
 	}
