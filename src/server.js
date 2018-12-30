@@ -28,6 +28,8 @@ export class Server
 	onClose(e)
 	{
 		console.log("WebSocket closed", e);
+		
+		this.connected = false;
 	}
 	
 	onError(e)

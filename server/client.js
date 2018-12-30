@@ -17,6 +17,8 @@ export class Client
 		this.ws.binaryType = "arraybuffer";
 		this.ws.on("message", this.onMessage.bind(this));
 		this.ws.on("close", this.onClose.bind(this));
+		
+		this.server.tlog(this.name, "connected");
 	}
 	
 	get name()
@@ -95,7 +97,7 @@ export class Client
 	
 	onSetBlockId(x, y, z, id)
 	{
-		let chunk = this.world.getChunk(x, y, z);
+		let chunk = this.world.getChunkAt(x, y, z);
 		
 		if(chunk.loaded) {
 			this.server.tlog(this.name, "stores block", x, y, z, id);

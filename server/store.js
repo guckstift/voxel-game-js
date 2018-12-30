@@ -38,7 +38,7 @@ export class Store
 	
 	storeBlockId(x, y, z, id, cb = noop, ecb = noop)
 	{
-		let i = getLinearBlockIndex(getLocalPos(x, y, z));
+		let i = getLinearBlockIndex(...getLocalPos(x, y, z));
 		let cp = getChunkPos(x, y, z);
 		
 		fs.open(this.getChunkPath(...cp), "r+", (err, fd) => {
