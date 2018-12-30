@@ -1,4 +1,6 @@
-import {getLocalPos} from "../src/world.js";
+import {getLocalPos, getChunkPos} from "../src/world.js";
+
+let noop = () => {};
 
 export class Client
 {
@@ -98,7 +100,10 @@ export class Client
 		if(chunk.loaded) {
 			this.server.tlog(this.name, "stores block", x, y, z, id);
 			this.world.setBlockId(x, y, z, id);
-			this.store.storeBlockId(x, y, z, id);
+			
+			this.store.storeBlockId(x, y, z, id, noop, () => {
+				this.store.storeChunk(...getChunkPos(x, y, z), chunk.data);
+			});
 			
 			this.server.clients.forEach(client => {
 				if(client !== this) {
