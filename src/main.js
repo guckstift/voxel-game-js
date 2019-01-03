@@ -10,6 +10,7 @@ import {blocks} from "./blocks.js";
 import {radians} from "./math.js";
 import * as matrix from "./matrix.js";
 import * as vector from "./vector.js";
+import * as glsl from "./glsl.js";
 
 const runspeed  = 4;
 const jumpspeed = 7.5;
@@ -36,7 +37,7 @@ server.onSetChunk = (x, y, z, data) => {
 
 server.onSetBlockId = (x, y, z, id) => {
 	let chunk = world.getChunkAt(x, y, z);
-	console.log("upadte blok", x,y,z,id);
+	console.log("update block", x,y,z,id);
 	chunk.data[getLinearBlockIndex(...getLocalPos(x, y, z))] = id;
 	chunk.updateMesh();
 };
@@ -50,25 +51,7 @@ let axis = display.createStaticByteBuffer([
 	0,0,1, 0,0,1,
 ]);
 
-let axisShader = display.createShader(`
-	uniform mat4 proj;
-	uniform mat4 view;
-	attribute vec3 pos;
-	attribute vec3 col;
-	varying vec3 vCol;
-	void main()
-	{
-		gl_Position = proj * view * vec4(pos, 1.0);
-		vCol = col;
-	}
-`,`
-	precision highp float;
-	varying vec3 vCol;
-	void main()
-	{
-		gl_FragColor = vec4(vCol, 1.0);
-	}
-`);
+let axisShader = display.createShader(glsl.axisSrc.vert, glsl.axisSrc.frag);
 
 let p = -1 / 1024;
 
@@ -77,33 +60,7 @@ let selector = display.createStaticFloatBuffer([
 	0,1,p, 1,0,p, 1,1,p,
 ]);
 
-let selectorShader = display.createShader(`
-	uniform mat4 proj;
-	uniform mat4 viewmodel;
-	attribute vec3 pos;
-	varying vec2 vPos;
-	void main()
-	{
-		gl_Position = proj * viewmodel * vec4(pos, 1.0);
-		vPos = pos.xy;
-	}
-`,`
-	precision highp float;
-	varying vec2 vPos;
-	void main()
-	{
-		gl_FragColor = vec4(1.0, 1.0, 1.0, 0.0);
-
-		float gap = 1.0/32.0;
-
-		if(vPos.x < gap || vPos.x > 1.0 - gap || vPos.y < gap || vPos.y > 1.0 - gap) {
-			gl_FragColor.a = 0.5;
-		}
-		else {
-			discard;
-		}
-	}
-`);
+let selectorShader = display.createShader(glsl.selectorSrc.vert, glsl.selectorSrc.frag);
 
 let cuboid = display.createStaticFloatBuffer([
 	...createCuboid(
@@ -204,42 +161,7 @@ function createCuboid(
 	];
 }
 
-let cubeShader = display.createShader(`
-	uniform mat4 proj;
-	uniform mat4 viewmodel;
-	uniform mat4 bones[8];
-	uniform vec3 roots[8];
-	attribute vec3 pos;
-	attribute vec2 texpos;
-	attribute float bone;
-	varying vec3 vCol;
-	varying vec2 vTexpos;
-	void main()
-	{
-		gl_Position = vec4(pos, 1.0);
-
-		for(float i=0.0; i<8.0; i++) {
-			if(i == bone - 1.0) {
-				gl_Position.xyz -= roots[int(i)];
-				gl_Position = bones[int(i)] * gl_Position;
-				gl_Position.xyz += roots[int(i)];
-			}
-		}
-
-		gl_Position = proj * viewmodel * gl_Position;
-		vCol = pos;
-		vTexpos = texpos;
-	}
-`,`
-	precision highp float;
-	uniform sampler2D tex;
-	varying vec3 vCol;
-	varying vec2 vTexpos;
-	void main()
-	{
-		gl_FragColor = texture2D(tex, vTexpos);
-	}
-`);
+let cubeShader = display.createShader(glsl.cubeSrc.vert, glsl.cubeSrc.frag);
 
 let playertex = display.getTexture("gfx/player.png");
 
