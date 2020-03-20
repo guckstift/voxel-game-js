@@ -38,4 +38,9 @@ export default class Shader
 		gl.enableVertexAttribArray(loca);
 		gl.vertexAttribPointer(loca, size, gl.FLOAT, false, stride * 4, offset * 4);
 	}
+	
+	use()
+	{
+		this.gl.useProgram(this.prog);
+	}
 }

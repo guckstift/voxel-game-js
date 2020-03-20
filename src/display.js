@@ -17,4 +17,11 @@ export default class Display
 	{
 		document.body.appendChild(this.canvas);
 	}
+	
+	drawTriangles(count)
+	{
+		let gl = this.gl;
+		
+		gl.drawArrays(gl.TRIANGLES, 0, count);
+	}
 }

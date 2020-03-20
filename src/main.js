@@ -33,3 +33,5 @@ let buf = new Buffer(display, new Float32Array([
 
 shader.assignFloatAttrib("pos", buf, 3, 6, 0);
 shader.assignFloatAttrib("col", buf, 3, 6, 3);
+shader.use();
+display.drawTriangles(3);
