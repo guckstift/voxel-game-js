@@ -7,7 +7,10 @@ export default class Display
 		canvas.width = width;
 		canvas.height = height;
 		
+		let gl = canvas.getContext("webgl");
+		
 		this.canvas = canvas;
+		this.gl = gl;
 	}
 	
 	appendToBody()
