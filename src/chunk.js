@@ -62,7 +62,13 @@ export default class Chunk
 		let gl = this.gl;
 		let mesh = [];
 		
-		this.remeshSide(mesh, 0,-1,0, [0,0,0], [1,0,0], [0,0,1], [1,0,1]);
+		this.remeshSide(mesh, -1, 0, 0, [0,1,0], [0,0,0], [0,1,1], [0,0,1]);
+		this.remeshSide(mesh,  0,-1, 0, [0,0,0], [1,0,0], [0,0,1], [1,0,1]);
+		this.remeshSide(mesh,  0, 0,-1, [0,1,0], [1,1,0], [0,0,0], [1,0,0]);
+		this.remeshSide(mesh, +1, 0, 0, [1,0,0], [1,1,0], [1,0,1], [1,1,1]);
+		this.remeshSide(mesh,  0,+1, 0, [1,1,0], [0,1,0], [1,1,1], [0,1,1]);
+		this.remeshSide(mesh,  0, 0,+1, [0,0,1], [1,0,1], [0,1,1], [1,1,1]);
+		
 		this.buffer.update(new Float32Array(mesh));
 		this.count = mesh.length / 5;
 	}
