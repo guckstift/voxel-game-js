@@ -2,6 +2,7 @@ import Display from "./display.js";
 import Shader from "./shader.js";
 import Buffer from "./buffer.js";
 import Camera from "./camera.js";
+import Controller from "./controller.js";
 
 let display = new Display();
 
@@ -35,6 +36,7 @@ let buf = new Buffer(display, new Float32Array([
 ]));
 
 let camera = new Camera(90, 800/600, 0.1, 1000, 1,-1,1, 90,0);
+let controller = new Controller();
 
 display.onframe = () =>
 {
