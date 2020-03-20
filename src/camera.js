@@ -1,3 +1,4 @@
+import Vector from "./vector.js";
 import Matrix from "./matrix.js";
 import {radians} from "./math.js";
 
@@ -9,9 +10,7 @@ export default class Camera
 		this.aspect = aspect;
 		this.near = near;
 		this.far = far;
-		this.x = x;
-		this.y = y;
-		this.z = z;
+		this.pos = new Vector(x, y, z);
 		this.rx = rx;
 		this.rz = rz;
 		this.proj = new Matrix();
@@ -24,6 +23,6 @@ export default class Camera
 		this.view.set();
 		this.view.rotateX(-radians(this.rx));
 		this.view.rotateZ(-radians(this.rz));
-		this.view.translate(-this.x, -this.y, -this.z);
+		this.view.translate(-this.pos.x, -this.pos.y, -this.pos.z);
 	}
 }
