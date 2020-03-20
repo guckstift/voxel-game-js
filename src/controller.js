@@ -42,5 +42,17 @@ export default class Controller
 		if(this.keymap.s) {
 			this.camera.moveBackward(delta);
 		}
+		if(this.keymap.d) {
+			this.camera.moveRightward(delta);
+		}
+		if(this.keymap.a) {
+			this.camera.moveLeftward(delta);
+		}
+		if(this.keymap.space) {
+			this.camera.moveUpward(delta);
+		}
+		if(this.keymap.shift) {
+			this.camera.moveDownward(delta);
+		}
 	}
 }
