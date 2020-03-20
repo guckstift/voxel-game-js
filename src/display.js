@@ -10,7 +10,7 @@ export default class Display
 		canvas.style.width = "100%";
 		canvas.style.height = "100%";
 		
-		let gl = canvas.getContext("webgl");
+		let gl = canvas.getContext("webgl", {alpha: false, antialias: false});
 		
 		let self = this;
 		
