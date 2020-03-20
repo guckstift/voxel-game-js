@@ -1,6 +1,7 @@
 import Display from "./display.js";
 import Shader from "./shader.js";
 import Buffer from "./buffer.js";
+import Camera from "./camera.js";
 
 let display = new Display(800, 600);
 
@@ -30,6 +31,8 @@ let buf = new Buffer(display, new Float32Array([
 	1,0,0, 0,1,0,
 	0,1,0, 0,0,1,
 ]));
+
+let camera = new Camera();
 
 shader.assignFloatAttrib("pos", buf, 3, 6, 0);
 shader.assignFloatAttrib("col", buf, 3, 6, 3);
