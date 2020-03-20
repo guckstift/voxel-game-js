@@ -27,6 +27,10 @@ export default class Camera
 		this.view.rotateX(-radians(this.rx));
 		this.view.rotateZ(-radians(this.rz));
 		this.view.translate(-this.pos.x, -this.pos.y, -this.pos.z);
+		this.rightward.set(1,0,0);
+		this.rightward.rotateZ(radians(this.rz));
+		this.forward.set(0,1,0);
+		this.forward.rotateZ(radians(this.rz));
 	}
 	
 	moveForward(delta)

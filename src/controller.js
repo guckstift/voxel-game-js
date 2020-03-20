@@ -1,12 +1,19 @@
 export default class Controller
 {
-	constructor(camera)
+	constructor(camera, display)
 	{
+		let canvas = display.canvas;
+		
+		this.canvas = canvas;
 		this.camera = camera;
 		this.keymap = {};
+		this.locked = false;
 		
 		window.addEventListener("keydown", e => this.keydown(e));
 		window.addEventListener("keyup", e => this.keyup(e));
+		canvas.addEventListener("mousedown", e => this.mousedown(e));
+		canvas.addEventListener("mousemove", e => this.mousemove(e));
+		document.addEventListener("pointerlockchange", e => this.lockchange(e));
 	}
 	
 	getKey(e)
@@ -32,6 +39,27 @@ export default class Controller
 		let key = this.getKey(e);
 		
 		this.keymap[key] = false;
+	}
+	
+	mousedown(e)
+	{
+		this.canvas.requestPointerLock();
+		this.locked = true;
+	}
+	
+	mousemove(e)
+	{
+		if(this.locked) {
+			this.camera.rx -= e.movementY;
+			this.camera.rz -= e.movementX;
+		}
+	}
+	
+	lockchange(e)
+	{
+		if(document.pointerLockElement !== this.canvas) {
+			this.locked = false;
+		}
 	}
 	
 	update(delta)
