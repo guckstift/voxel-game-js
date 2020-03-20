@@ -1,10 +1,12 @@
 import Shader from "./shader.js";
 import Texture from "./texture.js";
 import Buffer from "./buffer.js";
+import Matrix from "./matrix.js";
 
 let vert = `
 	uniform mat4 proj;
 	uniform mat4 view;
+	uniform mat4 model;
 	uniform vec3 sun;
 	attribute vec3 pos;
 	attribute vec3 norm;
@@ -14,7 +16,7 @@ let vert = `
 	
 	void main()
 	{
-		gl_Position = proj * view * vec4(pos, 1);
+		gl_Position = proj * view * model * vec4(pos, 1);
 		vUv = uv;
 		factor = max(0.0, dot(sun, norm)) * 0.5 + 0.5;
 	}
@@ -34,7 +36,7 @@ let frag = `
 
 export default class Chunk
 {
-	constructor(display)
+	constructor(display, cx, cy)
 	{
 		this.shader = new Shader(display, vert, frag);
 		this.texture = new Texture(display, "gfx/blocks.png");
@@ -52,6 +54,11 @@ export default class Chunk
 		
 		this.gl = display.gl;
 		this.display = display;
+		
+		this.model = new Matrix();
+		this.model.translate(cx * 16, cy * 16, 0);
+		
+		this.remesh();
 	}
 	
 	getBlock(x, y, z)
@@ -113,6 +120,7 @@ export default class Chunk
 		shader.use();
 		shader.assignMatrix("proj", camera.proj);
 		shader.assignMatrix("view", camera.view);
+		shader.assignMatrix("model", this.model);
 		shader.assignVector("sun", sun);
 		shader.assignTexture("tex", this.texture, 0);
 		
