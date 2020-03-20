@@ -34,7 +34,7 @@ let buf = new Buffer(display, new Float32Array([
 	0,1,0, 0,0,1,
 ]));
 
-let camera = new Camera(90, 800/600, 0.1, 1000, 0, 0, 1);
+let camera = new Camera(90, 800/600, 0.1, 1000, 1,-1,1, 90,0);
 
 camera.update();
 
