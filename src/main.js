@@ -36,11 +36,14 @@ let buf = new Buffer(display, new Float32Array([
 
 let camera = new Camera(90, 800/600, 0.1, 1000, 1,-1,1, 90,0);
 
-camera.update();
+display.onframe = () =>
+{
+	camera.update();
 
-shader.assignFloatAttrib("pos", buf, 3, 6, 0);
-shader.assignFloatAttrib("col", buf, 3, 6, 3);
-shader.use();
-shader.assignMatrix("proj", camera.proj);
-shader.assignMatrix("view", camera.view);
-display.drawTriangles(3);
+	shader.assignFloatAttrib("pos", buf, 3, 6, 0);
+	shader.assignFloatAttrib("col", buf, 3, 6, 3);
+	shader.use();
+	shader.assignMatrix("proj", camera.proj);
+	shader.assignMatrix("view", camera.view);
+	display.drawTriangles(3);
+};

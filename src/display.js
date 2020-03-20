@@ -9,8 +9,16 @@ export default class Display
 		
 		let gl = canvas.getContext("webgl");
 		
+		let self = this;
+		
+		requestAnimationFrame(function frame() {
+			requestAnimationFrame(frame);
+			self.onframe();
+		});
+		
 		this.canvas = canvas;
 		this.gl = gl;
+		this.onframe = () => {};
 	}
 	
 	appendToBody()
