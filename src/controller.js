@@ -1,7 +1,8 @@
 export default class Controller
 {
-	constructor()
+	constructor(camera)
 	{
+		this.camera = camera;
 		this.keymap = {};
 		
 		window.addEventListener("keydown", e => this.keydown(e));
@@ -31,5 +32,15 @@ export default class Controller
 		let key = this.getKey(e);
 		
 		this.keymap[key] = false;
+	}
+	
+	update(delta)
+	{
+		if(this.keymap.w) {
+			this.camera.moveForward(delta);
+		}
+		if(this.keymap.s) {
+			this.camera.moveBackward(delta);
+		}
 	}
 }

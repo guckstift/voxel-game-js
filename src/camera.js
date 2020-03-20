@@ -15,6 +15,7 @@ export default class Camera
 		this.rz = rz;
 		this.proj = new Matrix();
 		this.view = new Matrix();
+		this.forward = new Vector(0,1,0);
 	}
 	
 	update()
@@ -24,5 +25,15 @@ export default class Camera
 		this.view.rotateX(-radians(this.rx));
 		this.view.rotateZ(-radians(this.rz));
 		this.view.translate(-this.pos.x, -this.pos.y, -this.pos.z);
+	}
+	
+	moveForward(delta)
+	{
+		this.pos.addScaled(this.forward, +delta);
+	}
+	
+	moveBackward(delta)
+	{
+		this.pos.addScaled(this.forward, -delta);
 	}
 }

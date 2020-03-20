@@ -19,4 +19,11 @@ export default class Vector
 	{
 		return this.data[2];
 	}
+	
+	addScaled(other, scale)
+	{
+		this.data[0] += other.data[0] * scale;
+		this.data[1] += other.data[1] * scale;
+		this.data[2] += other.data[2] * scale;
+	}
 }

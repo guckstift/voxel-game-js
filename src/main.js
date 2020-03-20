@@ -36,10 +36,12 @@ let buf = new Buffer(display, new Float32Array([
 ]));
 
 let camera = new Camera(90, 800/600, 0.1, 1000, 1,-1,1, 90,0);
-let controller = new Controller();
+let controller = new Controller(camera);
 
 display.onframe = () =>
 {
+	controller.update(1/60);
+	
 	camera.aspect = display.getAspect();
 	camera.update();
 
