@@ -1,5 +1,6 @@
 import Display from "./display.js";
 import Shader from "./shader.js";
+import Buffer from "./buffer.js";
 
 let display = new Display(800, 600);
 
@@ -14,3 +15,9 @@ let shader = new Shader(display, `
 	{
 	}
 `);
+
+let buf = new Buffer(display, new Float32Array([
+	0,0,0, 1,0,0,
+	1,0,0, 0,1,0,
+	0,1,0, 0,0,1,
+]));
