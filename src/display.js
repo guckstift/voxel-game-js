@@ -12,6 +12,8 @@ export default class Display
 		
 		let gl = canvas.getContext("webgl", {alpha: false, antialias: false});
 		
+		gl.enable(gl.DEPTH_TEST);
+		
 		let self = this;
 		
 		requestAnimationFrame(function frame() {
