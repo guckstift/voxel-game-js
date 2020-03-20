@@ -5,24 +5,30 @@ import Buffer from "./buffer.js";
 let vert = `
 	uniform mat4 proj;
 	uniform mat4 view;
+	uniform vec3 sun;
 	attribute vec3 pos;
+	attribute vec3 norm;
 	attribute vec2 uv;
 	varying mediump vec2 vUv;
+	varying mediump float factor;
 	
 	void main()
 	{
 		gl_Position = proj * view * vec4(pos, 1);
 		vUv = uv;
+		factor = max(0.0, dot(sun, norm)) * 0.5 + 0.5;
 	}
 `;
 
 let frag = `
 	uniform sampler2D tex;
 	varying mediump vec2 vUv;
+	varying mediump float factor;
 	
 	void main()
 	{
 		gl_FragColor = texture2D(tex, vUv);
+		gl_FragColor.rgb *= factor;
 	}
 `;
 
@@ -70,7 +76,7 @@ export default class Chunk
 		this.remeshSide(mesh,  0, 0,+1, [0,0,1], [1,0,1], [0,1,1], [1,1,1]);
 		
 		this.buffer.update(new Float32Array(mesh));
-		this.count = mesh.length / 5;
+		this.count = mesh.length / 8;
 	}
 	
 	remeshSide(mesh, nx, ny, nz, p0, p1, p2, p3)
@@ -85,10 +91,10 @@ export default class Chunk
 					);
 					
 					if(block > 0) {
-						let v0 = [x + p0[0], y + p0[1], z + p0[2], 0/16, 1/16];
-						let v1 = [x + p1[0], y + p1[1], z + p1[2], 1/16, 1/16];
-						let v2 = [x + p2[0], y + p2[1], z + p2[2], 0/16, 0/16];
-						let v3 = [x + p3[0], y + p3[1], z + p3[2], 1/16, 0/16];
+						let v0 = [x + p0[0], y + p0[1], z + p0[2], nx, ny, nz, 0/16, 1/16];
+						let v1 = [x + p1[0], y + p1[1], z + p1[2], nx, ny, nz, 1/16, 1/16];
+						let v2 = [x + p2[0], y + p2[1], z + p2[2], nx, ny, nz, 0/16, 0/16];
+						let v3 = [x + p3[0], y + p3[1], z + p3[2], nx, ny, nz, 1/16, 0/16];
 						
 						mesh.push(...v0, ...v1, ...v2, ...v2, ...v1, ...v3);
 					}
@@ -97,15 +103,17 @@ export default class Chunk
 		}
 	}
 	
-	draw(camera)
+	draw(camera, sun)
 	{
 		let shader = this.shader;
 		
-		shader.assignFloatAttrib("pos", this.buffer, 3, 5, 0);
-		shader.assignFloatAttrib("uv",  this.buffer, 2, 5, 3);
+		shader.assignFloatAttrib("pos",  this.buffer, 3, 8, 0);
+		shader.assignFloatAttrib("norm", this.buffer, 3, 8, 3);
+		shader.assignFloatAttrib("uv",   this.buffer, 2, 8, 6);
 		shader.use();
 		shader.assignMatrix("proj", camera.proj);
 		shader.assignMatrix("view", camera.view);
+		shader.assignVector("sun", sun);
 		shader.assignTexture("tex", this.texture, 0);
 		
 		this.display.drawTriangles(this.count);

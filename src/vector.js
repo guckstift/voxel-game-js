@@ -33,6 +33,17 @@ export default class Vector
 		this.data[1] += other.data[1] * scale;
 		this.data[2] += other.data[2] * scale;
 	}
+	
+	rotateX(a)
+	{
+		let v = this.data;
+		let s = Math.sin(a);
+		let c = Math.cos(a);
+		let y = v[1];
+		let z = v[2];
+		v[1] = y * c - z * s;
+		v[2] = y * s + z * c;
+	}
 
 	rotateZ(a)
 	{
