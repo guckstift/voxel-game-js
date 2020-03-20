@@ -8,6 +8,7 @@ export default class Controller
 		this.camera = camera;
 		this.keymap = {};
 		this.locked = false;
+		this.movespeed = 4;
 		
 		window.addEventListener("keydown", e => this.keydown(e));
 		window.addEventListener("keyup", e => this.keyup(e));
@@ -65,22 +66,22 @@ export default class Controller
 	update(delta)
 	{
 		if(this.keymap.w) {
-			this.camera.moveForward(delta);
+			this.camera.moveForward(delta * this.movespeed);
 		}
 		if(this.keymap.s) {
-			this.camera.moveBackward(delta);
+			this.camera.moveBackward(delta * this.movespeed);
 		}
 		if(this.keymap.d) {
-			this.camera.moveRightward(delta);
+			this.camera.moveRightward(delta * this.movespeed);
 		}
 		if(this.keymap.a) {
-			this.camera.moveLeftward(delta);
+			this.camera.moveLeftward(delta * this.movespeed);
 		}
 		if(this.keymap.space) {
-			this.camera.moveUpward(delta);
+			this.camera.moveUpward(delta * this.movespeed);
 		}
 		if(this.keymap.shift) {
-			this.camera.moveDownward(delta);
+			this.camera.moveDownward(delta * this.movespeed);
 		}
 	}
 }
