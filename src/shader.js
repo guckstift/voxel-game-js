@@ -39,6 +39,14 @@ export default class Shader
 		gl.vertexAttribPointer(loca, size, gl.FLOAT, false, stride * 4, offset * 4);
 	}
 	
+	assignMatrix(name, mat)
+	{
+		let gl = this.gl;
+		let loca = gl.getUniformLocation(this.prog, name);
+		
+		gl.uniformMatrix4fv(loca, false, mat.data);
+	}
+	
 	use()
 	{
 		this.gl.useProgram(this.prog);

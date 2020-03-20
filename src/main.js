@@ -8,13 +8,15 @@ let display = new Display(800, 600);
 display.appendToBody();
 
 let shader = new Shader(display, `
+	uniform mat4 proj;
+	uniform mat4 view;
 	attribute vec3 pos;
 	attribute vec3 col;
 	varying mediump vec3 vCol;
 	
 	void main()
 	{
-		gl_Position = vec4(pos, 1);
+		gl_Position = proj * view * vec4(pos, 1);
 		vCol = col;
 	}
 `,`
@@ -37,4 +39,6 @@ let camera = new Camera();
 shader.assignFloatAttrib("pos", buf, 3, 6, 0);
 shader.assignFloatAttrib("col", buf, 3, 6, 3);
 shader.use();
+shader.assignMatrix("proj", camera.proj);
+shader.assignMatrix("view", camera.view);
 display.drawTriangles(3);
