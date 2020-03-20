@@ -3,7 +3,7 @@ import Shader from "./shader.js";
 import Buffer from "./buffer.js";
 import Camera from "./camera.js";
 
-let display = new Display(800, 600);
+let display = new Display();
 
 display.appendToBody();
 
@@ -38,6 +38,7 @@ let camera = new Camera(90, 800/600, 0.1, 1000, 1,-1,1, 90,0);
 
 display.onframe = () =>
 {
+	camera.aspect = display.getAspect();
 	camera.update();
 
 	shader.assignFloatAttrib("pos", buf, 3, 6, 0);
