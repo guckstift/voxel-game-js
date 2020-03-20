@@ -24,5 +24,18 @@ export default class Shader
 		gl.linkProgram(prog);
 
 		console.log("link shader program:", gl.getProgramInfoLog(prog));
+		
+		this.gl = gl;
+		this.prog = prog;
+	}
+	
+	assignFloatAttrib(name, buf, size, stride, offset)
+	{
+		let gl = this.gl;
+		let loca = gl.getAttribLocation(this.prog, name);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, buf.buf);
+		gl.enableVertexAttribArray(loca);
+		gl.vertexAttribPointer(loca, size, gl.FLOAT, false, stride * 4, offset * 4);
 	}
 }

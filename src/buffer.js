@@ -7,5 +7,7 @@ export default class Buffer
 		
 		gl.bindBuffer(gl.ARRAY_BUFFER, buf);
 		gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+		
+		this.buf = buf;
 	}
 }
