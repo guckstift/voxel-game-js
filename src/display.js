@@ -13,6 +13,7 @@ export default class Display
 		let gl = canvas.getContext("webgl", {alpha: false, antialias: false});
 		
 		gl.enable(gl.DEPTH_TEST);
+		gl.enable(gl.CULL_FACE);
 		
 		let self = this;
 		
