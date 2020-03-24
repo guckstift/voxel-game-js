@@ -27,6 +27,13 @@ export default class Vector
 		this.data[2] = z;
 	}
 	
+	add(other)
+	{
+		this.data[0] += other.data[0];
+		this.data[1] += other.data[1];
+		this.data[2] += other.data[2];
+	}
+	
 	addScaled(other, scale)
 	{
 		this.data[0] += other.data[0] * scale;

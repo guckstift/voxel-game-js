@@ -100,4 +100,83 @@ export default class Map
 			}
 		}
 	}
+	
+	boxmarch(boxmin, boxmax, vec)
+	{
+		let len      = Math.sqrt(vec[0] ** 2 + vec[1] ** 2 + vec[2] ** 2);
+		let way      = 0;
+		let axis     = 0;
+		let slope    = 0;
+		let voxmin   = [0,0,0];
+		let voxmax   = [0,0,0];
+		let leadvox  = [0,0,0];
+		let trailvox = [0,0,0];
+		let step     = [0,0,0];
+		let waydelta = [0,0,0];
+		let waynext  = [0,0,0];
+		
+		for(let i=0; i<3; i++) {
+			voxmin[i] = Math.floor(boxmin[i]);
+			voxmax[i] = Math.ceil(boxmax[i]) - 1;
+			
+			if(vec[i] > 0) {
+				leadvox[i]  = voxmax[i];
+				trailvox[i] = voxmin[i];
+				waydelta[i] = +len / vec[i];
+				waynext[i]  = waydelta[i] * (voxmax[i] + 1 - boxmax[i]);
+				step[i]     = +1;
+			}
+			else if(vec[i] < 0) {
+				leadvox[i]  = voxmin[i];
+				trailvox[i] = voxmax[i];
+				waydelta[i] = -len / vec[i];
+				waynext[i]  = waydelta[i] * (boxmin[i] - voxmin[i]);
+				step[i]     = -1;
+			}
+			else {
+				leadvox[i]  = voxmax[i];
+				trailvox[i] = voxmin[i];
+				waynext[i]  = Infinity;
+				step[i]     = +1;
+			}
+		}
+		
+		while(true) {
+			if(waynext[0] < waynext[1] && waynext[0] < waynext[2]) {
+				axis = 0;
+			}
+			else if(waynext[1] < waynext[2]) {
+				axis = 1;
+			}
+			else {
+				axis = 2;
+			}
+			
+			way             = waynext[axis];
+			waynext[axis]  += waydelta[axis];
+			leadvox[axis]  += step[axis];
+			trailvox[axis] += step[axis];
+			
+			if(way >= len) {
+				break;
+			}
+			
+			let xs = axis === 0 ? leadvox[0] : trailvox[0];
+			let ys = axis === 1 ? leadvox[1] : trailvox[1];
+			let zs = axis === 2 ? leadvox[2] : trailvox[2];
+			let xe = leadvox[0] + step[0];
+			let ye = leadvox[1] + step[1];
+			let ze = leadvox[2] + step[2];
+
+			for(let x = xs; x !== xe; x += step[0]) {
+				for(let y = ys; y !== ye; y += step[1]) {
+					for(let z = zs; z !== ze; z += step[2]) {
+						if(this.getBlock(x, y, z) > 0) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+	}
 }

@@ -15,9 +15,9 @@ let crosshairs = new Crosshairs();
 
 crosshairs.appendToBody();
 
-let camera = new Camera(90, 800/600, 0.1, 1000, 1,-1,1, 90,0);
-let controller = new Controller(camera, display);
 let map = new Map(display);
+let camera = new Camera(map, 90, 800/600, 0.1, 1000, 1,-1,1, 90,0);
+let controller = new Controller(camera, display);
 
 map.loadChunk(0, 0);
 map.loadChunk(-1, 0);

@@ -4,8 +4,9 @@ import {radians} from "./math.js";
 
 export default class Camera
 {
-	constructor(fovy, aspect, near, far, x, y, z, rx, rz)
+	constructor(map, fovy, aspect, near, far, x, y, z, rx, rz)
 	{
+		this.map = map;
 		this.fovy = fovy;
 		this.aspect = aspect;
 		this.near = near;
@@ -37,33 +38,54 @@ export default class Camera
 		this.lookat.rotateZ(radians(this.rz));
 	}
 	
+	move(vec, delta)
+	{
+		let deltavec = vec.clone();
+		
+		deltavec.scale(delta);
+		
+		let boxmin = this.pos.clone();
+		
+		boxmin.add(new Vector(-0.25, -0.25, -0.25));
+		
+		let boxmax = this.pos.clone();
+		
+		boxmax.add(new Vector(+0.25, +0.25, +0.25));
+		
+		if(this.map.boxmarch(boxmin.data, boxmax.data, deltavec.data) === true) {
+			return;
+		}
+		
+		this.pos.add(deltavec);
+	}
+	
 	moveForward(delta)
 	{
-		this.pos.addScaled(this.forward, +delta);
+		this.move(this.forward, +delta);
 	}
 	
 	moveBackward(delta)
 	{
-		this.pos.addScaled(this.forward, -delta);
+		this.move(this.forward, -delta);
 	}
 	
 	moveRightward(delta)
 	{
-		this.pos.addScaled(this.rightward, +delta);
+		this.move(this.rightward, +delta);
 	}
 	
 	moveLeftward(delta)
 	{
-		this.pos.addScaled(this.rightward, -delta);
+		this.move(this.rightward, -delta);
 	}
 	
 	moveUpward(delta)
 	{
-		this.pos.addScaled(this.upward, +delta);
+		this.move(this.upward, +delta);
 	}
 	
 	moveDownward(delta)
 	{
-		this.pos.addScaled(this.upward, -delta);
+		this.move(this.upward, -delta);
 	}
 }
