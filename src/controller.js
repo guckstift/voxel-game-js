@@ -8,7 +8,7 @@ export default class Controller
 		this.camera = camera;
 		this.keymap = {};
 		this.locked = false;
-		this.movespeed = 4;
+		this.movespeed = 8;
 		
 		window.addEventListener("keydown", e => this.keydown(e));
 		window.addEventListener("keyup", e => this.keyup(e));

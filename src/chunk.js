@@ -2,6 +2,7 @@ import Shader from "./shader.js";
 import Texture from "./texture.js";
 import Buffer from "./buffer.js";
 import Matrix from "./matrix.js";
+import blocks from "./blocks.js";
 
 let vert = `
 	uniform mat4 proj;
@@ -75,18 +76,18 @@ export default class Chunk
 		let gl = this.gl;
 		let mesh = [];
 		
-		this.remeshSide(mesh, -1, 0, 0, [0,1,0], [0,0,0], [0,1,1], [0,0,1]);
-		this.remeshSide(mesh,  0,-1, 0, [0,0,0], [1,0,0], [0,0,1], [1,0,1]);
-		this.remeshSide(mesh,  0, 0,-1, [0,1,0], [1,1,0], [0,0,0], [1,0,0]);
-		this.remeshSide(mesh, +1, 0, 0, [1,0,0], [1,1,0], [1,0,1], [1,1,1]);
-		this.remeshSide(mesh,  0,+1, 0, [1,1,0], [0,1,0], [1,1,1], [0,1,1]);
-		this.remeshSide(mesh,  0, 0,+1, [0,0,1], [1,0,1], [0,1,1], [1,1,1]);
+		this.remeshSide(mesh, -1, 0, 0, [0,1,0], [0,0,0], [0,1,1], [0,0,1], 0);
+		this.remeshSide(mesh,  0,-1, 0, [0,0,0], [1,0,0], [0,0,1], [1,0,1], 1);
+		this.remeshSide(mesh,  0, 0,-1, [0,1,0], [1,1,0], [0,0,0], [1,0,0], 2);
+		this.remeshSide(mesh, +1, 0, 0, [1,0,0], [1,1,0], [1,0,1], [1,1,1], 3);
+		this.remeshSide(mesh,  0,+1, 0, [1,1,0], [0,1,0], [1,1,1], [0,1,1], 4);
+		this.remeshSide(mesh,  0, 0,+1, [0,0,1], [1,0,1], [0,1,1], [1,1,1], 5);
 		
 		this.buffer.update(new Float32Array(mesh));
 		this.count = mesh.length / 8;
 	}
 	
-	remeshSide(mesh, nx, ny, nz, p0, p1, p2, p3)
+	remeshSide(mesh, nx, ny, nz, p0, p1, p2, p3, fid)
 	{
 		for(let z=0, i=0; z<256; z++) {
 			for(let y=0; y<16; y++) {
@@ -98,10 +99,13 @@ export default class Chunk
 					);
 					
 					if(block > 0) {
-						let v0 = [x + p0[0], y + p0[1], z + p0[2], nx, ny, nz, 0/16, 1/16];
-						let v1 = [x + p1[0], y + p1[1], z + p1[2], nx, ny, nz, 1/16, 1/16];
-						let v2 = [x + p2[0], y + p2[1], z + p2[2], nx, ny, nz, 0/16, 0/16];
-						let v3 = [x + p3[0], y + p3[1], z + p3[2], nx, ny, nz, 1/16, 0/16];
+						let face = blocks[block].faces[fid];
+						let fx = face % 16 / 16;
+						let fy = Math.floor(face / 16) / 16;
+						let v0 = [x + p0[0], y + p0[1], z + p0[2], nx, ny, nz, 0/16 + fx, 1/16 + fy];
+						let v1 = [x + p1[0], y + p1[1], z + p1[2], nx, ny, nz, 1/16 + fx, 1/16 + fy];
+						let v2 = [x + p2[0], y + p2[1], z + p2[2], nx, ny, nz, 0/16 + fx, 0/16 + fy];
+						let v3 = [x + p3[0], y + p3[1], z + p3[2], nx, ny, nz, 1/16 + fx, 0/16 + fy];
 						
 						mesh.push(...v0, ...v1, ...v2, ...v2, ...v1, ...v3);
 					}
