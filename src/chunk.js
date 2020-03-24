@@ -48,7 +48,11 @@ export default class Chunk
 		for(let z=0, i=0; z<256; z++) {
 			for(let y=0; y<16; y++) {
 				for(let x=0; x<16; x++, i++) {
-					this.data[i] = z > x + y ? 0 : 1;
+					this.data[i] =
+						z > x + y   ? 0 :
+						z === x + y ? 1 :
+						z*2 < x + y ? 3 :
+						              2 ;
 				}
 			}
 		}
