@@ -172,7 +172,9 @@ export default class Map
 				for(let y = ys; y !== ye; y += step[1]) {
 					for(let z = zs; z !== ze; z += step[2]) {
 						if(this.getBlock(x, y, z) > 0) {
-							return true;
+							let offs = way / len * vec[axis];
+							
+							return {axis, offs};
 						}
 					}
 				}

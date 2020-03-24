@@ -52,8 +52,14 @@ export default class Camera
 		
 		boxmax.add(new Vector(+0.25, +0.25, +0.25));
 		
-		if(this.map.boxmarch(boxmin.data, boxmax.data, deltavec.data) === true) {
-			return;
+		for(let i=0; i<3; i++) {
+			let hit = this.map.boxmarch(boxmin.data, boxmax.data, deltavec.data);
+			
+			if(!hit) {
+				break;
+			}
+			
+			deltavec.data[hit.axis] = hit.offs;
 		}
 		
 		this.pos.add(deltavec);
