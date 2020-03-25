@@ -6,6 +6,7 @@ export default class Map
 	{
 		this.chunks = {};
 		this.display = display;
+		this.loadedChunks = 0;
 	}
 	
 	getChunk(cx, cy)
@@ -23,6 +24,7 @@ export default class Map
 			}
 			
 			this.chunks[cy][cx] = new Chunk(this.display, cx, cy);
+			this.loadedChunks ++;
 		}
 	}
 	
