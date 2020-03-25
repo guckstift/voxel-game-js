@@ -3,6 +3,7 @@ import Texture from "./texture.js";
 import Buffer from "./buffer.js";
 import Matrix from "./matrix.js";
 import blocks from "./blocks.js";
+import Generator from "./generator.js";
 
 let vert = `
 	uniform mat4 proj;
@@ -43,16 +44,17 @@ export default class Chunk
 		this.texture = new Texture(display, "gfx/blocks.png");
 		this.buffer = new Buffer(display);
 		this.data = new Uint8Array(16 * 16 * 256);
+		this.generator = new Generator();
 		this.count = 0;
 		
 		for(let z=0, i=0; z<256; z++) {
 			for(let y=0; y<16; y++) {
 				for(let x=0; x<16; x++, i++) {
-					this.data[i] =
-						z > x + y   ? 0 :
-						z === x + y ? 1 :
-						z*2 < x + y ? 3 :
-						              2 ;
+					this.data[i] = this.generator.getBlock(
+						x + cx * 16,
+						y + cy * 16,
+						z,
+					);
 				}
 			}
 		}

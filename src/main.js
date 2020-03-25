@@ -16,7 +16,7 @@ let crosshairs = new Crosshairs();
 crosshairs.appendToBody();
 
 let map = new Map(display);
-let camera = new Camera(map, 90, 800/600, 0.1, 1000, 8,8,64, 15,0);
+let camera = new Camera(map, 90, 800/600, 0.1, 1000, 8,8,16, 30,0);
 let controller = new Controller(camera, display);
 
 let sun = new Vector(0,0,1);
