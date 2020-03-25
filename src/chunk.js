@@ -40,8 +40,8 @@ export default class Chunk
 {
 	constructor(display, cx, cy)
 	{
-		this.shader = new Shader(display, vert, frag);
-		this.texture = new Texture(display, "gfx/blocks.png");
+		this.shader = display.getCached("Chunk.shader", () => new Shader(display, vert, frag));
+		this.texture = display.getCached("Chunk.texture", () => new Texture(display, "gfx/blocks.png"));
 		this.buffer = new Buffer(display);
 		this.data = new Uint8Array(16 * 16 * 256);
 		this.generator = new Generator();

@@ -29,6 +29,7 @@ export default class Display
 		this.canvas = canvas;
 		this.gl = gl;
 		this.onframe = () => {};
+		this.cache = {};
 	}
 	
 	appendToBody()
@@ -62,5 +63,14 @@ export default class Display
 		let canvas = this.canvas;
 		
 		return canvas.clientWidth / canvas.clientHeight;
+	}
+	
+	getCached(id, factory)
+	{
+		if(!this.cache[id]) {
+			this.cache[id] = factory();
+		}
+		
+		return this.cache[id];
 	}
 }
