@@ -18,6 +18,7 @@ export default class Camera
 		this.rightward = new Vector(1,0,0);
 		this.forward = new Vector(0,1,0);
 		this.upward = new Vector(0,0,1);
+		this.lookat = new Vector(0,0,-1);
 	}
 	
 	update()
@@ -31,6 +32,9 @@ export default class Camera
 		this.rightward.rotateZ(radians(this.rz));
 		this.forward.set(0,1,0);
 		this.forward.rotateZ(radians(this.rz));
+		this.lookat.set(0,0,-1);
+		this.lookat.rotateX(radians(this.rx));
+		this.lookat.rotateZ(radians(this.rz));
 	}
 	
 	moveForward(delta)

@@ -80,6 +80,24 @@ export default class Matrix
 		m[11] = -s * a13 + c * a23;
 	}
 	
+	rotateY(a)
+	{
+		let m = this.data;
+		let s = Math.sin(a);
+		let c = Math.cos(a);
+		let a00 = m[0], a01 = m[1], a02 = m[2],  a03 = m[3];
+		let a20 = m[8], a21 = m[9], a22 = m[10], a23 = m[11];
+		
+		m[0]  =  c * a00 + s * a20;
+		m[1]  =  c * a01 + s * a21;
+		m[2]  =  c * a02 + s * a22;
+		m[3]  =  c * a03 + s * a23;
+		m[8]  = -s * a00 + c * a20;
+		m[9]  = -s * a01 + c * a21;
+		m[10] = -s * a02 + c * a22;
+		m[11] = -s * a03 + c * a23;
+	}
+	
 	rotateZ(a)
 	{
 		let m = this.data;

@@ -34,6 +34,13 @@ export default class Vector
 		this.data[2] += other.data[2] * scale;
 	}
 	
+	scale(s)
+	{
+		this.data[0] *= s;
+		this.data[1] *= s;
+		this.data[2] *= s;
+	}
+	
 	rotateX(a)
 	{
 		let v = this.data;
@@ -54,5 +61,10 @@ export default class Vector
 		let y = v[1];
 		v[0] = x * c - y * s;
 		v[1] = x * s + y * c;
+	}
+	
+	clone()
+	{
+		return new Vector(this.data[0], this.data[1], this.data[2]);
 	}
 }
