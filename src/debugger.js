@@ -26,6 +26,8 @@ export default class Debugger
 		this.fpsMonitor = this.addMonitor("FPS");
 		this.posMonitor = this.addMonitor("Position");
 		this.chunksMonitor = this.addMonitor("Loaded chunks");
+		this.chunkPosMonitor = this.addMonitor("Chunk position");
+		this.chunkQuadsMonitor = this.addMonitor("Chunk quad count");
 		
 		window.addEventListener("keydown", e => {
 			if(e.key === "F3") {
@@ -82,6 +84,18 @@ export default class Debugger
 		`;
 		
 		this.chunksMonitor.textContent = this.map.loadedChunks;
+		
+		let cx = Math.floor(this.camera.pos.x / 16);
+		let cy = Math.floor(this.camera.pos.y / 16);
+		
+		this.chunkPosMonitor.textContent = `
+			x = ${cx.toFixed(0)}
+			y = ${cy.toFixed(0)}
+		`;
+		
+		let chunk = this.map.getChunk(cx, cy);
+		
+		this.chunkQuadsMonitor.textContent = chunk ? chunk.count / 6 : "no chunk loaded";
 	}
 	
 	enable()
