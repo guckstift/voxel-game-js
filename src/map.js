@@ -23,7 +23,7 @@ export default class Map
 				this.chunks[cy] = {};
 			}
 			
-			this.chunks[cy][cx] = new Chunk(this.display, cx, cy);
+			this.chunks[cy][cx] = new Chunk(this.display, this, cx, cy);
 			this.loadedChunks ++;
 		}
 	}
@@ -35,6 +35,19 @@ export default class Map
 		let chunk = this.getChunk(cx, cy);
 		
 		return chunk ? chunk.getBlock(x - cx * 16, y - cy * 16, z) : 0;
+	}
+	
+	update()
+	{
+		for(let y in this.chunks) {
+			if(this.chunks[y]) {
+				for(let x in this.chunks[y]) {
+					let chunk = this.chunks[y][x];
+					
+					chunk.update();
+				}
+			}
+		}
 	}
 	
 	draw(camera, sun)

@@ -51,6 +51,8 @@ display.onframe = () =>
 	
 	picker.pick(camera.pos, camera.lookat, 16);
 	
+	map.update();
+	
 	map.draw(camera, sun);
 	picker.draw(camera);
 };
