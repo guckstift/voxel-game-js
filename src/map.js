@@ -37,6 +37,17 @@ export default class Map
 		return chunk ? chunk.getBlock(x - cx * 16, y - cy * 16, z) : 0;
 	}
 	
+	setBlock(x, y, z, b)
+	{
+		let cx = Math.floor(x / 16);
+		let cy = Math.floor(y / 16);
+		let chunk = this.getChunk(cx, cy);
+		
+		if(chunk) {
+			chunk.setBlock(x - cx * 16, y - cy * 16, z, b);
+		}
+	}
+	
 	update()
 	{
 		for(let y in this.chunks) {

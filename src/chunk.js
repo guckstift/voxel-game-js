@@ -81,17 +81,7 @@ export default class Chunk
 		this.cy = cy;
 		this.invalid = true;
 		
-		for(let y = -1; y <= +1; y++) {
-			for(let x = -1; x <= +1; x++) {
-				if(x !== 0 || y !== 0) {
-					let chunk = map.getChunk(cx + x, cy + y);
-					
-					if(chunk) {
-						chunk.invalid = true;
-					}
-				}
-			}
-		}
+		this.invalidateVicinity();
 		
 		this.model = new Matrix();
 		this.model.translate(cx * 16, cy * 16, 0);
@@ -108,6 +98,29 @@ export default class Chunk
 		}
 		
 		return 0;
+	}
+	
+	setBlock(x, y, z, b)
+	{
+		if(x >= 0 && y >= 0 && z >= 0 && x < 16 && y < 16 && z < 256) {
+			this.data[x + y * 16 + z * 16 * 16] = b;
+			this.invalidateVicinity();
+		}
+	}
+	
+	invalidateVicinity()
+	{
+		this.invalid = true;
+		
+		for(let y = -1; y <= +1; y++) {
+			for(let x = -1; x <= +1; x++) {
+				let chunk = this.map.getChunk(this.cx + x, this.cy + y);
+				
+				if(chunk) {
+					chunk.invalid = true;
+				}
+			}
+		}
 	}
 	
 	update()

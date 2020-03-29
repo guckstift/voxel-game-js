@@ -41,6 +41,7 @@ export default class Picker
 		this.buffer = new Buffer(display, new Float32Array([0,0,0, 1,0,0, 0,1,0, 0,1,0, 1,0,0, 1,1,0]));
 		this.model = new Matrix();
 		this.hasHit = false;
+		this.hitVox = null;
 	}
 	
 	pick(pos, vec, len)
@@ -53,6 +54,7 @@ export default class Picker
 		
 		if(hit) {
 			this.hasHit = true;
+			this.hitVox = hit.voxpos;
 			this.model.set();
 			this.model.translate(...hit.voxpos);
 			

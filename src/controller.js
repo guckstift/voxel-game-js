@@ -1,11 +1,13 @@
 export default class Controller
 {
-	constructor(camera, display)
+	constructor(camera, display, picker, map)
 	{
 		let canvas = display.canvas;
 		
 		this.canvas = canvas;
 		this.camera = camera;
+		this.picker = picker;
+		this.map = map;
 		this.keymap = {};
 		this.locked = false;
 		this.movespeed = 8;
@@ -44,8 +46,15 @@ export default class Controller
 	
 	mousedown(e)
 	{
-		this.canvas.requestPointerLock();
-		this.locked = true;
+		if(this.locked) {
+			if(e.button === 0 && this.picker.hasHit) {
+				this.map.setBlock(...this.picker.hitVox, 0);
+			}
+		}
+		else {
+			this.canvas.requestPointerLock();
+			this.locked = true;
+		}
 	}
 	
 	mousemove(e)

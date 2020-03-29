@@ -18,7 +18,8 @@ crosshairs.appendToBody();
 
 let map = new Map(display);
 let camera = new Camera(map, 90, 800/600, 0.1, 1000, 8,8,16, 30,0);
-let controller = new Controller(camera, display);
+let picker = new Picker(display, map);
+let controller = new Controller(camera, display, picker, map);
 
 let dbg = new Debugger(camera, map);
 
@@ -28,8 +29,6 @@ dbg.appendToBody();
 let sun = new Vector(0,0,1);
 
 sun.rotateX(radians(30));
-
-let picker = new Picker(display, map);
 
 display.onframe = () =>
 {
