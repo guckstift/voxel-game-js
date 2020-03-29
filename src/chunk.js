@@ -106,7 +106,43 @@ export default class Chunk
 	{
 		if(x >= 0 && y >= 0 && z >= 0 && x < 16 && y < 16 && z < 256) {
 			this.data[x + y * 16 + z * 16 * 16] = b;
-			this.invalidateVicinity();
+			this.invalid = true;
+			
+			let adjacentList = [];
+			
+			if(x === 0) {
+				adjacentList.push(this.map.getChunk(this.cx - 1, this.cy));
+			
+				if(y === 0) {
+					adjacentList.push(this.map.getChunk(this.cx - 1, this.cy - 1));
+				}
+				else if(y === 15) {
+					adjacentList.push(this.map.getChunk(this.cx - 1, this.cy + 1));
+				}
+			}
+			else if(x === 15) {
+				adjacentList.push(this.map.getChunk(this.cx + 1, this.cy));
+			
+				if(y === 0) {
+					adjacentList.push(this.map.getChunk(this.cx + 1, this.cy - 1));
+				}
+				else if(y === 15) {
+					adjacentList.push(this.map.getChunk(this.cx + 1, this.cy + 1));
+				}
+			}
+			
+			if(y === 0) {
+				adjacentList.push(this.map.getChunk(this.cx, this.cy - 1));
+			}
+			else if(y === 15) {
+				adjacentList.push(this.map.getChunk(this.cx, this.cy + 1));
+			}
+			
+			adjacentList.forEach(chunk => {
+				if(chunk) {
+					chunk.invalid = true;
+				}
+			});
 		}
 	}
 	
