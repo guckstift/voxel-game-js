@@ -27,4 +27,8 @@ export default [
 		faces: [16,16,16,16,16,16],
 		transparent: true,
 	},
+	{
+		name: "sand",
+		faces: [4, 4, 4, 4, 4, 4],
+	},
 ];
