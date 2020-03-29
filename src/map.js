@@ -48,30 +48,28 @@ export default class Map
 		}
 	}
 	
-	update()
+	forEachChunk(fn)
 	{
 		for(let y in this.chunks) {
 			if(this.chunks[y]) {
 				for(let x in this.chunks[y]) {
 					let chunk = this.chunks[y][x];
 					
-					chunk.update();
+					fn(chunk, x, y);
 				}
 			}
 		}
 	}
 	
+	update()
+	{
+		this.forEachChunk(chunk => chunk.update());
+	}
+	
 	draw(camera, sun)
 	{
-		for(let y in this.chunks) {
-			if(this.chunks[y]) {
-				for(let x in this.chunks[y]) {
-					let chunk = this.chunks[y][x];
-					
-					chunk.draw(camera, sun);
-				}
-			}
-		}
+		this.forEachChunk(chunk => chunk.draw(camera, sun, false));
+		this.forEachChunk(chunk => chunk.draw(camera, sun, true));
 	}
 	
 	raymarch(start, vec)

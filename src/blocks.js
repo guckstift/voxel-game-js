@@ -8,6 +8,7 @@
 export default [
 	{
 		name: "air",
+		transparent: true,
 	},
 	{
 		name: "grass",
@@ -20,5 +21,10 @@ export default [
 	{
 		name: "stone",
 		faces: [3, 3, 3, 3, 3, 3],
+	},
+	{
+		name: "water",
+		faces: [16,16,16,16,16,16],
+		transparent: true,
 	},
 ];

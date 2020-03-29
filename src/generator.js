@@ -44,11 +44,20 @@ export default class Generator
 	{
 		let height = Math.floor(16 * this.sample2d(x / 16, y / 16));
 		
-		return (
-			z > height   ? 0 :
-			z === height ? 1 :
-			z*2 < height ? 3 :
-				           2
-		);
+		if(z * 2 < height) {
+			return 3;
+		}
+		else if(z < height) {
+			return 2;
+		}
+		else if(z === height) {
+			return 1;
+		}
+		else if(z < 8) {
+			return 4;
+		}
+		else {
+			return 0;
+		}
 	}
 }

@@ -58,9 +58,11 @@ export default class Chunk
 		this.shader = display.getCached("Chunk.shader", () => new Shader(display, vert, frag));
 		this.texture = display.getCached("Chunk.texture", () => new Texture(display, "gfx/blocks.png"));
 		this.buffer = new Buffer(display);
+		this.transbuf = new Buffer(display);
 		this.data = new Uint8Array(16 * 16 * 256);
 		this.generator = new Generator();
 		this.count = 0;
+		this.transcount = 0;
 		
 		for(let z=0, i=0; z<256; z++) {
 			for(let y=0; y<16; y++) {
@@ -126,53 +128,61 @@ export default class Chunk
 	update()
 	{
 		if(this.invalid) {
-			this.remesh();
+			this.remesh(false);
+			this.remesh(true);
 			this.invalid = false;
 		}
 	}
 	
-	remesh()
+	remesh(meshTrans)
 	{
 		let gl = this.gl;
 		let mesh = [];
 		
-		this.remeshSide(mesh, -1, 0, 0, 0, // left
+		this.remeshSide(mesh, -1, 0, 0, 0, meshTrans, // left
 			1, 2, 0, false, true, false,
 			[-1,+1,+1], [-1, 0,+1], [-1,-1,+1],
 			[-1,+1, 0],             [-1,-1, 0],
 			[-1,+1,-1], [-1, 0,-1], [-1,-1,-1]);
-		this.remeshSide(mesh,  0,-1, 0, 1, // front
+		this.remeshSide(mesh,  0,-1, 0, 1, meshTrans, // front
 			0, 2, 1, false, false, false,
 			[-1,-1,+1], [ 0,-1,+1], [+1,-1,+1],
 			[-1,-1, 0],             [+1,-1, 0],
 			[-1,-1,-1], [ 0,-1,-1], [+1,-1,-1]);
-		this.remeshSide(mesh,  0, 0,-1, 2, // bottom
+		this.remeshSide(mesh,  0, 0,-1, 2, meshTrans, // bottom
 			0, 1, 2, false, true, false,
 			[-1,-1,-1], [ 0,-1,-1], [+1,-1,-1],
 			[-1, 0,-1],             [+1, 0,-1],
 			[-1,+1,-1], [ 0,+1,-1], [+1,+1,-1]);
-		this.remeshSide(mesh, +1, 0, 0, 3, // right
+		this.remeshSide(mesh, +1, 0, 0, 3, meshTrans, // right
 			1, 2, 0, false, false, false,
 			[+1,-1,+1], [+1, 0,+1], [+1,+1,+1],
 			[+1,-1, 0],             [+1,+1, 0],
 			[+1,-1,-1], [+1, 0,-1], [+1,+1,-1]);
-		this.remeshSide(mesh,  0,+1, 0, 4, // back
+		this.remeshSide(mesh,  0,+1, 0, 4, meshTrans, // back
 			0, 2, 1, true, false, false,
 			[+1,+1,+1], [ 0,+1,+1], [-1,+1,+1],
 			[+1,+1, 0],             [-1,+1, 0],
 			[+1,+1,-1], [ 0,+1,-1], [-1,+1,-1]);
-		this.remeshSide(mesh,  0, 0,+1, 5, // top
+		this.remeshSide(mesh,  0, 0,+1, 5, meshTrans, // top
 			0, 1, 2, false, false, false,
 			[-1,+1,+1], [ 0,+1,+1], [+1,+1,+1],
 			[-1, 0,+1],             [+1, 0,+1],
 			[-1,-1,+1], [ 0,-1,+1], [+1,-1,+1]);
 		
-		this.buffer.update(new Float32Array(mesh));
-		this.count = mesh.length / 10;
+		if(meshTrans) {
+			this.transbuf.update(new Float32Array(mesh));
+			this.transcount = mesh.length / 10;
+		}
+		else {
+			this.buffer.update(new Float32Array(mesh));
+			this.count = mesh.length / 10;
+		}
 	}
 	
 	remeshSide(
-		mesh, nx, ny, nz, fid, ax0, ax1, ax2, fx, fy, fz, aov0, aov1, aov2, aov3, aov4, aov5, aov6, aov7
+		mesh, nx, ny, nz, fid, meshTrans,
+		ax0, ax1, ax2, fx, fy, fz, aov0, aov1, aov2, aov3, aov4, aov5, aov6, aov7
 	) {
 		let map = [];
 		
@@ -180,12 +190,24 @@ export default class Chunk
 			for(let y=0; y<16; y++) {
 				for(let x=0; x<16; x++, i++) {
 					let block = this.getBlock(x, y, z);
+					let adjacent = this.getBlock(x + nx, y + ny, z + nz);
+					let transparent = blocks[block].transparent || false;
+					let adjTrans = blocks[adjacent].transparent || false;
 					
-					map[i] = (
-						block > 0 && this.getBlock(x + nx, y + ny, z + nz) === 0
-						? block
-						: 0
-					);
+					if(meshTrans) {
+						map[i] = (
+							block > 0 && transparent === true && adjacent !== block && adjTrans === true
+							? block
+							: 0
+						);
+					}
+					else {
+						map[i] = (
+							block > 0 && transparent === false && adjTrans === true
+							? block
+							: 0
+						);
+					}
 					
 					if(map[i] > 0) {
 						let ao0 = this.getOcclusion(
@@ -326,15 +348,30 @@ export default class Chunk
 		return ao0 > 0 && ao2 > 0 ? 3 : ao0 + ao1 + ao2;
 	}
 	
-	draw(camera, sun)
+	draw(camera, sun, drawTrans)
 	{
 		let shader = this.shader;
+		let buffer = null;
+		let count = 0;
 		
-		shader.assignFloatAttrib("pos",  this.buffer, 3, 10, 0);
-		shader.assignFloatAttrib("norm", this.buffer, 3, 10, 3);
-		shader.assignFloatAttrib("uv",   this.buffer, 2, 10, 6);
-		shader.assignFloatAttrib("face", this.buffer, 1, 10, 8);
-		shader.assignFloatAttrib("ao",   this.buffer, 1, 10, 9);
+		if(drawTrans) {
+			buffer = this.transbuf;
+			count = this.transcount;
+		}
+		else {
+			buffer = this.buffer;
+			count = this.count;
+		}
+		
+		if(count === 0) {
+			return;
+		}
+		
+		shader.assignFloatAttrib("pos",  buffer, 3, 10, 0);
+		shader.assignFloatAttrib("norm", buffer, 3, 10, 3);
+		shader.assignFloatAttrib("uv",   buffer, 2, 10, 6);
+		shader.assignFloatAttrib("face", buffer, 1, 10, 8);
+		shader.assignFloatAttrib("ao",   buffer, 1, 10, 9);
 		shader.use();
 		shader.assignMatrix("proj", camera.proj);
 		shader.assignMatrix("view", camera.view);
@@ -342,6 +379,6 @@ export default class Chunk
 		shader.assignVector("sun", sun);
 		shader.assignTexture("tex", this.texture, 0);
 		
-		this.display.drawTriangles(this.count);
+		this.display.drawTriangles(count);
 	}
 }
