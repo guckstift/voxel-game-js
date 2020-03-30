@@ -164,9 +164,13 @@ export default class Chunk
 	update()
 	{
 		if(this.invalid) {
+			let meshingStartTime = performance.now();
+			
 			this.remesh(false);
 			this.remesh(true);
 			this.invalid = false;
+			
+			console.log("chunk mesh updated", this.cx, this.cy, "time", performance.now() - meshingStartTime);
 		}
 	}
 	
