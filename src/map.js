@@ -7,6 +7,17 @@ export default class Map
 		this.chunks = {};
 		this.display = display;
 		this.loadedChunks = 0;
+		this.mesher = new Worker("src/mesher.js", {type: "module"});
+
+		this.mesher.onmessage = e => {
+			let cx = e.data.cx;
+			let cy = e.data.cy;
+			let chunk = this.getChunk(cx, cy);
+			
+			if(chunk) {
+				chunk.applyMesh(e.data.mesh, e.data.transmesh);
+			}
+		};
 	}
 	
 	getChunk(cx, cy)
@@ -26,6 +37,15 @@ export default class Map
 			this.chunks[cy][cx] = new Chunk(this.display, this, cx, cy);
 			this.loadedChunks ++;
 		}
+	}
+	
+	remeshChunk(chunk)
+	{
+		let chunks = chunk.getVicinity();
+		let cx = chunk.cx;
+		let cy = chunk.cy;
+		
+		this.mesher.postMessage({chunks, cx, cy});
 	}
 	
 	getBlock(x, y, z)

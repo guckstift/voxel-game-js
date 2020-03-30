@@ -5,10 +5,12 @@ let chunks = null;
 onmessage = e => {
 	chunks = e.data.chunks;
 	
+	let cx = e.data.cx;
+	let cy = e.data.cy;
 	let mesh = remesh(false);
 	let transmesh = remesh(true);
 	
-	postMessage({mesh, transmesh});
+	postMessage({mesh, transmesh, cx, cy});
 };
 
 function getBlock(x, y, z)

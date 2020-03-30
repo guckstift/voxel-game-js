@@ -77,17 +77,6 @@ export default class Chunk
 			}
 		}
 		
-		this.mesher = new Worker("src/mesher.js", {type: "module"});
-		
-		this.mesher.onmessage = e => {
-			this.buffer.update(new Float32Array(e.data.mesh));
-			this.count = e.data.mesh.length / 10;
-			this.transbuf.update(new Float32Array(e.data.transmesh));
-			this.transcount = e.data.transmesh.length / 10;
-			
-			console.log("chunk mesh updated", this.cx, this.cy, "time", performance.now() - this.meshingStartTime);
-		};
-		
 		this.gl = display.gl;
 		this.display = display;
 		this.map = map;
@@ -198,12 +187,19 @@ export default class Chunk
 	{
 		if(this.invalid) {
 			this.meshingStartTime = performance.now();
-			
-			let chunks = this.getVicinity();
-			
-			this.mesher.postMessage({chunks});
+			this.map.remeshChunk(this);
 			this.invalid = false;
 		}
+	}
+	
+	applyMesh(mesh, transmesh)
+	{
+		this.buffer.update(new Float32Array(mesh));
+		this.count = mesh.length / 10;
+		this.transbuf.update(new Float32Array(transmesh));
+		this.transcount = transmesh.length / 10;
+		
+		console.log("chunk mesh updated", this.cx, this.cy, "time", performance.now() - this.meshingStartTime);
 	}
 	
 	draw(camera, sun, drawTrans)
