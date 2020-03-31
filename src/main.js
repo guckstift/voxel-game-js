@@ -7,6 +7,9 @@ import {radians} from "./math.js";
 import Picker from "./picker.js";
 import Crosshairs from "./crosshairs.js";
 import Debugger from "./debugger.js";
+import Model from "./model.js";
+import Matrix from "./matrix.js";
+import Texture from "./texture.js";
 
 let display = new Display();
 
@@ -30,6 +33,19 @@ let sun = new Vector(0,0,1);
 
 sun.rotateX(radians(30));
 
+let model = new Model(display, new Texture(display, "gfx/guy.png"));
+
+model.addCube([-0.25, -0.25, 1.5], [ 0.5, 0.5, 0.5], [ 0, 0], [8,8, 8], 64); // head
+model.addCube([-0.25,-0.125,0.75], [ 0.5,0.25,0.75], [ 0, 8], [8,4,12], 64); // upper body
+model.addCube([ -0.5,-0.125,0.75], [0.25,0.25,0.75], [40, 0], [4,4,12], 64); // left arm
+model.addCube([ 0.25,-0.125,0.75], [0.25,0.25,0.75], [40,12], [4,4,12], 64); // right arm
+model.addCube([-0.25,-0.125,   0], [0.25,0.25,0.75], [ 0,20], [4,4,12], 64); // left leg
+model.addCube([    0,-0.125,   0], [0.25,0.25,0.75], [20,20], [4,4,12], 64); // right leg
+
+let modelMat = new Matrix();
+
+modelMat.translate(6,15,9);
+
 display.onframe = () =>
 {
 	dbg.frame();
@@ -51,7 +67,9 @@ display.onframe = () =>
 	picker.pick(camera.pos, camera.lookat, 16);
 	
 	map.update();
+	model.update();
 	
 	map.draw(camera, sun);
+	model.draw(camera, sun, modelMat);
 	picker.draw(camera);
 };
