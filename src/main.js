@@ -35,16 +35,19 @@ sun.rotateX(radians(30));
 
 let model = new Model(display, new Texture(display, "gfx/guy.png"));
 
-model.addCube([-0.25, -0.25, 1.5], [ 0.5, 0.5, 0.5], [ 0, 0], [8,8, 8], 64); // head
-model.addCube([-0.25,-0.125,0.75], [ 0.5,0.25,0.75], [ 0, 8], [8,4,12], 64); // upper body
-model.addCube([ -0.5,-0.125,0.75], [0.25,0.25,0.75], [40, 0], [4,4,12], 64); // left arm
-model.addCube([ 0.25,-0.125,0.75], [0.25,0.25,0.75], [40,12], [4,4,12], 64); // right arm
-model.addCube([-0.25,-0.125,   0], [0.25,0.25,0.75], [ 0,20], [4,4,12], 64); // left leg
-model.addCube([    0,-0.125,   0], [0.25,0.25,0.75], [20,20], [4,4,12], 64); // right leg
+model.addCube([-0.25, -0.25, 1.5], [ 0.5, 0.5, 0.5], [ 0, 0], [8,8, 8], 64, 0); // head
+model.addCube([-0.25,-0.125,0.75], [ 0.5,0.25,0.75], [ 0, 8], [8,4,12], 64, 0); // upper body
+model.addCube([ -0.5,-0.125,0.75], [0.25,0.25,0.75], [40, 0], [4,4,12], 64, 1); // left arm
+model.addCube([ 0.25,-0.125,0.75], [0.25,0.25,0.75], [40,12], [4,4,12], 64, 2); // right arm
+model.addCube([-0.25,-0.125,   0], [0.25,0.25,0.75], [ 0,20], [4,4,12], 64, 0); // left leg
+model.addCube([    0,-0.125,   0], [0.25,0.25,0.75], [20,20], [4,4,12], 64, 0); // right leg
 
 let modelMat = new Matrix();
 
 modelMat.translate(6,15,9);
+
+let boneLeftArm = new Matrix();
+let boneRightArm = new Matrix();
 
 display.onframe = () =>
 {
@@ -69,7 +72,15 @@ display.onframe = () =>
 	map.update();
 	model.update();
 	
+	boneLeftArm.translate(-0.375, 0, +1.375);
+	boneLeftArm.rotateX(radians(-1));
+	boneLeftArm.translate(+0.375, 0, -1.375);
+	
+	boneRightArm.translate(+0.375, 0, +1.375);
+	boneRightArm.rotateX(radians(+1));
+	boneRightArm.translate(-0.375, 0, -1.375);
+	
 	map.draw(camera, sun);
-	model.draw(camera, sun, modelMat);
+	model.draw(camera, sun, modelMat, [boneLeftArm, boneRightArm]);
 	picker.draw(camera);
 };

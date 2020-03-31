@@ -55,6 +55,17 @@ export default class Shader
 		gl.uniformMatrix4fv(loca, false, mat.data);
 	}
 	
+	assignMatrices(name, mats)
+	{
+		let gl = this.gl;
+		
+		mats.forEach((mat, i) => {
+			let loca = gl.getUniformLocation(this.prog, name + "[" + i + "]");
+			
+			gl.uniformMatrix4fv(loca, false, mat.data);
+		});
+	}
+	
 	assignTexture(name, tex, unit)
 	{
 		let gl = this.gl;
