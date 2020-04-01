@@ -56,37 +56,24 @@ export default class Chunk
 {
 	constructor(display, map, cx, cy)
 	{
-		this.shader = display.getCached("Chunk.shader", () => new Shader(display, vert, frag));
-		this.texture = display.getCached("Chunk.texture", () => new Texture(display, "gfx/blocks.png"));
-		this.buffer = new Buffer(display);
-		this.transbuf = new Buffer(display);
+		if(display) {
+			this.shader = display.getCached("Chunk.shader", () => new Shader(display, vert, frag));
+			this.texture = display.getCached("Chunk.texture", () => new Texture(display, "gfx/blocks.png"));
+			this.buffer = new Buffer(display);
+			this.transbuf = new Buffer(display);
+			this.gl = display.gl;
+		}
+		
 		this.data = new Uint8Array(16 * 16 * 256);
 		this.generator = new Generator();
 		this.count = 0;
 		this.transcount = 0;
-		
-		for(let z=0, i=0; z<256; z++) {
-			for(let y=0; y<16; y++) {
-				for(let x=0; x<16; x++, i++) {
-					this.data[i] = this.generator.getBlock(
-						x + cx * 16,
-						y + cy * 16,
-						z,
-					);
-				}
-			}
-		}
-		
-		this.gl = display.gl;
 		this.display = display;
 		this.map = map;
 		this.cx = cx;
 		this.cy = cy;
-		this.invalid = true;
+		this.invalid = false;
 		this.meshingStartTime = 0;
-		
-		this.invalidateVicinity();
-		
 		this.model = new Matrix();
 		this.model.translate(cx * 16, cy * 16, 0);
 	}
@@ -146,6 +133,29 @@ export default class Chunk
 				}
 			});
 		}
+	}
+	
+	generate()
+	{
+		for(let z=0, i=0; z<256; z++) {
+			for(let y=0; y<16; y++) {
+				for(let x=0; x<16; x++, i++) {
+					this.data[i] = this.generator.getBlock(
+						x + this.cx * 16,
+						y + this.cy * 16,
+						z,
+					);
+				}
+			}
+		}
+		
+		this.invalidateVicinity();
+	}
+	
+	setData(data)
+	{
+		this.data = data;
+		this.invalidateVicinity();
 	}
 	
 	invalidateVicinity()

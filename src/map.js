@@ -2,22 +2,37 @@ import Chunk from "./chunk.js";
 
 export default class Map
 {
-	constructor(display)
+	constructor(display, server)
 	{
+		if(display) {
+			this.mesher = new Worker("src/mesher.js", {type: "module"});
+			
+			this.mesher.onmessage = e => {
+				let cx = e.data.cx;
+				let cy = e.data.cy;
+				let chunk = this.getChunk(cx, cy);
+				
+				if(chunk) {
+					chunk.applyMesh(e.data.mesh, e.data.transmesh);
+				}
+			};
+		}
+		
+		if(server) {
+			server.onSetChunk = (cx, cy, data) => {
+				let chunk = this.getChunk(cx, cy);
+				chunk.setData(data);
+			};
+			
+			server.onSetBlock = (x, y, z, block) => {
+				this.setBlock(x, y, z, block, false)
+			};
+		}
+		
 		this.chunks = {};
 		this.display = display;
+		this.server = server;
 		this.loadedChunks = 0;
-		this.mesher = new Worker("src/mesher.js", {type: "module"});
-
-		this.mesher.onmessage = e => {
-			let cx = e.data.cx;
-			let cy = e.data.cy;
-			let chunk = this.getChunk(cx, cy);
-			
-			if(chunk) {
-				chunk.applyMesh(e.data.mesh, e.data.transmesh);
-			}
-		};
 	}
 	
 	getChunk(cx, cy)
@@ -29,14 +44,27 @@ export default class Map
 	
 	loadChunk(cx, cy)
 	{
-		if(!this.getChunk(cx, cy)) {
+		let chunk = this.getChunk(cx, cy);
+		
+		if(!chunk) {
 			if(!this.chunks[cy]) {
 				this.chunks[cy] = {};
 			}
 			
-			this.chunks[cy][cx] = new Chunk(this.display, this, cx, cy);
+			chunk = new Chunk(this.display, this, cx, cy);
+			
+			if(this.server) {
+				this.server.getChunk(cx, cy);
+			}
+			else {
+				chunk.generate();
+			}
+			
+			this.chunks[cy][cx] = chunk;
 			this.loadedChunks ++;
 		}
+		
+		return chunk;
 	}
 	
 	remeshChunk(chunk)
@@ -57,7 +85,7 @@ export default class Map
 		return chunk ? chunk.getBlock(x - cx * 16, y - cy * 16, z) : 0;
 	}
 	
-	setBlock(x, y, z, b)
+	setBlock(x, y, z, b, pushToServer = true)
 	{
 		let cx = Math.floor(x / 16);
 		let cy = Math.floor(y / 16);
@@ -65,6 +93,10 @@ export default class Map
 		
 		if(chunk) {
 			chunk.setBlock(x - cx * 16, y - cy * 16, z, b);
+		}
+		
+		if(this.server && pushToServer) {
+			this.server.setBlock(x, y, z, b);
 		}
 	}
 	
