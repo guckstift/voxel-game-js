@@ -16,6 +16,7 @@ export default class Camera
 		this.rz = rz;
 		this.proj = new Matrix();
 		this.view = new Matrix();
+		this.model = new Matrix();
 		this.rightward = new Vector(1,0,0);
 		this.forward = new Vector(0,1,0);
 		this.upward = new Vector(0,0,1);
@@ -29,6 +30,8 @@ export default class Camera
 		this.view.rotateX(-radians(this.rx));
 		this.view.rotateZ(-radians(this.rz));
 		this.view.translate(-this.pos.x, -this.pos.y, -this.pos.z);
+		this.model.set();
+		this.model.translate(this.pos.x, this.pos.y, this.pos.z);
 		this.rightward.set(1,0,0);
 		this.rightward.rotateZ(radians(this.rz));
 		this.forward.set(0,1,0);

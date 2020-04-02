@@ -11,6 +11,7 @@ import Model from "./model.js";
 import Matrix from "./matrix.js";
 import Texture from "./texture.js";
 import Server from "./server.js";
+import Sky from "./sky.js";
 
 let display = new Display();
 
@@ -50,6 +51,7 @@ modelMat.translate(6,15,9);
 
 let boneLeftArm = new Matrix();
 let boneRightArm = new Matrix();
+let sky = new Sky(display);
 
 display.onframe = () =>
 {
@@ -82,6 +84,7 @@ display.onframe = () =>
 	boneRightArm.rotateX(radians(+1));
 	boneRightArm.translate(-0.375, 0, -1.375);
 	
+	sky.draw(camera);
 	map.draw(camera, sun);
 	model.draw(camera, sun, modelMat, [boneLeftArm, boneRightArm]);
 	picker.draw(camera);
