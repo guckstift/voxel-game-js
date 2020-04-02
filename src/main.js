@@ -76,6 +76,8 @@ display.onframe = () =>
 	map.update();
 	model.update();
 	
+	modelMat.rotateZ(radians(1));
+	
 	boneLeftArm.translate(-0.375, 0, +1.375);
 	boneLeftArm.rotateX(radians(-1));
 	boneLeftArm.translate(+0.375, 0, -1.375);

@@ -27,6 +27,8 @@ let vert = `
 			}
 		}
 		
+		normal = model * normal;
+		
 		gl_Position = proj * view * model * gl_Position;
 		vUv = uv;
 		
