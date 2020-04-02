@@ -1,19 +1,18 @@
 import Vector from "./vector.js";
 import Matrix from "./matrix.js";
 import {radians} from "./math.js";
+import Body from "./body.js";
 
-export default class Camera
+export default class Camera extends Body
 {
 	constructor(map, fovy, aspect, near, far, x, y, z, rx, rz)
 	{
-		this.map = map;
+		super(map, x, y, z, rx, rz, [-0.25, -0.25, -0.25], [+0.25, +0.25, +0.25]);
+		
 		this.fovy = fovy;
 		this.aspect = aspect;
 		this.near = near;
 		this.far = far;
-		this.pos = new Vector(x, y, z);
-		this.rx = rx;
-		this.rz = rz;
 		this.proj = new Matrix();
 		this.view = new Matrix();
 		this.model = new Matrix();
@@ -39,33 +38,6 @@ export default class Camera
 		this.lookat.set(0,0,-1);
 		this.lookat.rotateX(radians(this.rx));
 		this.lookat.rotateZ(radians(this.rz));
-	}
-	
-	move(vec, delta)
-	{
-		let deltavec = vec.clone();
-		
-		deltavec.scale(delta);
-		
-		let boxmin = this.pos.clone();
-		
-		boxmin.add(new Vector(-0.25, -0.25, -0.25));
-		
-		let boxmax = this.pos.clone();
-		
-		boxmax.add(new Vector(+0.25, +0.25, +0.25));
-		
-		for(let i=0; i<3; i++) {
-			let hit = this.map.boxmarch(boxmin.data, boxmax.data, deltavec.data);
-			
-			if(!hit) {
-				break;
-			}
-			
-			deltavec.data[hit.axis] = hit.offs;
-		}
-		
-		this.pos.add(deltavec);
 	}
 	
 	moveForward(delta)
