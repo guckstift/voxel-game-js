@@ -2,19 +2,23 @@ import Vector from "./vector.js";
 
 export default class Controller
 {
-	constructor(camera, display, picker, map)
+	constructor(camera, display, picker, map, speaker)
 	{
 		let canvas = display.canvas;
 		
 		this.canvas = canvas;
 		this.camera = camera;
 		this.picker = picker;
+		this.speaker = speaker;
 		this.map = map;
 		this.keymap = {};
 		this.locked = false;
 		this.movespeed = 8;
 		this.jumpspeed = 8;
 		this.flymode = false;
+		this.jumpsound = null;
+		
+		speaker.loadSound("sfx/jump.ogg").then(sound => this.jumpsound = sound);
 		
 		window.addEventListener("keydown", e => this.keydown(e));
 		window.addEventListener("keyup", e => this.keyup(e));
@@ -36,6 +40,8 @@ export default class Controller
 	
 	keydown(e)
 	{
+		this.speaker.activate();
+		
 		let key = this.getKey(e);
 		
 		this.keymap[key] = true;
@@ -50,6 +56,8 @@ export default class Controller
 	
 	mousedown(e)
 	{
+		this.speaker.activate();
+		
 		if(this.locked) {
 			if(e.button === 0 && this.picker.hasHit) {
 				this.map.setBlock(...this.picker.hitVox, 0);
@@ -102,6 +110,10 @@ export default class Controller
 		else {
 			if(this.keymap.space && this.camera.rest.z < 0) {
 				this.camera.accel(new Vector(0, 0, this.jumpspeed), 1);
+				
+				if(this.jumpsound) {
+					this.speaker.playSound(this.jumpsound);
+				}
 			}
 		}
 		

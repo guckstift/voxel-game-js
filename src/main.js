@@ -12,6 +12,7 @@ import Matrix from "./matrix.js";
 import Texture from "./texture.js";
 import Server from "./server.js";
 import Sky from "./sky.js";
+import Speaker from "./speaker.js";
 
 let display = new Display();
 
@@ -27,7 +28,8 @@ let map = new Map(display, server);
 let camera = new Camera(map, 90, 800/600, 0.1, 1000, 8,8,16, 30,0);
 
 let picker = new Picker(display, map);
-let controller = new Controller(camera, display, picker, map);
+let speaker = new Speaker();
+let controller = new Controller(camera, display, picker, map, speaker);
 
 let dbg = new Debugger(camera, map, controller);
 
