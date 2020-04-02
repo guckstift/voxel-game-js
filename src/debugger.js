@@ -1,6 +1,6 @@
 export default class Debugger
 {
-	constructor(camera, map)
+	constructor(camera, map, controller)
 	{
 		let dom = document.createElement("div");
 		
@@ -21,6 +21,7 @@ export default class Debugger
 		this.last = 0;
 		this.camera = camera;
 		this.map = map;
+		this.controller = controller;
 		this.enabled = false;
 		
 		this.fpsMonitor = this.addMonitor("FPS");
@@ -102,12 +103,14 @@ export default class Debugger
 	{
 		this.enabled = true;
 		this.dom.style.display = "block";
+		this.controller.enableFly();
 	}
 	
 	disable()
 	{
 		this.enabled = false;
 		this.dom.style.display = "none";
+		this.controller.disableFly();
 	}
 	
 	toggle()

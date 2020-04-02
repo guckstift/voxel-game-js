@@ -250,7 +250,7 @@ export default class Map
 						if(this.getBlock(x, y, z) > 0) {
 							let offs = way / len * vec[axis];
 							
-							return {axis, offs};
+							return {axis, offs, step: step[axis]};
 						}
 					}
 				}

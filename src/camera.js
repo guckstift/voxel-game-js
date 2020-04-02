@@ -22,8 +22,10 @@ export default class Camera extends Body
 		this.lookat = new Vector(0,0,-1);
 	}
 	
-	update()
+	update(delta)
 	{
+		super.update(delta);
+		
 		this.proj.perspective(radians(this.fovy), this.aspect, this.near, this.far)
 		this.view.set();
 		this.view.rotateX(-radians(this.rx));

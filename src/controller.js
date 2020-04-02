@@ -1,3 +1,5 @@
+import Vector from "./vector.js";
+
 export default class Controller
 {
 	constructor(camera, display, picker, map)
@@ -11,6 +13,8 @@ export default class Controller
 		this.keymap = {};
 		this.locked = false;
 		this.movespeed = 8;
+		this.jumpspeed = 8;
+		this.flymode = false;
 		
 		window.addEventListener("keydown", e => this.keydown(e));
 		window.addEventListener("keyup", e => this.keyup(e));
@@ -72,8 +76,35 @@ export default class Controller
 		}
 	}
 	
+	enableFly()
+	{
+		this.flymode = true;
+		this.camera.acc.set(0,0,0);
+		this.camera.vel.set(0,0,0);
+	}
+	
+	disableFly()
+	{
+		this.flymode = false;
+		this.camera.acc.set(0,0,-16);
+	}
+	
 	update(delta)
 	{
+		if(this.flymode) {
+			if(this.keymap.space) {
+				this.camera.moveUpward(delta * this.movespeed);
+			}
+			if(this.keymap.shift) {
+				this.camera.moveDownward(delta * this.movespeed);
+			}
+		}
+		else {
+			if(this.keymap.space && this.camera.rest.z < 0) {
+				this.camera.accel(new Vector(0, 0, this.jumpspeed), 1);
+			}
+		}
+		
 		if(this.keymap.w) {
 			this.camera.moveForward(delta * this.movespeed);
 		}
@@ -85,12 +116,6 @@ export default class Controller
 		}
 		if(this.keymap.a) {
 			this.camera.moveLeftward(delta * this.movespeed);
-		}
-		if(this.keymap.space) {
-			this.camera.moveUpward(delta * this.movespeed);
-		}
-		if(this.keymap.shift) {
-			this.camera.moveDownward(delta * this.movespeed);
 		}
 	}
 }

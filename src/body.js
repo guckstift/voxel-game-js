@@ -6,6 +6,9 @@ export default class Body
 	{
 		this.map = map;
 		this.pos = new Vector(x, y, z);
+		this.vel = new Vector();
+		this.acc = new Vector();
+		this.rest = new Vector();
 		this.rx = rx;
 		this.rz = rz;
 		this.boxmin = new Vector(...boxmin);
@@ -34,8 +37,44 @@ export default class Body
 			}
 			
 			deltavec.data[hit.axis] = hit.offs;
+			this.rest.data[hit.axis] = hit.step;
 		}
 		
 		this.pos.add(deltavec);
+		
+		if(deltavec.x !== 0) {
+			this.rest.data[0] = 0;
+		}
+		
+		if(deltavec.y !== 0) {
+			this.rest.data[1] = 0;
+		}
+		
+		if(deltavec.z !== 0) {
+			this.rest.data[2] = 0;
+		}
+	}
+	
+	accel(acc, delta)
+	{
+		this.vel.addScaled(acc, delta);
+	}
+	
+	update(delta)
+	{
+		this.accel(this.acc, delta);
+		this.move(this.vel, delta);
+		
+		if(this.rest.x !== 0) {
+			this.vel.data[0] = 0;
+		}
+		
+		if(this.rest.y !== 0) {
+			this.vel.data[1] = 0;
+		}
+		
+		if(this.rest.z !== 0) {
+			this.vel.data[2] = 0;
+		}
 	}
 }
