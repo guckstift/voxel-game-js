@@ -1,8 +1,9 @@
 import {serve} from "https://deno.land/std/http/server.ts";
-import {acceptWebSocket} from "https://deno.land/std/ws/mod.ts";
+import {acceptWebSocket, acceptable} from "https://deno.land/std/ws/mod.ts";
+import {lookup} from "https://deno.land/std/media_types/mod.ts";
 import Map from "../src/map.js";
 
-let server = serve({hostname: "localhost", port: 12345});
+let server = serve({hostname: "0.0.0.0", port: 12345});
 let counter = 0;
 let map = new Map();
 let clientsocks = [];
@@ -12,14 +13,39 @@ listenForClients();
 async function listenForClients()
 {
 	for await(let request of server) {
-		let socket = await acceptWebSocket({
-			conn: request.conn,
-			headers: request.headers,
-			bufReader: request.r,
-			bufWriter: request.w,
-		});
-		
-		listenForEvents(counter++, socket);
+		if(acceptable(request)) {
+			let socket = await acceptWebSocket({
+				conn: request.conn,
+				headers: request.headers,
+				bufReader: request.r,
+				bufWriter: request.w,
+			});
+			
+			listenForEvents(counter++, socket);
+		}
+		else {
+			let path = "." + request.url;
+			
+			if(path === "./") {
+				path = "./index.html";
+			}
+			
+			console.log("requested", path);
+			
+			try {
+				let body = await Deno.readFile(path);
+				let mime = lookup(path);
+				let headers = new Headers();
+				
+				headers.set("Content-Type", mime);
+				request.respond({headers, body});
+			}
+			catch(e) {
+				request.respond({
+					body: "Not found",
+				});
+			}
+		}
 	}
 }
 

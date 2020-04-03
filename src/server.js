@@ -2,7 +2,7 @@ export default class Server
 {
 	constructor()
 	{
-		this.socket = new WebSocket("ws://localhost:12345");
+		this.socket = new WebSocket("ws://" + window.location.host);
 		
 		this.socket.onopen = e => {
 			this.isopen = true;
