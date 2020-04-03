@@ -19,7 +19,7 @@ export default class Camera extends Body
 		this.rightward = new Vector(1,0,0);
 		this.forward = new Vector(0,1,0);
 		this.upward = new Vector(0,0,1);
-		this.lookat = new Vector(0,0,-1);
+		this.lookat = new Vector(0,1,0);
 	}
 	
 	update(delta)
@@ -28,7 +28,7 @@ export default class Camera extends Body
 		
 		this.proj.perspective(radians(this.fovy), this.aspect, this.near, this.far)
 		this.view.set();
-		this.view.rotateX(-radians(this.rx));
+		this.view.rotateX(-radians(this.rx + 90));
 		this.view.rotateZ(-radians(this.rz));
 		this.view.translate(-this.pos.x, -this.pos.y, -this.pos.z);
 		this.model.set();
@@ -37,7 +37,7 @@ export default class Camera extends Body
 		this.rightward.rotateZ(radians(this.rz));
 		this.forward.set(0,1,0);
 		this.forward.rotateZ(radians(this.rz));
-		this.lookat.set(0,0,-1);
+		this.lookat.set(0,1,0);
 		this.lookat.rotateX(radians(this.rx));
 		this.lookat.rotateZ(radians(this.rz));
 	}
