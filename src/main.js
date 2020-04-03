@@ -13,6 +13,7 @@ import Texture from "./texture.js";
 import Server from "./server.js";
 import Sky from "./sky.js";
 import Speaker from "./speaker.js";
+import Bone from "./bone.js";
 
 let display = new Display();
 
@@ -53,8 +54,8 @@ let modelMat = new Matrix();
 
 modelMat.translate(6,15,9);
 
-let boneLeftArm = new Matrix();
-let boneRightArm = new Matrix();
+let boneLeftArm = new Bone(-0.375, 0, +1.375);
+let boneRightArm = new Bone(+0.375, 0, +1.375);
 let sky = new Sky(display);
 
 display.onframe = () =>
@@ -82,16 +83,14 @@ display.onframe = () =>
 	
 	modelMat.rotateZ(radians(1));
 	
-	boneLeftArm.translate(-0.375, 0, +1.375);
-	boneLeftArm.rotateX(radians(-1));
-	boneLeftArm.translate(+0.375, 0, -1.375);
+	boneLeftArm.rx -= 1;
+	boneLeftArm.update();
 	
-	boneRightArm.translate(+0.375, 0, +1.375);
-	boneRightArm.rotateX(radians(+1));
-	boneRightArm.translate(-0.375, 0, -1.375);
+	boneRightArm.rx += 1;
+	boneRightArm.update();
 	
 	sky.draw(camera);
 	map.draw(camera, sun);
-	model.draw(camera, sun, modelMat, [boneLeftArm, boneRightArm]);
+	model.draw(camera, sun, modelMat, [boneLeftArm.mat, boneRightArm.mat]);
 	picker.draw(camera);
 };
