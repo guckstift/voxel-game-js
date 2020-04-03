@@ -7,7 +7,7 @@ export default class Camera extends Body
 {
 	constructor(map, fovy, aspect, near, far, x, y, z, rx, rz)
 	{
-		super(map, x, y, z, rx, rz, [-0.25, -0.25, -0.25], [+0.25, +0.25, +0.25]);
+		super(map, x, y, z, rx, rz, [-0.25, -0.25, -1.75], [+0.25, +0.25, +0.25]);
 		
 		this.fovy = fovy;
 		this.aspect = aspect;

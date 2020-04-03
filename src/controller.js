@@ -13,10 +13,12 @@ export default class Controller
 		this.map = map;
 		this.keymap = {};
 		this.locked = false;
-		this.movespeed = 8;
+		this.movespeed = 4;
+		this.flyspeed = 8;
 		this.jumpspeed = 8;
 		this.flymode = false;
 		this.jumpsound = null;
+		this.soundcooldown = true;
 		
 		speaker.loadSound("sfx/jump.ogg").then(sound => this.jumpsound = sound);
 		
@@ -94,40 +96,44 @@ export default class Controller
 	disableFly()
 	{
 		this.flymode = false;
-		this.camera.acc.set(0,0,-16);
+		this.camera.acc.set(0,0,-20);
 	}
 	
 	update(delta)
 	{
+		let movespeed = this.flymode ? this.flyspeed : this.movespeed;
+		
 		if(this.flymode) {
 			if(this.keymap.space) {
-				this.camera.moveUpward(delta * this.movespeed);
+				this.camera.moveUpward(delta * movespeed);
 			}
 			if(this.keymap.shift) {
-				this.camera.moveDownward(delta * this.movespeed);
+				this.camera.moveDownward(delta * movespeed);
 			}
 		}
 		else {
 			if(this.keymap.space && this.camera.rest.z < 0) {
 				this.camera.accel(new Vector(0, 0, this.jumpspeed), 1);
 				
-				if(this.jumpsound) {
+				if(this.jumpsound && this.soundcooldown) {
 					this.speaker.playSound(this.jumpsound);
+					this.soundcooldown = false;
+					setTimeout(() => this.soundcooldown = true, 500);
 				}
 			}
 		}
 		
 		if(this.keymap.w) {
-			this.camera.moveForward(delta * this.movespeed);
+			this.camera.moveForward(delta * movespeed);
 		}
 		if(this.keymap.s) {
-			this.camera.moveBackward(delta * this.movespeed);
+			this.camera.moveBackward(delta * movespeed);
 		}
 		if(this.keymap.d) {
-			this.camera.moveRightward(delta * this.movespeed);
+			this.camera.moveRightward(delta * movespeed);
 		}
 		if(this.keymap.a) {
-			this.camera.moveLeftward(delta * this.movespeed);
+			this.camera.moveLeftward(delta * movespeed);
 		}
 	}
 }
