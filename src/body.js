@@ -1,4 +1,6 @@
 import Vector from "./vector.js";
+import Matrix from "./matrix.js";
+import {radians} from "./math.js";
 
 export default class Body
 {
@@ -13,6 +15,7 @@ export default class Body
 		this.rz = rz;
 		this.boxmin = new Vector(...boxmin);
 		this.boxmax = new Vector(...boxmax);
+		this.mat = new Matrix();
 	}
 	
 	move(vec, delta)
@@ -76,5 +79,10 @@ export default class Body
 		if(this.rest.z !== 0) {
 			this.vel.data[2] = 0;
 		}
+		
+		this.mat.set();
+		this.mat.translate(this.pos.x, this.pos.y, this.pos.z);
+		this.mat.rotateX(radians(this.rx));
+		this.mat.rotateZ(radians(this.rz));
 	}
 }

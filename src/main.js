@@ -8,12 +8,11 @@ import Picker from "./picker.js";
 import Crosshairs from "./crosshairs.js";
 import Debugger from "./debugger.js";
 import Model from "./model.js";
-import Matrix from "./matrix.js";
 import Texture from "./texture.js";
 import Server from "./server.js";
 import Sky from "./sky.js";
 import Speaker from "./speaker.js";
-import Bone from "./bone.js";
+import Mob from "./mob.js";
 
 let display = new Display();
 
@@ -41,21 +40,19 @@ let sun = new Vector(0,0,1);
 
 sun.rotateX(radians(30));
 
-let model = new Model(display, new Texture(display, "gfx/guy.png"));
+let model = new Model(display, new Texture(display, "gfx/guy.png"), [[-0.375, 0, -0.375], [+0.375, 0, -0.375]]);
 
-model.addCube([-0.25, -0.25, 1.5], [ 0.5, 0.5, 0.5], [ 0, 0], [8,8, 8], 64, 0); // head
-model.addCube([-0.25,-0.125,0.75], [ 0.5,0.25,0.75], [ 0, 8], [8,4,12], 64, 0); // upper body
-model.addCube([ -0.5,-0.125,0.75], [0.25,0.25,0.75], [40, 0], [4,4,12], 64, 1); // left arm
-model.addCube([ 0.25,-0.125,0.75], [0.25,0.25,0.75], [40,12], [4,4,12], 64, 2); // right arm
-model.addCube([-0.25,-0.125,   0], [0.25,0.25,0.75], [ 0,20], [4,4,12], 64, 0); // left leg
-model.addCube([    0,-0.125,   0], [0.25,0.25,0.75], [20,20], [4,4,12], 64, 0); // right leg
+model.addCube([-0.25, -0.25,-0.25], [ 0.5, 0.5, 0.5], [ 0, 0], [8,8, 8], 64, 0); // head
+model.addCube([-0.25,-0.125, -1.0], [ 0.5,0.25,0.75], [ 0, 8], [8,4,12], 64, 0); // upper body
+model.addCube([ -0.5,-0.125, -1.0], [0.25,0.25,0.75], [40, 0], [4,4,12], 64, 1); // left arm
+model.addCube([ 0.25,-0.125, -1.0], [0.25,0.25,0.75], [40,12], [4,4,12], 64, 2); // right arm
+model.addCube([-0.25,-0.125,-1.75], [0.25,0.25,0.75], [ 0,20], [4,4,12], 64, 0); // left leg
+model.addCube([    0,-0.125,-1.75], [0.25,0.25,0.75], [20,20], [4,4,12], 64, 0); // right leg
 
-let modelMat = new Matrix();
+let guy = new Mob(map, 6,15,64, 0,0, [-0.25, -0.25, -1.75], [+0.25, +0.25, +0.25], model);
 
-modelMat.translate(6,15,9);
+guy.acc.set(0,0,-20);
 
-let boneLeftArm = new Bone(-0.375, 0, +1.375);
-let boneRightArm = new Bone(+0.375, 0, +1.375);
 let sky = new Sky(display);
 
 display.onframe = () =>
@@ -79,18 +76,14 @@ display.onframe = () =>
 	picker.pick(camera.pos, camera.lookat, 16);
 	
 	map.update();
-	model.update();
 	
-	modelMat.rotateZ(radians(1));
-	
-	boneLeftArm.rx -= 1;
-	boneLeftArm.update();
-	
-	boneRightArm.rx += 1;
-	boneRightArm.update();
+	guy.rz += 1;
+	guy.bones[0].rx -= 1;
+	guy.bones[1].rx += 1;
+	guy.update(1/60);
 	
 	sky.draw(camera);
 	map.draw(camera, sun);
-	model.draw(camera, sun, modelMat, [boneLeftArm.mat, boneRightArm.mat]);
+	guy.draw(camera, sun);
 	picker.draw(camera);
 };

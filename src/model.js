@@ -53,7 +53,7 @@ let frag = `
 
 export default class Model
 {
-	constructor(display, texture)
+	constructor(display, texture, roots)
 	{
 		this.gl = display.gl;
 		this.display = display;
@@ -62,6 +62,8 @@ export default class Model
 		this.buffer = new Buffer(display);
 		this.mesh = [];
 		this.invalid = false;
+		this.boneCount = 0;
+		this.roots = roots;
 	}
 	
 	addQuad(v0, v1, v2, v3, n, uvStart, uvSize, bone)
@@ -79,6 +81,7 @@ export default class Model
 		this.mesh.push(...v3, ...n, ...uv11, bone);
 		
 		this.invalid = true;
+		this.boneCount = Math.max(this.boneCount, bone);
 	}
 	
 	addCube(start, size, texpos, texbox, div, bone)
