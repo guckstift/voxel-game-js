@@ -62,10 +62,17 @@ export default class Server
 	
 	broadcast(except, msg)
 	{
-		this.clients.forEach(client => {
-			if(client !== except) {
-				client.socket.send(JSON.stringify(msg));
+		try {
+			this.clients.forEach(client => {
+				if(client !== except) {
+					client.socket.send(JSON.stringify(msg));
+				}
+			});
+		}
+		catch(e) {
+			if(!(e instanceof ConnectionReset)) {
+				throw e;
 			}
-		});
+		}
 	}
 }

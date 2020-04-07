@@ -14,15 +14,15 @@ export default class Client
 		
 		this.server.clients.forEach(client => {
 			if(client !== this) {
-				this.socket.send(JSON.stringify({
+				this.send({
 					msg: 3,
 					id: client.id,
-				}));
+				});
 				
-				client.socket.send(JSON.stringify({
+				client.send({
 					msg: 3,
 					id: this.id,
-				}));
+				});
 			}
 		});
 		
@@ -36,12 +36,29 @@ export default class Client
 		
 		this.server.clients.forEach(client => {
 			if(client !== this) {
-				client.socket.send(JSON.stringify({
+				client.send({
 					msg: 4,
 					id: this.id,
-				}));
+				});
 			}
 		});
+	}
+	
+	send(msg, raw = false)
+	{
+		try {
+			if(raw) {
+				this.socket.send(msg);
+			}
+			else {
+				this.socket.send(JSON.stringify(msg));
+			}
+		}
+		catch(e) {
+			if(!(e instanceof ConnectionReset)) {
+				throw e;
+			}
+		}
 	}
 
 	handleMessage(msg)
@@ -61,7 +78,7 @@ export default class Client
 			f64[2] = y;
 			buf.set(chunk.data, 3 * 8);
 			
-			this.socket.send(buf);
+			this.send(buf, true);
 		}
 		else if(msg.msg === 2) {
 			let x = msg.x;
@@ -77,6 +94,19 @@ export default class Client
 				msg: 2,
 				x, y, z,
 				block,
+			});
+		}
+		else if(msg.msg === 5) {
+			let x = msg.x;
+			let y = msg.y;
+			let z = msg.z;
+			let rx = msg.rx;
+			let rz = msg.rz;
+			
+			this.server.broadcast(this, {
+				msg: 6,
+				id: this.id,
+				x, y, z, rx, rz,
 			});
 		}
 	}

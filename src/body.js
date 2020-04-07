@@ -82,7 +82,7 @@ export default class Body
 		
 		this.mat.set();
 		this.mat.translate(this.pos.x, this.pos.y, this.pos.z);
-		this.mat.rotateX(radians(this.rx));
 		this.mat.rotateZ(radians(this.rz));
+		this.mat.rotateX(radians(this.rx));
 	}
 }

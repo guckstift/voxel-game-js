@@ -19,10 +19,15 @@ export default class Server
 					this.onSetBlock(msg.x, msg.y, msg.z, msg.block);
 				}
 				else if(msg.msg === 3) {
+					this.others.add(msg.id);
 					this.onAddPlayer(msg.id);
 				}
 				else if(msg.msg === 4) {
+					this.others.delete(msg.id);
 					this.onRemovePlayer(msg.id);
+				}
+				else if(msg.msg === 6) {
+					this.onSetPlayerPos(msg.id, msg.x, msg.y, msg.z, msg.rx, msg.rz);
 				}
 			}
 			else {
@@ -41,6 +46,9 @@ export default class Server
 		this.queue = [];
 		this.onSetChunk = () => {};
 		this.onSetBlock = () => {};
+		this.onAddPlayer = () => {};
+		this.onRemovePlayer = () => {};
+		this.onSetPlayerPos = () => {};
 	}
 	
 	send(msg)
@@ -63,13 +71,8 @@ export default class Server
 		this.send({msg: 2, x, y, z, block});
 	}
 	
-	onAddPlayer(id)
+	setMyPos(x, y, z, rx, rz)
 	{
-		this.others.add(id);
-	}
-	
-	onRemovePlayer(id)
-	{
-		this.others.delete(id);
+		this.send({msg: 5, x, y, z, rx, rz});
 	}
 }

@@ -40,18 +40,40 @@ let sun = new Vector(0,0,1);
 
 sun.rotateX(radians(30));
 
-let model = new Model(display, new Texture(display, "gfx/guy.png"), [[-0.375, 0, -0.375], [+0.375, 0, -0.375]]);
+let model = new Model(
+	display,
+	new Texture(display, "gfx/guy.png"),
+	[[-0.375, 0, -0.375], [+0.375, 0, -0.375], [0, 0, -0.25]]
+);
 
-model.addCube([-0.25, -0.25,-0.25], [ 0.5, 0.5, 0.5], [ 0, 0], [8,8, 8], 64, 0); // head
+model.addCube([-0.25, -0.25,-0.25], [ 0.5, 0.5, 0.5], [ 0, 0], [8,8, 8], 64, 3); // head
 model.addCube([-0.25,-0.125, -1.0], [ 0.5,0.25,0.75], [ 0, 8], [8,4,12], 64, 0); // upper body
 model.addCube([ -0.5,-0.125, -1.0], [0.25,0.25,0.75], [40, 0], [4,4,12], 64, 1); // left arm
 model.addCube([ 0.25,-0.125, -1.0], [0.25,0.25,0.75], [40,12], [4,4,12], 64, 2); // right arm
 model.addCube([-0.25,-0.125,-1.75], [0.25,0.25,0.75], [ 0,20], [4,4,12], 64, 0); // left leg
 model.addCube([    0,-0.125,-1.75], [0.25,0.25,0.75], [20,20], [4,4,12], 64, 0); // right leg
 
-let guy = new Mob(map, 6,15,64, 0,0, [-0.25, -0.25, -1.75], [+0.25, +0.25, +0.25], model);
+let players = {};
 
-guy.acc.set(0,0,-20);
+server.onAddPlayer = id => {
+	players[id] = new Mob(map, 6,15,16, 0,0, [-0.25, -0.25, -1.75], [+0.25, +0.25, +0.25], model);
+};
+
+server.onRemovePlayer = id => {
+	delete players[id];
+};
+
+server.onSetPlayerPos = (id, x, y, z, rx, rz) => {
+	let player = players[id];
+	
+	if(player) {
+		player.pos.data[0] = x;
+		player.pos.data[1] = y;
+		player.pos.data[2] = z;
+		player.bones[2].rx = rx;
+		player.rz = rz;
+	}
+};
 
 let sky = new Sky(display);
 
@@ -70,6 +92,8 @@ display.onframe = () =>
 	
 	controller.update(1/60);
 	
+	server.setMyPos(camera.pos.x, camera.pos.y, camera.pos.z, camera.rx, camera.rz);
+	
 	camera.aspect = display.getAspect();
 	camera.update(1/60);
 	
@@ -77,13 +101,16 @@ display.onframe = () =>
 	
 	map.update();
 	
-	guy.rz += 1;
-	guy.bones[0].rx -= 1;
-	guy.bones[1].rx += 1;
-	guy.update(1/60);
+	for(let id in players) {
+		players[id].update(1/60);
+	}
 	
 	sky.draw(camera);
 	map.draw(camera, sun);
-	guy.draw(camera, sun);
+	
+	for(let id in players) {
+		players[id].draw(camera, sun);
+	}
+	
 	picker.draw(camera);
 };
