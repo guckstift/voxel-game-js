@@ -1,6 +1,6 @@
 export default class Debugger
 {
-	constructor(camera, map, controller)
+	constructor(camera, map, controller, server)
 	{
 		let dom = document.createElement("div");
 		
@@ -22,6 +22,7 @@ export default class Debugger
 		this.camera = camera;
 		this.map = map;
 		this.controller = controller;
+		this.server = server;
 		this.enabled = false;
 		
 		this.fpsMonitor = this.addMonitor("FPS");
@@ -29,6 +30,7 @@ export default class Debugger
 		this.chunksMonitor = this.addMonitor("Loaded chunks");
 		this.chunkPosMonitor = this.addMonitor("Chunk position");
 		this.chunkQuadsMonitor = this.addMonitor("Chunk quad count");
+		this.othersMonitor = this.addMonitor("Other player IDs");
 		
 		window.addEventListener("keydown", e => {
 			if(e.key === "F3") {
@@ -97,6 +99,8 @@ export default class Debugger
 		let chunk = this.map.getChunk(cx, cy);
 		
 		this.chunkQuadsMonitor.textContent = chunk ? chunk.count / 6 : "no chunk loaded";
+		
+		this.othersMonitor.textContent = Array.from(this.server.others).join(",");
 	}
 	
 	enable()

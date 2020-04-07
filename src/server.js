@@ -2,6 +2,7 @@ export default class Server
 {
 	constructor()
 	{
+		this.others = new Set();
 		this.socket = new WebSocket("ws://" + window.location.host);
 		
 		this.socket.onopen = e => {
@@ -16,6 +17,12 @@ export default class Server
 				
 				if(msg.msg === 2) {
 					this.onSetBlock(msg.x, msg.y, msg.z, msg.block);
+				}
+				else if(msg.msg === 3) {
+					this.onAddPlayer(msg.id);
+				}
+				else if(msg.msg === 4) {
+					this.onRemovePlayer(msg.id);
 				}
 			}
 			else {
@@ -54,5 +61,15 @@ export default class Server
 	setBlock(x, y, z, block)
 	{
 		this.send({msg: 2, x, y, z, block});
+	}
+	
+	onAddPlayer(id)
+	{
+		this.others.add(id);
+	}
+	
+	onRemovePlayer(id)
+	{
+		this.others.delete(id);
 	}
 }

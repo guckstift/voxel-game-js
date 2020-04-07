@@ -12,6 +12,20 @@ export default class Client
 	{
 		console.log(`client ${this.id}: joined`);
 		
+		this.server.clients.forEach(client => {
+			if(client !== this) {
+				this.socket.send(JSON.stringify({
+					msg: 3,
+					id: client.id,
+				}));
+				
+				client.socket.send(JSON.stringify({
+					msg: 3,
+					id: this.id,
+				}));
+			}
+		});
+		
 		for await(let event of this.socket.receive()) {
 			if(typeof event === "string") {
 				this.handleMessage(JSON.parse(event));
@@ -19,6 +33,15 @@ export default class Client
 		}
 		
 		console.log(`client ${this.id}: left`);
+		
+		this.server.clients.forEach(client => {
+			if(client !== this) {
+				client.socket.send(JSON.stringify({
+					msg: 4,
+					id: this.id,
+				}));
+			}
+		});
 	}
 
 	handleMessage(msg)

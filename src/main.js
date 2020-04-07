@@ -31,7 +31,7 @@ let picker = new Picker(display, map);
 let speaker = new Speaker();
 let controller = new Controller(camera, display, picker, map, speaker);
 
-let dbg = new Debugger(camera, map, controller);
+let dbg = new Debugger(camera, map, controller, server);
 
 dbg.enable();
 dbg.appendToBody();
