@@ -60,6 +60,24 @@ export default class Client
 			}
 		}
 	}
+	
+	async loadChunk(cx, cy)
+	{
+		let chunk = this.map.getChunk(cx, cy);
+		
+		if(chunk) {
+			return chunk;
+		}
+		
+		try {
+			let data = await Deno.readFile("./save/chunk_" + cx + "_" + cy);
+			
+			return this.map.loadChunk(cx, cy, data);
+		}
+		catch(e) {
+			return this.map.loadChunk(cx, cy);
+		}
+	}
 
 	handleMessage(msg)
 	{
@@ -69,16 +87,18 @@ export default class Client
 			
 			console.log(`client ${this.id}: getChunk ${x} ${y}`);
 			
-			let chunk = this.map.loadChunk(x, y);
-			let buf = new Uint8Array(3 * 8 + chunk.data.byteLength);
-			let f64 = new Float64Array(buf.buffer);
-			
-			f64[0] = 1;
-			f64[1] = x;
-			f64[2] = y;
-			buf.set(chunk.data, 3 * 8);
-			
-			this.send(buf, true);
+			this.loadChunk(x, y)
+				.then(chunk => {
+					let buf = new Uint8Array(3 * 8 + chunk.data.byteLength);
+					let f64 = new Float64Array(buf.buffer);
+					
+					f64[0] = 1;
+					f64[1] = x;
+					f64[2] = y;
+					buf.set(chunk.data, 3 * 8);
+					
+					this.send(buf, true);
+				});
 		}
 		else if(msg.msg === 2) {
 			let x = msg.x;
@@ -88,13 +108,15 @@ export default class Client
 			
 			console.log(`client ${this.id}: setBlock ${x} ${y} ${z} ${block}`);
 			
-			this.map.setBlock(x, y, z, block);
+			let chunk = this.map.setBlock(x, y, z, block);
 			
 			this.server.broadcast(this, {
 				msg: 2,
 				x, y, z,
 				block,
 			});
+			
+			Deno.writeFile("./save/chunk_" + chunk.cx + "_" + chunk.cy, chunk.data);
 		}
 		else if(msg.msg === 5) {
 			let x = msg.x;

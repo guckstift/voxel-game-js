@@ -42,7 +42,7 @@ export default class Map
 		}
 	}
 	
-	loadChunk(cx, cy)
+	loadChunk(cx, cy, data = null)
 	{
 		let chunk = this.getChunk(cx, cy);
 		
@@ -55,6 +55,9 @@ export default class Map
 			
 			if(this.server) {
 				this.server.getChunk(cx, cy);
+			}
+			else if(data) {
+				chunk.setData(data);
 			}
 			else {
 				chunk.generate();
@@ -98,6 +101,8 @@ export default class Map
 		if(this.server && pushToServer) {
 			this.server.setBlock(x, y, z, b);
 		}
+		
+		return chunk;
 	}
 	
 	forEachChunk(fn)
