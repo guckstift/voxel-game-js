@@ -1,2 +1,2 @@
 #!/bin/bash
-deno --allow-net --allow-read=. --allow-write=. server/main.js
+./deno run --allow-net --allow-read=. --allow-write=. server/main.js
