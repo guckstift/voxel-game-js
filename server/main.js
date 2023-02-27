@@ -64,11 +64,14 @@ async function handle_ws_conn(conn)
 
 	for await(let event of http_conn) {
         let request = event.request;
-        let upgrade = Deno.upgradeWebSocket(request);
-        let socket = upgrade.socket;
-        let response = upgrade.response;
-        await event.respondWith(response);
-        return await handle_socket(socket);
+        try {
+            let upgrade = Deno.upgradeWebSocket(request);
+            let socket = upgrade.socket;
+            let response = upgrade.response;
+            await event.respondWith(response);
+            return await handle_socket(socket);
+        }
+        catch(e) {}
 	}
 }
 
